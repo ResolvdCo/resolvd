@@ -1,0 +1,34 @@
+<.header>
+  Mail server <%= @mail_server.id %>
+  <:subtitle>This is a mail_server record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/admin/mail-servers/#{@mail_server}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit mail_server</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Inbound type"><%= @mail_server.inbound_type %></:item>
+  <:item title="Inbound config"><%= Jason.encode!(@mail_server.inbound_config) %></:item>
+  <:item title="Outbound type"><%= @mail_server.outbound_type %></:item>
+  <:item title="Outbound config"><%= Jason.encode!(@mail_server.outbound_config) %></:item>
+</.list>
+
+<.back navigate={~p"/admin/mail-servers"}>Back to mail_servers</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="mail_server-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/mail-servers/#{@mail_server}")}
+>
+  <.live_component
+    module={ResolvdWeb.MailServerLive.FormComponent}
+    id={@mail_server.id}
+    title={@page_title}
+    action={@live_action}
+    mail_server={@mail_server}
+    patch={~p"/admin/mail-servers/#{@mail_server}"}
+  />
+</.modal>

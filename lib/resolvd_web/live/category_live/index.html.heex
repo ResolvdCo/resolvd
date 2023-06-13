@@ -1,0 +1,47 @@
+<.header>
+  Listing Categories
+  <:actions>
+    <.link patch={~p"/admin/categories/new"}>
+      <.button>New Category</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="categories"
+  rows={@streams.categories}
+  row_click={fn {_id, category} -> JS.navigate(~p"/admin/categories/#{category}") end}
+>
+  <:col :let={{_id, category}} label="Title"><%= category.title %></:col>
+  <:col :let={{_id, category}} label="Slug"><%= category.slug %></:col>
+  <:action :let={{_id, category}}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/categories/#{category}"}>Show</.link>
+    </div>
+    <.link patch={~p"/admin/categories/#{category}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, category}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: category.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="category-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/categories")}
+>
+  <.live_component
+    module={ResolvdWeb.CategoryLive.FormComponent}
+    id={@category.id || :new}
+    title={@page_title}
+    action={@live_action}
+    category={@category}
+    patch={~p"/admin/categories"}
+  />
+</.modal>
