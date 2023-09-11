@@ -68,19 +68,20 @@ defmodule ResolvdWeb.ConversationLive.ConversationComponent do
     end
   end
 
-  defp save_conversation(socket, :new, conversation_params) do
-    case Conversations.create_conversation(conversation_params) do
-      {:ok, conversation} ->
-        notify_parent({:saved, conversation})
+  defp save_conversation(socket, :new, _conversation_params) do
+    # case Conversations.create_conversation(conversation_params) do
+    #   {:ok, conversation} ->
+    #     notify_parent({:saved, conversation})
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Conversation created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+    #     {:noreply,
+    #      socket
+    #      |> put_flash(:info, "Conversation created successfully")
+    #      |> push_patch(to: socket.assigns.patch)}
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
-    end
+    #   {:error, %Ecto.Changeset{} = changeset} ->
+    #     {:noreply, assign_form(socket, changeset)}
+    # end
+    {:noreply, socket}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

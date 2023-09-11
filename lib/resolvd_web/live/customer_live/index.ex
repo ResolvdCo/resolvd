@@ -28,7 +28,7 @@ defmodule ResolvdWeb.CustomerLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Customers")
+    |> assign(:page_title, "Customers")
     |> assign(:customer, nil)
   end
 

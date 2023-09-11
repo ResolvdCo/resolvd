@@ -19,7 +19,7 @@ defmodule ResolvdWeb.MessageLiveTest do
     test "lists all messages", %{conn: conn, message: message} do
       {:ok, _index_live, html} = live(conn, ~p"/messages")
 
-      assert html =~ "Listing Messages"
+      assert html =~ "Messages"
       assert html =~ message.body
     end
 

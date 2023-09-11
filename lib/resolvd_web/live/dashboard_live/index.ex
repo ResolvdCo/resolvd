@@ -3,7 +3,7 @@ defmodule ResolvdWeb.DashboardLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, socket |> assign(:page_title, "Dashboard")}
   end
 
   @impl true

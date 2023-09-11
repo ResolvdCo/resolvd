@@ -1,0 +1,53 @@
+<.header>
+  Mail Servers
+  <:actions>
+    <.link patch={~p"/admin/mail-servers/new"}>
+      <.button>Add Mail Server</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="mail_servers"
+  rows={@streams.mail_servers}
+  row_click={fn {_id, mail_server} -> JS.navigate(~p"/admin/mail-servers/#{mail_server}") end}
+>
+  <:col :let={{_id, mail_server}} label="Inbound type"><%= mail_server.inbound_type %></:col>
+  <:col :let={{_id, mail_server}} label="Inbound config">
+    <%= Jason.encode!(mail_server.inbound_config) %>
+  </:col>
+  <:col :let={{_id, mail_server}} label="Outbound type"><%= mail_server.outbound_type %></:col>
+  <:col :let={{_id, mail_server}} label="Outbound config">
+    <%= Jason.encode!(mail_server.outbound_config) %>
+  </:col>
+  <:action :let={{_id, mail_server}}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/mail-servers/#{mail_server}"}>Show</.link>
+    </div>
+    <.link patch={~p"/admin/mail-servers/#{mail_server}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, mail_server}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: mail_server.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="mail_server-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/mail-servers")}
+>
+  <.live_component
+    module={ResolvdWeb.Admin.MailServerLive.FormComponent}
+    id={@mail_server.id || :new}
+    title={@page_title}
+    action={@live_action}
+    mail_server={@mail_server}
+    patch={~p"/admin/mail-servers"}
+  />
+</.modal>

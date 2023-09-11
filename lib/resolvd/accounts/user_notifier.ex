@@ -8,7 +8,7 @@ defmodule Resolvd.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Resolvd", "contact@example.com"})
+      |> from({"Resolvd", "support@resolvd.co"})
       |> subject(subject)
       |> text_body(body)
 
@@ -32,6 +32,26 @@ defmodule Resolvd.Accounts.UserNotifier do
     #{url}
 
     If you didn't create an account with us, please ignore this.
+
+    ==============================
+    """)
+  end
+
+  @doc """
+  Deliver instructions to sign up for a Resolvd account.
+  """
+  def deliver_invite_instructions(user, tenant, url) do
+    deliver(user.email, "You've been invited to join #{tenant.name} on Resolvd", """
+
+    ==============================
+
+    Hi #{user.email},
+
+    You've been invited you to join #{tenant.name} on Resolvd.
+
+    To accept this invite click the URL below to setup your password:
+
+    #{url}
 
     ==============================
     """)

@@ -57,9 +57,17 @@ defmodule Resolvd.Mailbox.Mail do
     |> Map.put(:sender, hd(mail.sender))
   end
 
+  def get_body({found_mime, charset, body}, mime) when found_mime == mime do
+    body
+  end
+
+  def get_body({found_mime, charset, body}, mime) do
+    body
+  end
+
   def get_body(bodies, mime) do
     bodies
-    |> Enum.find_value(fn raw ->
+    |> Enum.find_value("", fn raw ->
       case raw do
         # Try and find the mime we want
         {^mime, _charset, body} -> body

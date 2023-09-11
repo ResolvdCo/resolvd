@@ -15,11 +15,19 @@
         </span>
         <div class="relative flex items-start space-x-3">
           <div class="relative">
-            <img
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-400 ring-8 ring-white"
-              src="https://images.unsplash.com/photo-1520785643438-5bf77931f493?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80"
-              alt=""
-            />
+            <%= if is_nil(message.customer_id) do %>
+              <img
+                class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-400 ring-8 ring-white"
+                src={gravatar_avatar(message.user.email)}
+                alt=""
+              />
+            <% else %>
+              <img
+                class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-400 ring-8 ring-white"
+                src={gravatar_avatar(message.customer.email)}
+                alt=""
+              />
+            <% end %>
 
             <span class="absolute -bottom-0.5 -right-1 rounded-tl bg-white px-0.5 py-px">
               <svg

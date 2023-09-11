@@ -181,7 +181,7 @@ defmodule Resolvd.Conversations do
         email =
           Swoosh.Email.new(headers: %{"Message-ID" => message_id, "In-Reply-To" => in_reply_to})
           |> Swoosh.Email.to(conversation.customer.email)
-          |> Swoosh.Email.from({"Resolvd", "aida@axxim.net"})
+          |> Swoosh.Email.from({"Resolvd", "test@resolvd.co"})
           |> Swoosh.Email.subject(conversation.subject)
           |> Swoosh.Email.html_body(message.html_body)
 

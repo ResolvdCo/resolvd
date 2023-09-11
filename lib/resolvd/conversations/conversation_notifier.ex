@@ -8,7 +8,7 @@ defmodule Resolvd.Conversations.ConversationNotifier do
     email =
       new(headers: %{"Message-ID" => message_id})
       |> to(recipient)
-      |> from({"Resolvd", "aida@axxim.net"})
+      |> from({"Resolvd", "notifier@resolvd.co"})
       |> subject(subject)
       |> text_body(body)
       |> dbg()

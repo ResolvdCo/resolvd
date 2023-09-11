@@ -58,7 +58,7 @@ defmodule ResolvdWeb.ConversationLive.MessageComponent do
     {:noreply, assign_form(socket, changeset)}
   end
 
-  @impl Phoenix.LiveView
+  @impl Phoenix.LiveComponent
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :images, ref)}
   end
@@ -126,7 +126,7 @@ defmodule ResolvdWeb.ConversationLive.MessageComponent do
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
-  defp error_to_string(:too_large), do: "Too large"
-  defp error_to_string(:too_many_files), do: "You have selected too many files"
-  defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
+  # defp error_to_string(:too_large), do: "Too large"
+  # defp error_to_string(:too_many_files), do: "You have selected too many files"
+  # defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
 end

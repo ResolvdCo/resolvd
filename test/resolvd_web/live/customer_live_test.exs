@@ -5,7 +5,11 @@ defmodule ResolvdWeb.CustomerLiveTest do
   import Resolvd.CustomersFixtures
 
   @create_attrs %{email: "some email", name: "some name", phone: "some phone"}
-  @update_attrs %{email: "some updated email", name: "some updated name", phone: "some updated phone"}
+  @update_attrs %{
+    email: "some updated email",
+    name: "some updated name",
+    phone: "some updated phone"
+  }
   @invalid_attrs %{email: nil, name: nil, phone: nil}
 
   defp create_customer(_) do
@@ -19,7 +23,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
     test "lists all customers", %{conn: conn, customer: customer} do
       {:ok, _index_live, html} = live(conn, ~p"/customers")
 
-      assert html =~ "Listing Customers"
+      assert html =~ "Customers"
       assert html =~ customer.email
     end
 

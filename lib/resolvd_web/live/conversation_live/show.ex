@@ -40,4 +40,9 @@ defmodule ResolvdWeb.ConversationLive.Show do
   defp message_body(_) do
     "~~~"
   end
+
+  defp gravatar_avatar(email) do
+    hash = :crypto.hash(:md5, email) |> Base.encode16(case: :lower)
+    "https://www.gravatar.com/avatar/#{hash}"
+  end
 end

@@ -215,6 +215,7 @@ defmodule ResolvdWeb.UserAuth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
+    #  && !is_nil(conn.assigns.current_user.confirmed_at)
     if conn.assigns[:current_user] do
       conn
     else
@@ -230,7 +231,7 @@ defmodule ResolvdWeb.UserAuth do
   Used for routes that require the user to be an admin.
   """
   def require_admin_user(conn, _opts) do
-    if conn.assigns[:current_user] do
+    if conn.assigns[:current_user] && conn.assigns.current_user.is_admin do
       conn
     else
       conn

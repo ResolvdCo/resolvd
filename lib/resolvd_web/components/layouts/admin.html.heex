@@ -1,0 +1,15 @@
+<div>
+  <ResolvdWeb.Nav.sidebar view={@socket.view} current_user={@current_user} />
+
+  <div class="lg:pl-72">
+    <ResolvdWeb.Nav.top current_user={@current_user} />
+
+    <main class="py-10">
+      <div class="px-4 sm:px-6 lg:px-8">
+        <ResolvdWeb.Nav.admin view={@socket.view} />
+        <.flash_group flash={@flash} />
+        <%= @inner_content %>
+      </div>
+    </main>
+  </div>
+</div>

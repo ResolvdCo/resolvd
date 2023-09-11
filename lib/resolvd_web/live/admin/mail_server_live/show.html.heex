@@ -1,0 +1,47 @@
+<.header>
+  Mail server <%= @mail_server.id %>
+  <:subtitle>This is a mail_server record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/admin/mail-servers/#{@mail_server}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit mail_server</.button>
+    </.link>
+    <.button phx-click="start">Start</.button>
+    <.button phx-click="stop">Stop</.button>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Status"><%= Resolvd.Mailbox.mail_server_running?(@mail_server) %></:item>
+  <:item title="Inbound type"><%= @mail_server.inbound_type %></:item>
+  <:item title="Inbound config">
+    <pre><%= Jason.Formatter.pretty_print(Jason.encode!(@mail_server.inbound_config)) %></pre>
+  </:item>
+  <:item title="Test Inbound">
+    <.button phx-click="test_inbound">Test Inbound</.button>
+  </:item>
+  <:item title="Outbound type"><%= @mail_server.outbound_type %></:item>
+  <:item title="Outbound config">
+    <pre><%= Jason.Formatter.pretty_print(Jason.encode!(@mail_server.outbound_config)) %></pre>
+  </:item>
+  <:item title="Test Outbound">
+    <.button phx-click="test_outbound">Test Outbound</.button>
+  </:item>
+</.list>
+
+<.back navigate={~p"/admin/mail-servers"}>Back to mail_servers</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="mail_server-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/mail-servers/#{@mail_server}")}
+>
+  <.live_component
+    module={ResolvdWeb.Admin.MailServerLive.FormComponent}
+    id={@mail_server.id}
+    title={@page_title}
+    action={@live_action}
+    mail_server={@mail_server}
+    patch={~p"/admin/mail-servers/#{@mail_server}"}
+  />
+</.modal>

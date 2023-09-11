@@ -7,10 +7,13 @@ defmodule Resolvd.Accounts.User do
   schema "users" do
     belongs_to :tenant, Resolvd.Tenants.Tenant
 
+    field :name, :string
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+
+    field :is_admin, :boolean
 
     timestamps()
   end
@@ -40,9 +43,22 @@ defmodule Resolvd.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:name, :email, :password, :is_admin])
+    |> validate_name()
     |> validate_email(opts)
     |> validate_password(opts)
+  end
+
+  def invite_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:name, :email])
+    |> validate_name()
+    |> validate_email(opts)
+  end
+
+  defp validate_name(changeset) do
+    changeset
+    |> validate_required([:name])
   end
 
   defp validate_email(changeset, opts) do
@@ -128,9 +144,12 @@ defmodule Resolvd.Accounts.User do
   @doc """
   Confirms the account by setting `confirmed_at`.
   """
-  def confirm_changeset(user) do
+  def confirm_changeset(user, attrs \\ %{}) do
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-    change(user, confirmed_at: now)
+
+    user
+    |> change(confirmed_at: now)
+    |> password_changeset(attrs)
   end
 
   @doc """
@@ -158,5 +177,14 @@ defmodule Resolvd.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
+  end
+
+  @doc """
+  A user changeset for changing the users profile.
+  """
+  def profile_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:name, :is_admin])
+    |> validate_name()
   end
 end

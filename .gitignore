@@ -35,3 +35,4 @@ resolvd-*.tar
 npm-debug.log
 /assets/node_modules/
 
+config/local.exs

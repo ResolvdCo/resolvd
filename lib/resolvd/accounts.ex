@@ -2,11 +2,45 @@ defmodule Resolvd.Accounts do
   @moduledoc """
   The Accounts context.
   """
+  use ResolvdWeb, :verified_routes
 
   import Ecto.Query, warn: false
   alias Resolvd.Repo
 
   alias Resolvd.Accounts.{User, UserToken, UserNotifier}
+  alias Resolvd.Tenants.Tenant
+
+  def gravatar_avatar(%User{email: email}) do
+    hash = :crypto.hash(:md5, email) |> Base.encode16(case: :lower)
+    "https://www.gravatar.com/avatar/#{hash}"
+  end
+
+  ## Tenant Actions
+  def list_users(%User{tenant_id: user_tenant} = user) do
+    Repo.all(from u in User, where: u.tenant_id == ^user_tenant)
+  end
+
+  def invite_user(%User{tenant_id: user_tenant} = user, params) do
+    tenant = Resolvd.Tenants.get_tenant!(user_tenant)
+
+    {:ok, user} =
+      Repo.insert(
+        User.invite_changeset(
+          %User{
+            tenant_id: tenant.id
+          },
+          params
+        )
+      )
+
+    deliver_user_invite(
+      user,
+      tenant,
+      &url(~p"/users/confirm/#{&1}")
+    )
+
+    {:ok, user}
+  end
 
   ## Database getters
 
@@ -94,6 +128,25 @@ defmodule Resolvd.Accounts do
   end
 
   ## Settings
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user changes.
+
+  ## Examples
+
+      iex> change_user_profile(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def change_user_profile(%User{} = user, attrs \\ %{}) do
+    User.profile_changeset(user, attrs)
+  end
+
+  def update_user_profile(%User{} = user, attrs) do
+    user
+    |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
 
   @doc """
   Returns an `%Ecto.Changeset{}` for changing the user email.
@@ -267,25 +320,53 @@ defmodule Resolvd.Accounts do
     end
   end
 
+  @doc ~S"""
+  Delivers the confirmation email instructions to the given user.
+
+  ## Examples
+
+      iex> deliver_user_invite(user, tenant, &url(~p"/users/confirm/#{&1}"))
+      {:ok, %{to: ..., body: ...}}
+
+      iex> deliver_user_invite(confirmed_user, tenant, &url(~p"/users/confirm/#{&1}"))
+      {:error, :already_confirmed}
+
+  """
+  def deliver_user_invite(%User{} = user, %Tenant{} = tenant, confirmation_url_fun)
+      when is_function(confirmation_url_fun, 1) do
+    if user.confirmed_at do
+      {:error, :already_confirmed}
+    else
+      {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
+      Repo.insert!(user_token)
+      UserNotifier.deliver_invite_instructions(user, tenant, confirmation_url_fun.(encoded_token))
+    end
+  end
+
+  def get_user_by_email_verify_token(token) do
+    {:ok, query} = UserToken.verify_email_token_query(token, "confirm")
+    Repo.one(query)
+  end
+
   @doc """
   Confirms a user by the given token.
 
   If the token matches, the user account is marked as confirmed
   and the token is deleted.
   """
-  def confirm_user(token) do
+  def confirm_user(token, attrs) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
          %User{} = user <- Repo.one(query),
-         {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user)) do
+         {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user, attrs)) do
       {:ok, user}
     else
       _ -> :error
     end
   end
 
-  defp confirm_user_multi(user) do
+  defp confirm_user_multi(user, attrs) do
     Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.confirm_changeset(user))
+    |> Ecto.Multi.update(:user, User.confirm_changeset(user, attrs))
     |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["confirm"]))
   end
 

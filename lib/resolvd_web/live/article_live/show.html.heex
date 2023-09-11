@@ -14,9 +14,19 @@
   <:item title="Body"><%= @article.body %></:item>
 </.list>
 
+<h2><%= @article.subject %></h2>
+<article class="prose max-w-none">
+  <%= raw(@article.body) %>
+</article>
+
 <.back navigate={~p"/articles"}>Back to articles</.back>
 
-<.modal :if={@live_action == :edit} id="article-modal" show on_cancel={JS.patch(~p"/articles/#{@article}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="article-modal"
+  show
+  on_cancel={JS.patch(~p"/articles/#{@article}")}
+>
   <.live_component
     module={ResolvdWeb.ArticleLive.FormComponent}
     id={@article.id}

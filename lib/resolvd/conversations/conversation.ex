@@ -6,11 +6,14 @@ defmodule Resolvd.Conversations.Conversation do
   @foreign_key_type :binary_id
   schema "conversations" do
     field :subject, :string
-    belongs_to :tenant, Resolvd.Tenants.Tenant
 
     has_many :messages, Resolvd.Conversations.Message
-    belongs_to :user, Resolvd.Accounts.User
+
+    belongs_to :tenant, Resolvd.Tenants.Tenant
+
     belongs_to :customer, Resolvd.Customers.Customer
+
+    belongs_to :user, Resolvd.Accounts.User
 
     timestamps()
   end

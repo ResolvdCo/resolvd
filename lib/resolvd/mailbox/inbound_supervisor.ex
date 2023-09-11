@@ -1,6 +1,7 @@
 defmodule Resolvd.Mailbox.InboundSupervisor do
   use DynamicSupervisor
 
+  alias Hex.API.Key
   alias Resolvd.Mailbox.InboundProviders.IMAPProvider
   alias Resolvd.Mailbox.InboundProcessor
 
@@ -9,11 +10,16 @@ defmodule Resolvd.Mailbox.InboundSupervisor do
   end
 
   def start_child(id, %IMAPProvider{} = server) do
-    # If MyWorker is not using the new child specs, we need to pass a map:
-    # spec = %{id: MyWorker, start: {MyWorker, :start_link, [foo, bar, baz]}}
-    # spec = {InboundPairSupervisor, server: server}
     spec = {InboundProcessor, id: id, server: server}
     DynamicSupervisor.start_child(__MODULE__, spec)
+  end
+
+  def stop_child(id) do
+    InboundProcessor.stop(id, :normal)
+  end
+
+  def child_started?(id) do
+    InboundProcessor.alive?(id)
   end
 
   @impl true

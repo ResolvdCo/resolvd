@@ -19,7 +19,7 @@ defmodule ResolvdWeb.CategoryLiveTest do
     test "lists all categories", %{conn: conn, category: category} do
       {:ok, _index_live, html} = live(conn, ~p"/categories")
 
-      assert html =~ "Listing Categories"
+      assert html =~ "Categories"
       assert html =~ category.slug
     end
 

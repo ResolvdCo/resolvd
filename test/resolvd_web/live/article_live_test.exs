@@ -5,7 +5,11 @@ defmodule ResolvdWeb.ArticleLiveTest do
   import Resolvd.ArticlesFixtures
 
   @create_attrs %{body: "some body", slug: "some slug", subject: "some subject"}
-  @update_attrs %{body: "some updated body", slug: "some updated slug", subject: "some updated subject"}
+  @update_attrs %{
+    body: "some updated body",
+    slug: "some updated slug",
+    subject: "some updated subject"
+  }
   @invalid_attrs %{body: nil, slug: nil, subject: nil}
 
   defp create_article(_) do
@@ -19,7 +23,7 @@ defmodule ResolvdWeb.ArticleLiveTest do
     test "lists all articles", %{conn: conn, article: article} do
       {:ok, _index_live, html} = live(conn, ~p"/articles")
 
-      assert html =~ "Listing Articles"
+      assert html =~ "Articles"
       assert html =~ article.body
     end
 

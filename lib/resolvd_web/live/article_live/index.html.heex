@@ -1,5 +1,5 @@
 <.header>
-  Listing Articles
+  Articles
   <:actions>
     <.link patch={~p"/articles/new"}>
       <.button>New Article</.button>
@@ -31,7 +31,12 @@
   </:action>
 </.table>
 
-<.modal :if={@live_action in [:new, :edit]} id="article-modal" show on_cancel={JS.patch(~p"/articles")}>
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="article-modal"
+  show
+  on_cancel={JS.patch(~p"/articles")}
+>
   <.live_component
     module={ResolvdWeb.ArticleLive.FormComponent}
     id={@article.id || :new}

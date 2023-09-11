@@ -20,8 +20,16 @@ defmodule ResolvdWeb.ArticleLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:subject]} type="text" label="Subject" />
-        <.input field={@form[:slug]} type="text" label="Slug" />
-        <.input field={@form[:body]} type="text" label="Body" />
+        <%!-- <.input field={@form[:slug]} type="text" label="Slug" /> --%>
+        <.input type="hidden" field={@form[:body]} id="trix-editor" phx-hook="Trix" />
+        <div id="richtext" phx-update="ignore">
+          <trix-editor
+            input="trix-editor"
+            class="trix-content prose max-w-none prose-pre:text-black"
+            autofocus
+          >
+          </trix-editor>
+        </div>
         <:actions>
           <.button phx-disable-with="Saving...">Save Article</.button>
         </:actions>

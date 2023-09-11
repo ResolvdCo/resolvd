@@ -4,6 +4,7 @@ defmodule Resolvd.Mailbox do
   alias Resolvd.Repo
   alias Resolvd.Mailbox.MailServer
   alias Resolvd.Mailbox.InboundSupervisor
+  alias Resolvd.Tenants.Tenant
 
   def list_inbound_types do
     %{
@@ -13,10 +14,31 @@ defmodule Resolvd.Mailbox do
   end
 
   def get_inbound_provider(provider) do
-    Map.get(list_inbound_types, provider)
+    Map.get(list_inbound_types(), provider)
   end
 
-  alias Resolvd.Mailbox.MailServer
+  def tenant_outbound_provider(%Tenant{} = tenant) do
+    nil
+  end
+
+  def deliver(%Tenant{} = tenant, email) do
+    outbound = tenant_outbound_provider(tenant)
+
+    config = [
+      adapter: Swoosh.Adapters.SMTP,
+      relay: outbound.server,
+      username: outbound.username,
+      password: outbound.password,
+      ssl: outbound.ssl,
+      tls: outbound.tls,
+      auth: outbound.auth,
+      port: outbound.port
+    ]
+
+    with {:ok, metadata} <- Resolvd.Mailer.deliver(email, config) do
+      nil
+    end
+  end
 
   @doc """
   Returns the list of mail_servers.
@@ -83,8 +105,6 @@ defmodule Resolvd.Mailbox do
       |> MailServer.changeset(attrs)
       |> Repo.update()
 
-    InboundSupervisor.start_child(server.id, server.inbound_config)
-
     {:ok, server}
   end
 
@@ -115,6 +135,22 @@ defmodule Resolvd.Mailbox do
   """
   def change_mail_server(%MailServer{} = mail_server, attrs \\ %{}) do
     MailServer.changeset(mail_server, attrs)
+  end
+
+  def upstart_mail_server(%MailServer{} = server) do
+    if InboundSupervisor.child_started?(server.id) do
+      stop_mail_server(server)
+    end
+
+    InboundSupervisor.start_child(server.id, server.inbound_config)
+  end
+
+  def stop_mail_server(%MailServer{} = server) do
+    InboundSupervisor.stop_child(server.id)
+  end
+
+  def mail_server_running?(%MailServer{id: server_id}) do
+    InboundSupervisor.child_started?(server_id) |> dbg()
   end
 
   # use GenServer

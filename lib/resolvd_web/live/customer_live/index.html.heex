@@ -1,5 +1,5 @@
 <.header>
-  Listing Customers
+  Customers
   <:actions>
     <.link patch={~p"/customers/new"}>
       <.button>New Customer</.button>
@@ -31,7 +31,12 @@
   </:action>
 </.table>
 
-<.modal :if={@live_action in [:new, :edit]} id="customer-modal" show on_cancel={JS.patch(~p"/customers")}>
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="customer-modal"
+  show
+  on_cancel={JS.patch(~p"/customers")}
+>
   <.live_component
     module={ResolvdWeb.CustomerLive.FormComponent}
     id={@customer.id || :new}

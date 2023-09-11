@@ -28,7 +28,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Conversations")
+    |> assign(:page_title, "Conversations")
     |> assign(:conversation, nil)
   end
 

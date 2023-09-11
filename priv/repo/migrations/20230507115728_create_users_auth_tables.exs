@@ -8,9 +8,11 @@ defmodule Resolvd.Repo.Migrations.CreateUsersAuthTables do
       add :id, :binary_id, primary_key: true
       add :tenant_id, references(:tenants, type: :binary_id, on_delete: :delete_all), null: false
 
+      add :name, :string
       add :email, :citext, null: false
-      add :hashed_password, :string, null: false
+      add :hashed_password, :string
       add :confirmed_at, :naive_datetime
+      add :is_admin, :boolean
 
       timestamps()
     end

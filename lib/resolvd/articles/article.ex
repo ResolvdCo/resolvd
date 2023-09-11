@@ -8,7 +8,7 @@ defmodule Resolvd.Articles.Article do
     field :body, :string
     field :slug, :string
     field :subject, :string
-    field :category_id, :binary_id
+    belongs_to :category, Resolvd.Articles.Category
 
     timestamps()
   end
@@ -16,7 +16,18 @@ defmodule Resolvd.Articles.Article do
   @doc false
   def changeset(article, attrs) do
     article
-    |> cast(attrs, [:subject, :slug, :body])
-    |> validate_required([:subject, :slug, :body])
+    |> cast(attrs, [:subject, :body])
+    |> validate_required([:subject, :body])
+    |> cast_slug()
+  end
+
+  def cast_slug(changeset) do
+    case changeset do
+      %Ecto.Changeset{valid?: true, changes: %{subject: subject}} ->
+        put_change(changeset, :slug, Slug.slugify(subject))
+
+      _ ->
+        changeset
+    end
   end
 end

@@ -4,9 +4,24 @@ defmodule ResolvdWeb.MailServerLiveTest do
   import Phoenix.LiveViewTest
   import Resolvd.TenantsFixtures
 
-  @create_attrs %{inbound_config: %{}, inbound_type: "some inbound_type", outbound_config: %{}, outbound_type: "some outbound_type"}
-  @update_attrs %{inbound_config: %{}, inbound_type: "some updated inbound_type", outbound_config: %{}, outbound_type: "some updated outbound_type"}
-  @invalid_attrs %{inbound_config: nil, inbound_type: nil, outbound_config: nil, outbound_type: nil}
+  @create_attrs %{
+    inbound_config: %{},
+    inbound_type: "some inbound_type",
+    outbound_config: %{},
+    outbound_type: "some outbound_type"
+  }
+  @update_attrs %{
+    inbound_config: %{},
+    inbound_type: "some updated inbound_type",
+    outbound_config: %{},
+    outbound_type: "some updated outbound_type"
+  }
+  @invalid_attrs %{
+    inbound_config: nil,
+    inbound_type: nil,
+    outbound_config: nil,
+    outbound_type: nil
+  }
 
   defp create_mail_server(_) do
     mail_server = mail_server_fixture()
@@ -19,7 +34,7 @@ defmodule ResolvdWeb.MailServerLiveTest do
     test "lists all mail_servers", %{conn: conn, mail_server: mail_server} do
       {:ok, _index_live, html} = live(conn, ~p"/mail_servers")
 
-      assert html =~ "Listing Mail servers"
+      assert html =~ "Mail Servers"
       assert html =~ mail_server.inbound_type
     end
 
@@ -72,7 +87,10 @@ defmodule ResolvdWeb.MailServerLiveTest do
     test "deletes mail_server in listing", %{conn: conn, mail_server: mail_server} do
       {:ok, index_live, _html} = live(conn, ~p"/mail_servers")
 
-      assert index_live |> element("#mail_servers-#{mail_server.id} a", "Delete") |> render_click()
+      assert index_live
+             |> element("#mail_servers-#{mail_server.id} a", "Delete")
+             |> render_click()
+
       refute has_element?(index_live, "#mail_servers-#{mail_server.id}")
     end
   end

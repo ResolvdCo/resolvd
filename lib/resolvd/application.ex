@@ -18,21 +18,9 @@ defmodule Resolvd.Application do
       {Finch, name: Resolvd.Finch},
       # Start the Endpoint (http/https)
       ResolvdWeb.Endpoint,
+      {Registry, [keys: :unique, name: :inbound_processors]},
       Resolvd.Mailbox.InboundSupervisor
-      # Start a worker by calling: Resolvd.Worker.start_link(arg)
-      # {Resolvd.Worker, arg}
-      # Yugo.Client instantiation should be moved to the MailProcessor (processor should start / supervise)
-      # {
-      #   Yugo.Client,
-      #   name: :resolvd,
-      #   server: Application.get_env(:resolvd, Yugo.Client)[:server],
-      #   username: Application.get_env(:resolvd, Yugo.Client)[:username],
-      #   password: Application.get_env(:resolvd, Yugo.Client)[:password]
-      # },
-      # Resolvd.Mailbox.MailProcessor
     ]
-
-    :observer.start()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

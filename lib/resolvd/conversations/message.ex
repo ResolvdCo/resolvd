@@ -10,7 +10,9 @@ defmodule Resolvd.Conversations.Message do
     field :email_message_id, :string
 
     belongs_to :conversation, Resolvd.Conversations.Conversation
+
     belongs_to :customer, Resolvd.Customers.Customer
+
     belongs_to :user, Resolvd.Accounts.User
 
     timestamps()

@@ -5,7 +5,11 @@ defmodule ResolvdWeb.TenantMailConfigLiveTest do
   import Resolvd.TenantsFixtures
 
   @create_attrs %{adapter: "some adapter", config: %{}, direction: "some direction"}
-  @update_attrs %{adapter: "some updated adapter", config: %{}, direction: "some updated direction"}
+  @update_attrs %{
+    adapter: "some updated adapter",
+    config: %{},
+    direction: "some updated direction"
+  }
   @invalid_attrs %{adapter: nil, config: nil, direction: nil}
 
   defp create_tenant_mail_config(_) do
@@ -19,7 +23,7 @@ defmodule ResolvdWeb.TenantMailConfigLiveTest do
     test "lists all tenant_mail_configs", %{conn: conn, tenant_mail_config: tenant_mail_config} do
       {:ok, _index_live, html} = live(conn, ~p"/tenant_mail_configs")
 
-      assert html =~ "Listing Tenant mail configs"
+      assert html =~ "Tenant mail configs"
       assert html =~ tenant_mail_config.adapter
     end
 
@@ -46,10 +50,15 @@ defmodule ResolvdWeb.TenantMailConfigLiveTest do
       assert html =~ "some adapter"
     end
 
-    test "updates tenant_mail_config in listing", %{conn: conn, tenant_mail_config: tenant_mail_config} do
+    test "updates tenant_mail_config in listing", %{
+      conn: conn,
+      tenant_mail_config: tenant_mail_config
+    } do
       {:ok, index_live, _html} = live(conn, ~p"/tenant_mail_configs")
 
-      assert index_live |> element("#tenant_mail_configs-#{tenant_mail_config.id} a", "Edit") |> render_click() =~
+      assert index_live
+             |> element("#tenant_mail_configs-#{tenant_mail_config.id} a", "Edit")
+             |> render_click() =~
                "Edit Tenant mail config"
 
       assert_patch(index_live, ~p"/tenant_mail_configs/#{tenant_mail_config}/edit")
@@ -69,10 +78,16 @@ defmodule ResolvdWeb.TenantMailConfigLiveTest do
       assert html =~ "some updated adapter"
     end
 
-    test "deletes tenant_mail_config in listing", %{conn: conn, tenant_mail_config: tenant_mail_config} do
+    test "deletes tenant_mail_config in listing", %{
+      conn: conn,
+      tenant_mail_config: tenant_mail_config
+    } do
       {:ok, index_live, _html} = live(conn, ~p"/tenant_mail_configs")
 
-      assert index_live |> element("#tenant_mail_configs-#{tenant_mail_config.id} a", "Delete") |> render_click()
+      assert index_live
+             |> element("#tenant_mail_configs-#{tenant_mail_config.id} a", "Delete")
+             |> render_click()
+
       refute has_element?(index_live, "#tenant_mail_configs-#{tenant_mail_config.id}")
     end
   end
@@ -87,7 +102,10 @@ defmodule ResolvdWeb.TenantMailConfigLiveTest do
       assert html =~ tenant_mail_config.adapter
     end
 
-    test "updates tenant_mail_config within modal", %{conn: conn, tenant_mail_config: tenant_mail_config} do
+    test "updates tenant_mail_config within modal", %{
+      conn: conn,
+      tenant_mail_config: tenant_mail_config
+    } do
       {:ok, show_live, _html} = live(conn, ~p"/tenant_mail_configs/#{tenant_mail_config}")
 
       assert show_live |> element("a", "Edit") |> render_click() =~

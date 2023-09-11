@@ -1,0 +1,70 @@
+<.header>
+  Users
+  <:actions>
+    <.link patch={~p"/admin/users/new"}>
+      <.button>Invite User</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="users"
+  rows={@streams.users}
+  row_click={fn {_id, user} -> JS.navigate(~p"/admin/users/#{user}") end}
+>
+  <:col :let={{_id, user}} label="Full Name"><%= user.name %></:col>
+  <:col :let={{_id, user}} label="Email"><%= user.email %></:col>
+  <:col :let={{_id, user}} label="Status">
+    <%= if is_nil(user.hashed_password) do %>
+      Invited
+    <% else %>
+      Active
+    <% end %>
+  </:col>
+  <:col :let={{_id, user}} label="Type">
+    <%= if user.is_admin do %>
+      Admin
+    <% else %>
+      Regular
+    <% end %>
+  </:col>
+  <:action :let={{_id, user}}>
+    <.link
+      :if={is_nil(user.hashed_password)}
+      phx-click={JS.push("resend_invite", value: %{id: user.id})}
+    >
+      Resend Invite
+    </.link>
+  </:action>
+  <:action :let={{_id, user}}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/users/#{user}"}>Show</.link>
+    </div>
+    <.link patch={~p"/admin/users/#{user}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, user}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: user.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="user-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/users")}
+>
+  <.live_component
+    module={ResolvdWeb.Admin.UserLive.FormComponent}
+    id={@user.id || :new}
+    title={@page_title}
+    action={@live_action}
+    user={@user}
+    current_user={@current_user}
+    patch={~p"/admin/users"}
+  />
+</.modal>

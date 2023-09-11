@@ -1,0 +1,28 @@
+# fly.toml app configuration file generated for resolvd-app on 2023-07-12T10:07:40-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "resolvd-app"
+primary_region = "iad"
+kill_signal = "SIGTERM"
+
+[deploy]
+  release_command = "/app/bin/migrate"
+
+[env]
+  PHX_HOST = "resolvd.app"
+  PORT = "8080"
+  MAILGUN_DOMAIN = "resolvd.co"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 1000
+    soft_limit = 1000
