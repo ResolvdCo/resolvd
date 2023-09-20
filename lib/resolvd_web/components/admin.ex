@@ -30,8 +30,8 @@ defmodule ResolvdWeb.Admin do
         <:item to={~p"/admin/billing"}>
           <%= gettext("Billing") %>
         </:item>
-        <:item to={~p"/admin/mail-servers"}>
-          <%= gettext("Mail Servers") %>
+        <:item to={~p"/admin/mailboxes"}>
+          <%= gettext("Mailboxes") %>
         </:item>
       </.tab_nav>
 
@@ -185,7 +185,7 @@ defmodule ResolvdWeb.Admin do
     assigns =
       assigns
       |> assign(field: nil, id: assigns.id || field.id)
-      |> assign(:errors, Enum.map(field.errors, &GlimeshWeb.CoreComponents.translate_error(&1)))
+      |> assign(:errors, Enum.map(field.errors, &ResolvdWeb.CoreComponents.translate_error(&1)))
       |> assign_new(:name, fn -> field.name end)
       |> assign_new(:value, fn -> field.value end)
       |> assign_new(:checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", field.value) end)

@@ -1,4 +1,4 @@
-defmodule Resolvd.Mailbox.InboundProcessor do
+defmodule Resolvd.Mailboxes.InboundProcessor do
   @moduledoc """
   MailProcessor is a simple GenServer that listens to the various mail
   connections, checking for new email, and ingesting them as messages.
@@ -12,7 +12,6 @@ defmodule Resolvd.Mailbox.InboundProcessor do
   ## GenServer API
 
   def start_link(_start_from, opts \\ []) do
-    Logger.info("InboundProcessor.start_link")
     id = Keyword.get(opts, :id)
     server = Keyword.get(opts, :server)
 
@@ -33,7 +32,6 @@ defmodule Resolvd.Mailbox.InboundProcessor do
   end
 
   def stop(process_name, stop_reason) do
-    Logger.info("InboundProcessor stopping for #{process_name}")
     Registry.lookup(@registry, process_name) |> dbg()
     process_name |> via_tuple() |> GenServer.stop(stop_reason)
   end
@@ -45,7 +43,7 @@ defmodule Resolvd.Mailbox.InboundProcessor do
   ## GenServer Callbacks
   @impl true
   def init(%{id: id, server: server}) do
-    Logger.info("InboundProcessor starting for #{id}")
+    Logger.debug("[#{id}] Starting process")
     mailbox_atom = String.to_atom(id)
 
     {:ok, yugo_pid} =
@@ -63,7 +61,7 @@ defmodule Resolvd.Mailbox.InboundProcessor do
 
   @impl true
   def terminate(reason, state) do
-    # Logger.info("InboundProcessor terminating for #{reason}")
+    Logger.debug("[#{state.mailbox_atom}] Terminating process")
 
     # Is this normal?
     Yugo.unsubscribe(state.mailbox_atom)
@@ -74,27 +72,11 @@ defmodule Resolvd.Mailbox.InboundProcessor do
 
   @impl true
   def handle_info({:email, mailbox_atom, message}, state) do
-    Logger.info("Got new email")
-    dbg(message)
-    tenant = Resolvd.Tenants.get_tenant_from_mailbox!(Atom.to_string(mailbox_atom))
+    Logger.debug("[#{mailbox_atom}] Processing new email")
+    mailbox = Resolvd.Mailboxes.get_mailbox!(Atom.to_string(mailbox_atom))
+    parsed_email = Resolvd.Mailboxes.Mail.from_yugo_type(message)
 
-    mail =
-      message
-      |> Resolvd.Mailbox.Mail.from_yugo_type()
-
-    Resolvd.Conversations.create_or_update_conversation_from_email(tenant, mail)
-    |> dbg()
-
-    # email =
-    #   Swoosh.Email.new()
-    #   |> Swoosh.Email.to(message.reply_to)
-    #   |> Swoosh.Email.from({"Resolvd", "resolvd@axxim.net"})
-    #   |> Swoosh.Email.subject(message.subject)
-    #   |> Swoosh.Email.text_body("We got your ticket bruv! Will respond soon.")
-    #   |> Swoosh.Email.header("In-Reply-To", message.message_id)
-    #   |> Swoosh.Email.header("References", message.message_id)
-
-    # Resolvd.Mailer.deliver(email) |> dbg()
+    Resolvd.Mailboxes.process_customer_email(mailbox, parsed_email)
 
     {:noreply, state}
   end

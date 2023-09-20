@@ -8,14 +8,16 @@ defmodule Resolvd.Tenants do
   alias Resolvd.Accounts
   alias Resolvd.Accounts.User
   alias Resolvd.Tenants.Tenant
-  alias Resolvd.Mailbox.MailServer
+  alias Resolvd.Mailboxes.Mailbox
 
   import Ecto.Changeset, only: [get_field: 2]
 
   def get_tenant!(id), do: Repo.get!(Tenant, id)
 
   def get_tenant_from_mailbox!(mailbox_id),
-    do: Repo.one!(from(t in Tenant, left_join: m in MailServer, on: m.id == ^mailbox_id))
+    do: Repo.one!(from(t in Tenant, left_join: m in Mailbox, on: m.id == ^mailbox_id))
+
+  def get_tenant_for_user!(%User{tenant_id: tenant_id}), do: Repo.get_by!(Tenant, id: tenant_id)
 
   @doc """
   Create a tenant and a user from a %TenantCreation{} changeset

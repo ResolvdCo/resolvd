@@ -1,9 +1,12 @@
-defmodule Resolvd.Repo.Migrations.CreateMailServers do
+defmodule Resolvd.Repo.Migrations.CreateMailboxes do
   use Ecto.Migration
 
   def change do
-    create table(:mail_servers, primary_key: false) do
+    create table(:mailboxes, primary_key: false) do
       add :id, :binary_id, primary_key: true
+      add :name, :string
+      add :from, :string
+      add :email_address, :string
       add :inbound_type, :string
       add :inbound_config, :map
       add :outbound_type, :string
@@ -13,6 +16,6 @@ defmodule Resolvd.Repo.Migrations.CreateMailServers do
       timestamps()
     end
 
-    create index(:mail_servers, [:tenant_id])
+    create index(:mailboxes, [:tenant_id])
   end
 end

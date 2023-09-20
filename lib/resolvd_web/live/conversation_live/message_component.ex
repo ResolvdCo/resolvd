@@ -106,8 +106,7 @@ defmodule ResolvdWeb.ConversationLive.MessageComponent do
            socket.assigns.conversation,
            socket.assigns.current_user,
            message_params
-         )
-         |> dbg() do
+         ) do
       {:ok, message} ->
         notify_parent({:saved, message})
 

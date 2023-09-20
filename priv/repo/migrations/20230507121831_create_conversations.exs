@@ -17,6 +17,9 @@ defmodule Resolvd.Repo.Migrations.CreateConversations do
       add :id, :binary_id, primary_key: true
       add :tenant_id, references(:tenants, type: :binary_id, on_delete: :delete_all), null: false
 
+      add :mailbox_id, references(:mailboxes, type: :binary_id, on_delete: :delete_all),
+        null: false
+
       add :subject, :text
 
       add :customer_id, references(:customers, on_delete: :delete_all, type: :binary_id)

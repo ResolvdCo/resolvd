@@ -1,4 +1,4 @@
-defmodule ResolvdWeb.MailServerLiveTest do
+defmodule ResolvdWeb.MailboxLiveTest do
   use ResolvdWeb.ConnCase
 
   import Phoenix.LiveViewTest
@@ -23,108 +23,108 @@ defmodule ResolvdWeb.MailServerLiveTest do
     outbound_type: nil
   }
 
-  defp create_mail_server(_) do
-    mail_server = mail_server_fixture()
-    %{mail_server: mail_server}
+  defp create_mailbox(_) do
+    mailbox = mailbox_fixture()
+    %{mailbox: mailbox}
   end
 
   describe "Index" do
-    setup [:create_mail_server]
+    setup [:create_mailbox]
 
-    test "lists all mail_servers", %{conn: conn, mail_server: mail_server} do
-      {:ok, _index_live, html} = live(conn, ~p"/mail_servers")
+    test "lists all mailboxes", %{conn: conn, mailbox: mailbox} do
+      {:ok, _index_live, html} = live(conn, ~p"/mailboxes")
 
-      assert html =~ "Mail Servers"
-      assert html =~ mail_server.inbound_type
+      assert html =~ "Mailboxes"
+      assert html =~ mailbox.inbound_type
     end
 
-    test "saves new mail_server", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, ~p"/mail_servers")
+    test "saves new mailbox", %{conn: conn} do
+      {:ok, index_live, _html} = live(conn, ~p"/mailboxes")
 
-      assert index_live |> element("a", "New Mail server") |> render_click() =~
-               "New Mail server"
+      assert index_live |> element("a", "New Mailbox") |> render_click() =~
+               "New Mailbox"
 
-      assert_patch(index_live, ~p"/mail_servers/new")
+      assert_patch(index_live, ~p"/mailboxes/new")
 
       assert index_live
-             |> form("#mail_server-form", mail_server: @invalid_attrs)
+             |> form("#mailbox-form", mailbox: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       assert index_live
-             |> form("#mail_server-form", mail_server: @create_attrs)
+             |> form("#mailbox-form", mailbox: @create_attrs)
              |> render_submit()
 
-      assert_patch(index_live, ~p"/mail_servers")
+      assert_patch(index_live, ~p"/mailboxes")
 
       html = render(index_live)
-      assert html =~ "Mail server created successfully"
+      assert html =~ "Mailbox created successfully"
       assert html =~ "some inbound_type"
     end
 
-    test "updates mail_server in listing", %{conn: conn, mail_server: mail_server} do
-      {:ok, index_live, _html} = live(conn, ~p"/mail_servers")
+    test "updates mailbox in listing", %{conn: conn, mailbox: mailbox} do
+      {:ok, index_live, _html} = live(conn, ~p"/mailboxes")
 
-      assert index_live |> element("#mail_servers-#{mail_server.id} a", "Edit") |> render_click() =~
-               "Edit Mail server"
+      assert index_live |> element("#mailboxes-#{mailbox.id} a", "Edit") |> render_click() =~
+               "Edit Mailbox"
 
-      assert_patch(index_live, ~p"/mail_servers/#{mail_server}/edit")
+      assert_patch(index_live, ~p"/mailboxes/#{mailbox}/edit")
 
       assert index_live
-             |> form("#mail_server-form", mail_server: @invalid_attrs)
+             |> form("#mailbox-form", mailbox: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       assert index_live
-             |> form("#mail_server-form", mail_server: @update_attrs)
+             |> form("#mailbox-form", mailbox: @update_attrs)
              |> render_submit()
 
-      assert_patch(index_live, ~p"/mail_servers")
+      assert_patch(index_live, ~p"/mailboxes")
 
       html = render(index_live)
-      assert html =~ "Mail server updated successfully"
+      assert html =~ "Mailbox updated successfully"
       assert html =~ "some updated inbound_type"
     end
 
-    test "deletes mail_server in listing", %{conn: conn, mail_server: mail_server} do
-      {:ok, index_live, _html} = live(conn, ~p"/mail_servers")
+    test "deletes mailbox in listing", %{conn: conn, mailbox: mailbox} do
+      {:ok, index_live, _html} = live(conn, ~p"/mailboxes")
 
       assert index_live
-             |> element("#mail_servers-#{mail_server.id} a", "Delete")
+             |> element("#mailboxes-#{mailbox.id} a", "Delete")
              |> render_click()
 
-      refute has_element?(index_live, "#mail_servers-#{mail_server.id}")
+      refute has_element?(index_live, "#mailboxes-#{mailbox.id}")
     end
   end
 
   describe "Show" do
-    setup [:create_mail_server]
+    setup [:create_mailbox]
 
-    test "displays mail_server", %{conn: conn, mail_server: mail_server} do
-      {:ok, _show_live, html} = live(conn, ~p"/mail_servers/#{mail_server}")
+    test "displays mailbox", %{conn: conn, mailbox: mailbox} do
+      {:ok, _show_live, html} = live(conn, ~p"/mailboxes/#{mailbox}")
 
-      assert html =~ "Show Mail server"
-      assert html =~ mail_server.inbound_type
+      assert html =~ "Show Mailbox"
+      assert html =~ mailbox.inbound_type
     end
 
-    test "updates mail_server within modal", %{conn: conn, mail_server: mail_server} do
-      {:ok, show_live, _html} = live(conn, ~p"/mail_servers/#{mail_server}")
+    test "updates mailbox within modal", %{conn: conn, mailbox: mailbox} do
+      {:ok, show_live, _html} = live(conn, ~p"/mailboxes/#{mailbox}")
 
       assert show_live |> element("a", "Edit") |> render_click() =~
-               "Edit Mail server"
+               "Edit Mailbox"
 
-      assert_patch(show_live, ~p"/mail_servers/#{mail_server}/show/edit")
+      assert_patch(show_live, ~p"/mailboxes/#{mailbox}/show/edit")
 
       assert show_live
-             |> form("#mail_server-form", mail_server: @invalid_attrs)
+             |> form("#mailbox-form", mailbox: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       assert show_live
-             |> form("#mail_server-form", mail_server: @update_attrs)
+             |> form("#mailbox-form", mailbox: @update_attrs)
              |> render_submit()
 
-      assert_patch(show_live, ~p"/mail_servers/#{mail_server}")
+      assert_patch(show_live, ~p"/mailboxes/#{mailbox}")
 
       html = render(show_live)
-      assert html =~ "Mail server updated successfully"
+      assert html =~ "Mailbox updated successfully"
       assert html =~ "some updated inbound_type"
     end
   end

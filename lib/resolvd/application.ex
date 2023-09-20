@@ -19,7 +19,7 @@ defmodule Resolvd.Application do
       # Start the Endpoint (http/https)
       ResolvdWeb.Endpoint,
       {Registry, [keys: :unique, name: :inbound_processors]},
-      Resolvd.Mailbox.InboundSupervisor
+      Resolvd.Mailboxes.InboundSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

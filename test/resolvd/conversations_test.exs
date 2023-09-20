@@ -40,7 +40,7 @@ defmodule Resolvd.ConversationsTest do
         to: ["resolvd@axxim.net"]
       }
 
-      email = Resolvd.Mailbox.Mail.from_yugo_type(email)
+      email = Resolvd.Mailboxes.Mail.from_yugo_type(email)
 
       {:ok, conversation} = Conversations.create_or_update_conversation_from_email(email)
 

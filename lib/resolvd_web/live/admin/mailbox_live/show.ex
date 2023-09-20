@@ -1,7 +1,7 @@
-defmodule ResolvdWeb.Admin.MailServerLive.Show do
+defmodule ResolvdWeb.Admin.MailboxLive.Show do
   use ResolvdWeb, :admin_live_view
 
-  alias Resolvd.Mailbox
+  alias Resolvd.Mailboxes
 
   @impl true
   def mount(_params, _session, socket) do
@@ -13,28 +13,26 @@ defmodule ResolvdWeb.Admin.MailServerLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:mail_server, Mailbox.get_mail_server!(id))}
+     |> assign(:mailbox, Mailboxes.get_mailbox!(socket.assigns.current_user, id))}
   end
 
   @impl true
   def handle_event("start", _, socket) do
-    Mailbox.upstart_mail_server(socket.assigns.mail_server)
+    Mailboxes.upstart_mailbox(socket.assigns.mailbox)
 
     {:noreply, socket}
   end
 
   def handle_event("stop", _, socket) do
-    Mailbox.stop_mail_server(socket.assigns.mail_server)
+    Mailboxes.stop_mailbox(socket.assigns.mailbox)
 
     {:noreply, socket}
   end
 
   def handle_event("test_inbound", _, socket) do
-    inbound = socket.assigns.mail_server.inbound_config
-
     email =
       Swoosh.Email.new()
-      |> Swoosh.Email.to(inbound.username)
+      |> Swoosh.Email.to(socket.assigns.mailbox.email_address)
       |> Swoosh.Email.from({"Resolvd", "test@resolvd.co"})
       |> Swoosh.Email.subject("Testing Email")
       |> Swoosh.Email.text_body("Hello world!")
@@ -48,29 +46,19 @@ defmodule ResolvdWeb.Admin.MailServerLive.Show do
   end
 
   def handle_event("test_outbound", _, socket) do
-    outbound = socket.assigns.mail_server.outbound_config
+    mailbox = socket.assigns.mailbox
+    current_user = socket.assigns.current_user
 
     email =
       Swoosh.Email.new()
-      |> Swoosh.Email.to({"Luke Strickland", "luke@axxim.net"})
-      |> Swoosh.Email.from({outbound.username, outbound.username})
+      |> Swoosh.Email.to({current_user.name, current_user.email})
       |> Swoosh.Email.subject("Testing Email")
-      |> Swoosh.Email.text_body("Hello world!")
+      |> Swoosh.Email.html_body("Hello world, this is a test!")
+      |> Swoosh.Email.text_body("Hello world, this is a test!")
 
-    config = [
-      adapter: Swoosh.Adapters.SMTP,
-      relay: outbound.server,
-      username: outbound.username,
-      password: outbound.password,
-      ssl: outbound.ssl,
-      tls: outbound.tls,
-      auth: outbound.auth,
-      port: outbound.port
-    ]
-
-    with {:ok, metadata} <- Resolvd.Mailer.deliver(email, config) do
+    with {:ok, _metadata} <- Resolvd.Mailboxes.send_customer_email(mailbox, email) do
       {:noreply,
-       socket |> put_flash(:info, "Sent an email from this inbox. #{inspect(metadata)}")}
+       socket |> put_flash(:info, "Sent an email from this mailbox to #{current_user.email}.")}
     else
       err ->
         dbg(err)
@@ -78,6 +66,6 @@ defmodule ResolvdWeb.Admin.MailServerLive.Show do
     end
   end
 
-  defp page_title(:show), do: "Show Mail server"
-  defp page_title(:edit), do: "Edit Mail server"
+  defp page_title(:show), do: "Show Mailbox"
+  defp page_title(:edit), do: "Edit Mailbox"
 end

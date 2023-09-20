@@ -19,8 +19,10 @@ defmodule ResolvdWeb.ConversationLive.ConversationComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:subject]} type="text" label="Subject" autofocus />
+        <.input field={@form[:customer_email]} type="email" label="Customer Email" autofocus />
+        <.input field={@form[:subject]} type="text" label="Subject" />
         <.input field={@form[:body]} type="textarea" label="Body" />
+        <.input field={@form[:send_email]} type="checkbox" label="Notify Customer about this Conversation" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Conversation</.button>
         </:actions>
@@ -68,20 +70,32 @@ defmodule ResolvdWeb.ConversationLive.ConversationComponent do
     end
   end
 
-  defp save_conversation(socket, :new, _conversation_params) do
-    # case Conversations.create_conversation(conversation_params) do
-    #   {:ok, conversation} ->
-    #     notify_parent({:saved, conversation})
+  defp save_conversation(socket, :new, %{
+         "body" => body,
+         "subject" => subject,
+         "send_email" => send_customer_email,
+         "customer_email" => customer_email
+       }) do
+    tenant = Resolvd.Tenants.get_tenant_for_user!(socket.assigns.current_user)
 
-    #     {:noreply,
-    #      socket
-    #      |> put_flash(:info, "Conversation created successfully")
-    #      |> push_patch(to: socket.assigns.patch)}
+    case Conversations.create_conversation(
+           tenant,
+           customer_email,
+           subject,
+           body,
+           send_customer_email == "true"
+         ) do
+      {:ok, conversation} ->
+        notify_parent({:saved, conversation})
 
-    #   {:error, %Ecto.Changeset{} = changeset} ->
-    #     {:noreply, assign_form(socket, changeset)}
-    # end
-    {:noreply, socket}
+        {:noreply,
+         socket
+         |> put_flash(:info, "Conversation created successfully")
+         |> push_patch(to: socket.assigns.patch)}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign_form(socket, changeset)}
+    end
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

@@ -1,9 +1,9 @@
-defmodule Resolvd.Mailbox.InboundSupervisor do
+defmodule Resolvd.Mailboxes.InboundSupervisor do
   use DynamicSupervisor
 
   alias Hex.API.Key
-  alias Resolvd.Mailbox.InboundProviders.IMAPProvider
-  alias Resolvd.Mailbox.InboundProcessor
+  alias Resolvd.Mailboxes.InboundProviders.IMAPProvider
+  alias Resolvd.Mailboxes.InboundProcessor
 
   def start_link(init_args) do
     DynamicSupervisor.start_link(__MODULE__, init_args, name: __MODULE__)
@@ -32,12 +32,12 @@ defmodule Resolvd.Mailbox.InboundSupervisor do
   end
 end
 
-# defmodule Resolvd.Mailbox.InboundPairSupervisor do
+# defmodule Resolvd.Mailboxes.InboundPairSupervisor do
 #   use DynamicSupervisor
 
 #   require Logger
 
-#   alias Resolvd.Mailbox.InboundProcessor
+#   alias Resolvd.Mailboxes.InboundProcessor
 
 #   def start_link(_start_from, opts) do
 #     Logger.info("InboundPairSupervisor.start_link")
@@ -87,7 +87,7 @@ end
 #   end
 # end
 
-# defmodule Resolvd.Mailbox.YugoStarter do
+# defmodule Resolvd.Mailboxes.YugoStarter do
 #   use GenServer
 
 #   def start_link(_start_from, opts) do

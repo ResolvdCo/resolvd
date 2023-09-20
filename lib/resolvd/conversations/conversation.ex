@@ -10,6 +10,7 @@ defmodule Resolvd.Conversations.Conversation do
     has_many :messages, Resolvd.Conversations.Message
 
     belongs_to :tenant, Resolvd.Tenants.Tenant
+    belongs_to :mailbox, Resolvd.Mailboxes.Mailbox
 
     belongs_to :customer, Resolvd.Customers.Customer
 
@@ -23,6 +24,8 @@ defmodule Resolvd.Conversations.Conversation do
     conversation
     |> cast(attrs, [:subject])
     |> cast_assoc(:messages)
+    |> cast_assoc(:tenant)
+    |> cast_assoc(:mailbox)
     |> cast_assoc(:customer)
     |> validate_required([:subject])
   end

@@ -22,7 +22,7 @@
   on_cancel={JS.patch(~p"/admin/categories/#{@category}")}
 >
   <.live_component
-    module={ResolvdWeb.CategoryLive.FormComponent}
+    module={ResolvdWeb.Admin.CategoryLive.FormComponent}
     id={@category.id}
     title={@page_title}
     action={@live_action}

@@ -33,7 +33,7 @@ defmodule ResolvdWeb.Admin.CategoryLive.Index do
   end
 
   @impl true
-  def handle_info({ResolvdWeb.CategoryLive.FormComponent, {:saved, category}}, socket) do
+  def handle_info({ResolvdWeb.Admin.CategoryLive.FormComponent, {:saved, category}}, socket) do
     {:noreply, stream_insert(socket, :categories, category)}
   end
 

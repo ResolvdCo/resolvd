@@ -150,12 +150,12 @@ defmodule ResolvdWeb.Router do
 
       live "/billing", BillingLive
 
-      live "/mail-servers", MailServerLive.Index, :index
-      live "/mail-servers/new", MailServerLive.Index, :new
-      live "/mail-servers/:id/edit", MailServerLive.Index, :edit
+      live "/mailboxes", MailboxLive.Index, :index
+      live "/mailboxes/new", MailboxLive.Index, :new
+      live "/mailboxes/:id/edit", MailboxLive.Index, :edit
 
-      live "/mail-servers/:id", MailServerLive.Show, :show
-      live "/mail-servers/:id/show/edit", MailServerLive.Show, :edit
+      live "/mailboxes/:id", MailboxLive.Show, :show
+      live "/mailboxes/:id/show/edit", MailboxLive.Show, :edit
 
       live "/users", UserLive.Index, :index
       live "/users/new", UserLive.Index, :new

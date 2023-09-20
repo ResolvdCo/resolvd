@@ -1,4 +1,4 @@
-defmodule ResolvdWeb.CategoryLiveTest do
+defmodule ResolvdWeb.Admin.CategoryLiveTest do
   use ResolvdWeb.ConnCase
 
   import Phoenix.LiveViewTest

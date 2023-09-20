@@ -1,4 +1,4 @@
-defmodule Resolvd.Mailbox.InboundProviders.IMAPProvider do
+defmodule Resolvd.Mailboxes.InboundProviders.IMAPProvider do
   use Ecto.Schema
 
   import Ecto.Changeset

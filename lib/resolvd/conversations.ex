@@ -4,10 +4,13 @@ defmodule Resolvd.Conversations do
   """
 
   import Ecto.Query, warn: false
+  alias Resolvd.Tenants
   alias Resolvd.Repo
 
+  alias Resolvd.Tenants.Tenant
   alias Resolvd.Accounts.User
   alias Resolvd.Conversations.Conversation
+  alias Resolvd.Conversations.Message
 
   @doc """
   Returns the list of conversations.
@@ -41,6 +44,11 @@ defmodule Resolvd.Conversations do
       Repo.get!(Conversation, id)
       |> Repo.preload([:messages, :customer, messages: [:customer, :user]])
 
+  def get_conversation(id),
+    do:
+      Repo.get(Conversation, id)
+      |> Repo.preload([:messages, :customer, messages: [:customer, :user]])
+
   @doc """
   Creates a conversation.
 
@@ -53,16 +61,34 @@ defmodule Resolvd.Conversations do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_conversation(subject, body) do
-    %Conversation{}
-    |> Conversation.changeset(%{
-      subject: subject
-    })
-    |> Ecto.build_assoc(:messages, %{
+  def create_conversation(
+        %Tenant{} = tenant,
+        customer_email,
+        subject,
+        body,
+        notify_customer \\ false
+      ) do
+    # New message, do we have a conversation for any of it's references or reply tos?
+    customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, customer_email)
+
+    {:ok, conversation} =
+      %Conversation{tenant: tenant, customer: customer}
+      |> Conversation.changeset(%{
+        subject: subject
+      })
+      |> Repo.insert()
+
+    %Message{
+      conversation: conversation,
+      customer: customer
+    }
+    |> Message.changeset(%{
       text_body: body,
       html_body: body
     })
     |> Repo.insert()
+
+    {:ok, get_conversation!(conversation.id)}
   end
 
   @doc """
@@ -178,14 +204,15 @@ defmodule Resolvd.Conversations do
 
     case creation do
       {:ok, message} ->
+        mailbox = Resolvd.Mailboxes.get_mailbox!(conversation.mailbox_id)
+
         email =
           Swoosh.Email.new(headers: %{"Message-ID" => message_id, "In-Reply-To" => in_reply_to})
           |> Swoosh.Email.to(conversation.customer.email)
-          |> Swoosh.Email.from({"Resolvd", "test@resolvd.co"})
           |> Swoosh.Email.subject(conversation.subject)
           |> Swoosh.Email.html_body(message.html_body)
 
-        with {:ok, _metadata} <- Resolvd.Mailer.deliver(email) do
+        with {:ok, _metadata} <- Resolvd.Mailboxes.send_customer_email(mailbox, email) do
           {:ok, email}
         end
 
@@ -255,14 +282,15 @@ defmodule Resolvd.Conversations do
   end
 
   def create_or_update_conversation_from_email(
-        %Resolvd.Tenants.Tenant{} = tenant,
-        %Resolvd.Mailbox.Mail{} = email
+        %Resolvd.Mailboxes.Mailbox{} = mailbox,
+        %Resolvd.Mailboxes.Mail{} = email
       ) do
     if not is_nil(get_message_by_email_message_id(email.message_id)) do
       # If we've already seen this message ID -- ignore it!
       {:ok, :dupe}
     else
       # New message, do we have a conversation for any of it's references or reply tos?
+      tenant = Tenants.get_tenant!(mailbox.tenant_id)
       customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, email.sender)
 
       conversation =
@@ -272,7 +300,7 @@ defmodule Resolvd.Conversations do
         else
           # New conversation
           {:ok, conversation} =
-            %Conversation{tenant: tenant, customer: customer}
+            %Conversation{tenant: tenant, mailbox: mailbox, customer: customer}
             |> Conversation.changeset(%{
               subject: email.subject
             })

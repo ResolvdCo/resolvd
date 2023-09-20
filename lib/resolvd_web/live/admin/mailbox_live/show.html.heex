@@ -1,0 +1,50 @@
+<.header>
+  Mailbox <%= @mailbox.id %>
+  <:subtitle>This is a mailbox record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/admin/mailboxes/#{@mailbox}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit mailbox</.button>
+    </.link>
+    <.button phx-click="start">Start</.button>
+    <.button phx-click="stop">Stop</.button>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Status">
+    <%= if(Resolvd.Mailboxes.mailbox_running?(@mailbox), do: "Running", else: "Not Running") %>
+  </:item>
+  <:item title="Inbound type"><%= @mailbox.inbound_type %></:item>
+  <:item title="Inbound config">
+    <pre><%= Jason.Formatter.pretty_print(Jason.encode!(@mailbox.inbound_config)) %></pre>
+  </:item>
+  <:item title="Test Inbound">
+    <.button phx-click="test_inbound">Test Inbound</.button>
+  </:item>
+  <:item title="Outbound type"><%= @mailbox.outbound_type %></:item>
+  <:item title="Outbound config">
+    <pre><%= Jason.Formatter.pretty_print(Jason.encode!(@mailbox.outbound_config)) %></pre>
+  </:item>
+  <:item title="Test Outbound">
+    <.button phx-click="test_outbound">Test Outbound</.button>
+  </:item>
+</.list>
+
+<.back navigate={~p"/admin/mailboxes"}>Back to mailboxes</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="mailbox-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/mailboxes/#{@mailbox}")}
+>
+  <.live_component
+    module={ResolvdWeb.Admin.MailboxLive.FormComponent}
+    id={@mailbox.id}
+    title={@page_title}
+    action={@live_action}
+    mailbox={@mailbox}
+    patch={~p"/admin/mailboxes/#{@mailbox}"}
+    current_user={@current_user}
+  />
+</.modal>

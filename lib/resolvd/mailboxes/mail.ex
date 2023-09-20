@@ -1,4 +1,4 @@
-defmodule Resolvd.Mailbox.Mail do
+defmodule Resolvd.Mailboxes.Mail do
   @type address :: String.t()
 
   @typedoc """
@@ -20,7 +20,7 @@ defmodule Resolvd.Mailbox.Mail do
 
   @type flag :: :seen | :answered | :flagged | :draft | :deleted
 
-  @type t :: %Resolvd.Mailbox.Mail{
+  @type t :: %Resolvd.Mailboxes.Mail{
           bcc: [address],
           text_body: String.t(),
           html_body: String.t(),

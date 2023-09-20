@@ -1,7 +1,7 @@
-defmodule ResolvdWeb.Admin.MailServerLive.FormComponent do
+defmodule ResolvdWeb.Admin.MailboxLive.FormComponent do
   use ResolvdWeb, :live_component
 
-  alias Resolvd.Mailbox
+  alias Resolvd.Mailboxes
 
   @impl true
   def render(assigns) do
@@ -9,16 +9,19 @@ defmodule ResolvdWeb.Admin.MailServerLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage mail_server records in your database.</:subtitle>
+        <:subtitle>Use this form to manage mailbox records in your database.</:subtitle>
       </.header>
 
       <.form
         for={@form}
-        id="mail_server-form"
+        id="mailbox-form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
       >
+        <.input type="text" field={@form[:name]} label="Name" />
+        <.input type="text" field={@form[:from]} label="From" />
+        <.input type="text" field={@form[:email_address]} label="Email Address" />
         <.inputs_for :let={input} field={@form[:inbound_config]}>
           <div class="border-b border-gray-900/10 pb-12">
             <h2 class="text-base font-semibold leading-7 text-gray-900">Incoming Mail</h2>
@@ -37,7 +40,7 @@ defmodule ResolvdWeb.Admin.MailServerLive.FormComponent do
 
               <div class="sm:col-span-3">
                 <label
-                  for="mail_server_inbound_config_tls"
+                  for="mailbox_inbound_config_tls"
                   class="block text-sm font-medium leading-6 text-gray-900"
                 >
                   TLS
@@ -103,32 +106,30 @@ defmodule ResolvdWeb.Admin.MailServerLive.FormComponent do
           </div>
         </.inputs_for>
 
-        <.button phx-disable-with="Saving...">Save Mail Server</.button>
+        <.button phx-disable-with="Saving...">Save Mailbox</.button>
       </.form>
     </div>
     """
   end
 
   @impl true
-  def update(%{mail_server: mail_server} = assigns, socket) do
-    dbg("update called")
-    changeset = Mailbox.change_mail_server(mail_server)
-    dbg(changeset)
+  def update(%{mailbox: mailbox} = assigns, socket) do
+    changeset = Mailboxes.change_mailbox(mailbox)
 
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:inbound_type, Resolvd.Mailbox.InboundProviders.IMAPProvider)
+     |> assign(:inbound_type, Resolvd.Mailboxes.InboundProviders.IMAPProvider)
      |> assign_form(changeset)}
   end
 
   @impl true
-  def handle_event("validate", %{"mail_server" => mail_server_params}, socket) do
-    dbg(mail_server_params)
+  def handle_event("validate", %{"mailbox" => mailbox_params}, socket) do
+    dbg(mailbox_params)
 
     changeset =
-      socket.assigns.mail_server
-      |> Mailbox.change_mail_server(mail_server_params)
+      socket.assigns.mailbox
+      |> Mailboxes.change_mailbox(mailbox_params)
       |> Map.put(:action, :validate)
 
     {:noreply,
@@ -136,18 +137,22 @@ defmodule ResolvdWeb.Admin.MailServerLive.FormComponent do
      |> assign_form(changeset)}
   end
 
-  def handle_event("save", %{"mail_server" => mail_server_params}, socket) do
-    save_mail_server(socket, socket.assigns.action, mail_server_params)
+  def handle_event("save", %{"mailbox" => mailbox_params}, socket) do
+    save_mailbox(socket, socket.assigns.action, mailbox_params)
   end
 
-  defp save_mail_server(socket, :edit, mail_server_params) do
-    case Mailbox.update_mail_server(socket.assigns.mail_server, mail_server_params) do
-      {:ok, mail_server} ->
-        notify_parent({:saved, mail_server})
+  defp save_mailbox(socket, :edit, mailbox_params) do
+    case Mailboxes.update_mailbox(
+           socket.assigns.current_user,
+           socket.assigns.mailbox,
+           mailbox_params
+         ) do
+      {:ok, mailbox} ->
+        notify_parent({:saved, mailbox})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Mail server updated successfully")
+         |> put_flash(:info, "Mailbox updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -155,14 +160,14 @@ defmodule ResolvdWeb.Admin.MailServerLive.FormComponent do
     end
   end
 
-  defp save_mail_server(socket, :new, mail_server_params) do
-    case Mailbox.create_mail_server(mail_server_params) do
-      {:ok, mail_server} ->
-        notify_parent({:saved, mail_server})
+  defp save_mailbox(socket, :new, mailbox_params) do
+    case Mailboxes.create_mailbox(socket.assigns.current_user, mailbox_params) do
+      {:ok, mailbox} ->
+        notify_parent({:saved, mailbox})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Mail server created successfully")
+         |> put_flash(:info, "Mailbox created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

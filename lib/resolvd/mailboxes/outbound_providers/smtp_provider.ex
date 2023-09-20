@@ -1,4 +1,4 @@
-defmodule Resolvd.Mailbox.OutboundProviders.SMTPProvider do
+defmodule Resolvd.Mailboxes.OutboundProviders.SMTPProvider do
   use Ecto.Schema
 
   import Ecto.Changeset
@@ -20,7 +20,7 @@ defmodule Resolvd.Mailbox.OutboundProviders.SMTPProvider do
     config
     |> cast(attrs, [:server, :username, :password, :port, :tls])
     |> validate_required([:server, :username, :password])
-    |> validate_subset(:tls, ["always", "never", "if_available"])
-    |> validate_subset(:auth, ["always", "never", "if_available"])
+    |> validate_inclusion(:tls, ["always", "never", "if_available"])
+    |> validate_inclusion(:auth, ["always", "never", "if_available"])
   end
 end

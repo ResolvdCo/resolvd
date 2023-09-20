@@ -551,7 +551,7 @@ defmodule ResolvdWeb.Nav do
           >
             <option>Settings</option>
             <option>Billing</option>
-            <option selected>Mail Servers</option>
+            <option selected>Mailboxes</option>
             <option>Offer</option>
             <option>Hired</option>
           </select>
@@ -607,10 +607,10 @@ defmodule ResolvdWeb.Nav do
         module: ResolvdWeb.Admin.BillingLive
       },
       %{
-        to: ~p"/admin/mail-servers",
+        to: ~p"/admin/mailboxes",
         icon: "hero-user",
-        label: gettext("Mail Servers"),
-        module: ResolvdWeb.Admin.MailServerLive
+        label: gettext("Mailboxes"),
+        module: ResolvdWeb.Admin.MailboxLive
       }
     ]
   end

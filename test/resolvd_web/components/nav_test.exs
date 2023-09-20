@@ -4,7 +4,7 @@ defmodule ResolvdWeb.NavTest do
   import ResolvdWeb.Nav
 
   test "active path logic" do
-    assert active_path(ResolvdWeb.Admin.MailServerLive.Show, ResolvdWeb.Admin.MailServerLive)
-    refute active_path(ResolvdWeb.Admin.MailServerLive.Show, ResolvdWeb.Admin.BillingLive)
+    assert active_path(ResolvdWeb.Admin.MailboxLive.Show, ResolvdWeb.Admin.MailboxLive)
+    refute active_path(ResolvdWeb.Admin.MailboxLive.Show, ResolvdWeb.Admin.BillingLive)
   end
 end
