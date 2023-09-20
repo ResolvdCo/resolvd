@@ -16,11 +16,11 @@ defmodule Resolvd.Accounts do
   end
 
   ## Tenant Actions
-  def list_users(%User{tenant_id: user_tenant} = user) do
+  def list_users(%User{tenant_id: user_tenant}) do
     Repo.all(from u in User, where: u.tenant_id == ^user_tenant)
   end
 
-  def invite_user(%User{tenant_id: user_tenant} = user, params) do
+  def invite_user(%User{tenant_id: user_tenant}, params) do
     tenant = Resolvd.Tenants.get_tenant!(user_tenant)
 
     {:ok, user} =

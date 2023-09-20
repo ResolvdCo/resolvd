@@ -137,7 +137,7 @@ defmodule Resolvd.Mailboxes do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_mailbox(%User{} = user, %Mailbox{} = mailbox, attrs) do
+  def update_mailbox(%User{} = _user, %Mailbox{} = mailbox, attrs) do
     # raise "Permissions check"
 
     {:ok, server} =
@@ -160,7 +160,7 @@ defmodule Resolvd.Mailboxes do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_mailbox(%User{} = user, %Mailbox{} = mailbox) do
+  def delete_mailbox(%User{} = _user, %Mailbox{} = mailbox) do
     raise "Permissions check"
     Repo.delete(mailbox)
   end

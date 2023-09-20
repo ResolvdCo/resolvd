@@ -57,11 +57,11 @@ defmodule Resolvd.Mailboxes.Mail do
     |> Map.put(:sender, hd(mail.sender))
   end
 
-  def get_body({found_mime, charset, body}, mime) when found_mime == mime do
+  def get_body({found_mime, _charset, body}, mime) when found_mime == mime do
     body
   end
 
-  def get_body({found_mime, charset, body}, mime) do
+  def get_body({_found_mime, _charset, body}, _mime) do
     body
   end
 

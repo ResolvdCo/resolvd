@@ -68,8 +68,8 @@ defmodule Resolvd.Conversations do
         body,
         notify_customer \\ false
       ) do
-    # New message, do we have a conversation for any of it's references or reply tos?
     customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, customer_email)
+    message_id = to_string(:smtp_util.generate_message_id())
 
     {:ok, conversation} =
       %Conversation{tenant: tenant, customer: customer}
@@ -84,9 +84,25 @@ defmodule Resolvd.Conversations do
     }
     |> Message.changeset(%{
       text_body: body,
-      html_body: body
+      html_body: body,
+      email_message_id: message_id
     })
     |> Repo.insert()
+
+    if notify_customer do
+      mailbox = Resolvd.Mailboxes.get_mailbox!(conversation.mailbox_id)
+
+      email =
+        Swoosh.Email.new(headers: %{"Message-ID" => message_id})
+        |> Swoosh.Email.to(customer.email)
+        |> Swoosh.Email.subject(subject)
+        |> Swoosh.Email.html_body(body)
+        |> Swoosh.Email.text_body(body)
+
+      with {:ok, _metadata} <- Resolvd.Mailboxes.send_customer_email(mailbox, email) do
+        {:ok, email}
+      end
+    end
 
     {:ok, get_conversation!(conversation.id)}
   end

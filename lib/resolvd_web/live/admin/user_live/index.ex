@@ -38,7 +38,7 @@ defmodule ResolvdWeb.Admin.UserLive.Index do
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
+  def handle_event("delete", %{"id" => _id}, socket) do
     # category = Accounts.get_user!(id)
     # {:ok, _} = Articles.delete_category(category)
 

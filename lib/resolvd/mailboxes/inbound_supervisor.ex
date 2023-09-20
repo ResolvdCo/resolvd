@@ -1,7 +1,6 @@
 defmodule Resolvd.Mailboxes.InboundSupervisor do
   use DynamicSupervisor
 
-  alias Hex.API.Key
   alias Resolvd.Mailboxes.InboundProviders.IMAPProvider
   alias Resolvd.Mailboxes.InboundProcessor
 

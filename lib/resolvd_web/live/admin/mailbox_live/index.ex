@@ -4,8 +4,6 @@ defmodule ResolvdWeb.Admin.MailboxLive.Index do
   alias Resolvd.Mailboxes
   alias Resolvd.Mailboxes.Mailbox
 
-  alias ResolvdWeb.Admin
-
   @impl true
   def mount(_params, _session, socket) do
     {:ok, stream(socket, :mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))}
