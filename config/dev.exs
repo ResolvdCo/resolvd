@@ -19,12 +19,12 @@ config :resolvd, Resolvd.Repo,
 config :resolvd, ResolvdWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [:inet6, port: 4000],
   https: [
     port: 443,
     cipher_suite: :strong,
-    keyfile: "~/Code/Secure/resolvd.local.key",
-    certfile: "~/Code/Secure/resolvd.local.crt",
+    keyfile: System.get_env("RESOLVD_SSL_KEY_PATH"),
+    certfile: System.get_env("RESOLVD_SSL_CERT_PATH"),
     transport_options: [socket_opts: [:inet6]]
   ],
   check_origin: false,
