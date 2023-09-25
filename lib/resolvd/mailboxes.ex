@@ -27,7 +27,7 @@ defmodule Resolvd.Mailboxes do
         versions: [:"tlsv1.3"],
         verify: :verify_peer,
         cacerts: :public_key.cacerts_get(),
-        server_name_indication: ~c"smtp.gmail.com",
+        server_name_indication: mailbox.outbound_config.server |> String.to_charlist(),
         depth: 99
       ]
     ]
