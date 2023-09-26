@@ -1,24 +1,50 @@
-defmodule Resolvd.Mailboxes.InboundSupervisor do
+defmodule Resolvd.Mailboxes.Inbound.Supervisor do
   use DynamicSupervisor
 
+  alias Phoenix.PubSub
   alias Resolvd.Mailboxes.InboundProviders.IMAPProvider
-  alias Resolvd.Mailboxes.InboundProcessor
+  alias Resolvd.Mailboxes.Inbound.PairSupervisor
+
+  @registry :inbound_pair_supervisors
 
   def start_link(init_args) do
     DynamicSupervisor.start_link(__MODULE__, init_args, name: __MODULE__)
   end
 
   def start_child(id, %IMAPProvider{} = server) do
-    spec = {InboundProcessor, id: id, server: server}
-    DynamicSupervisor.start_child(__MODULE__, spec)
+    spec = {PairSupervisor, [id: id, server: server, name: via_tuple(id)]}
+
+    case DynamicSupervisor.start_child(__MODULE__, spec) do
+      {:ok, child} ->
+        PubSub.broadcast!(Resolvd.PubSub, id, {:update_status, true})
+        Process.monitor(child)
+
+      _ ->
+        nil
+    end
   end
 
   def stop_child(id) do
-    InboundProcessor.stop(id, :normal)
+    case Registry.lookup(@registry, id) do
+      [{pid, _}] ->
+        DynamicSupervisor.terminate_child(__MODULE__, pid)
+
+      _ ->
+        :ok
+    end
+
+    PubSub.broadcast!(Resolvd.PubSub, id, {:update_status, false})
   end
 
   def child_started?(id) do
-    InboundProcessor.alive?(id)
+    case Registry.lookup(@registry, id) do
+      [{pid, _}] ->
+        %{specs: specs, active: active} = Supervisor.count_children(pid)
+        specs == active
+
+      _ ->
+        false
+    end
   end
 
   @impl true
@@ -29,6 +55,8 @@ defmodule Resolvd.Mailboxes.InboundSupervisor do
       extra_arguments: [init_args]
     )
   end
+
+  defp via_tuple(name), do: {:via, Registry, {@registry, name}}
 end
 
 # defmodule Resolvd.Mailboxes.InboundPairSupervisor do

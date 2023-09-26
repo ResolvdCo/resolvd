@@ -3,7 +3,7 @@ defmodule Resolvd.Mailboxes do
 
   alias Resolvd.Repo
   alias Resolvd.Mailboxes.Mailbox
-  alias Resolvd.Mailboxes.InboundSupervisor
+  alias Resolvd.Mailboxes.Inbound.Supervisor, as: InboundSupervisor
   alias Resolvd.Accounts.User
 
   def process_customer_email(%Mailbox{} = mailbox, %Resolvd.Mailboxes.Mail{} = email) do
