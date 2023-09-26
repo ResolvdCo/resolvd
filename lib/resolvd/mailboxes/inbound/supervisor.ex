@@ -1,6 +1,7 @@
 defmodule Resolvd.Mailboxes.Inbound.Supervisor do
   use DynamicSupervisor
 
+  alias Resolvd.Mailboxes
   alias Phoenix.PubSub
   alias Resolvd.Mailboxes.InboundProviders.IMAPProvider
   alias Resolvd.Mailboxes.Inbound.PairSupervisor
@@ -57,6 +58,22 @@ defmodule Resolvd.Mailboxes.Inbound.Supervisor do
   end
 
   defp via_tuple(name), do: {:via, Registry, {@registry, name}}
+end
+
+defmodule Resolvd.Mailboxes.Inbound.Initializer do
+  use Task
+
+  alias Resolvd.Mailboxes
+  alias Resolvd.Mailboxes.Inbound.Supervisor, as: InboundSupervisor
+
+  def start_link([]) do
+    Task.start_link(fn ->
+      Mailboxes.all_mailboxes()
+      |> Enum.each(fn mailbox ->
+        InboundSupervisor.start_child(mailbox.id, mailbox.inbound_config)
+      end)
+    end)
+  end
 end
 
 # defmodule Resolvd.Mailboxes.InboundPairSupervisor do

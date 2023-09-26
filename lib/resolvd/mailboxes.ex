@@ -64,6 +64,13 @@ defmodule Resolvd.Mailboxes do
   # end
 
   @doc """
+  List all mailboxes in the database.
+  """
+  def all_mailboxes() do
+    Mailbox |> Repo.all()
+  end
+
+  @doc """
   List mailboxes the user is allowed to see.
 
   ## Examples
