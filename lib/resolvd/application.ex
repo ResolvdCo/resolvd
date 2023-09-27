@@ -20,7 +20,7 @@ defmodule Resolvd.Application do
       ResolvdWeb.Endpoint,
       {Registry, [keys: :unique, name: :inbound_pair_supervisors]},
       Resolvd.Mailboxes.Inbound.Supervisor,
-      Resolvd.Mailboxes.Inbound.Initializer
+      Resolvd.Mailboxes.Inbound.Manager
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

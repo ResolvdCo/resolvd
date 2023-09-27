@@ -1,8 +1,6 @@
 defmodule Resolvd.Mailboxes.Inbound.Supervisor do
   use DynamicSupervisor
 
-  alias Resolvd.Mailboxes
-  alias Phoenix.PubSub
   alias Resolvd.Mailboxes.InboundProviders.IMAPProvider
   alias Resolvd.Mailboxes.Inbound.PairSupervisor
 
@@ -14,15 +12,7 @@ defmodule Resolvd.Mailboxes.Inbound.Supervisor do
 
   def start_child(id, %IMAPProvider{} = server) do
     spec = {PairSupervisor, [id: id, server: server, name: via_tuple(id)]}
-
-    case DynamicSupervisor.start_child(__MODULE__, spec) do
-      {:ok, child} ->
-        PubSub.broadcast!(Resolvd.PubSub, id, {:update_status, true})
-        Process.monitor(child)
-
-      _ ->
-        nil
-    end
+    DynamicSupervisor.start_child(__MODULE__, spec)
   end
 
   def stop_child(id) do
@@ -33,8 +23,6 @@ defmodule Resolvd.Mailboxes.Inbound.Supervisor do
       _ ->
         :ok
     end
-
-    PubSub.broadcast!(Resolvd.PubSub, id, {:update_status, false})
   end
 
   def child_started?(id) do
@@ -58,22 +46,6 @@ defmodule Resolvd.Mailboxes.Inbound.Supervisor do
   end
 
   defp via_tuple(name), do: {:via, Registry, {@registry, name}}
-end
-
-defmodule Resolvd.Mailboxes.Inbound.Initializer do
-  use Task
-
-  alias Resolvd.Mailboxes
-  alias Resolvd.Mailboxes.Inbound.Supervisor, as: InboundSupervisor
-
-  def start_link([]) do
-    Task.start_link(fn ->
-      Mailboxes.all_mailboxes()
-      |> Enum.each(fn mailbox ->
-        InboundSupervisor.start_child(mailbox.id, mailbox.inbound_config)
-      end)
-    end)
-  end
 end
 
 # defmodule Resolvd.Mailboxes.InboundPairSupervisor do

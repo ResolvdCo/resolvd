@@ -3,7 +3,7 @@ defmodule Resolvd.Mailboxes do
 
   alias Resolvd.Repo
   alias Resolvd.Mailboxes.Mailbox
-  alias Resolvd.Mailboxes.Inbound.Supervisor, as: InboundSupervisor
+  alias Resolvd.Mailboxes.Inbound.Manager, as: InboundManager
   alias Resolvd.Accounts.User
 
   def process_customer_email(%Mailbox{} = mailbox, %Resolvd.Mailboxes.Mail{} = email) do
@@ -186,19 +186,19 @@ defmodule Resolvd.Mailboxes do
   end
 
   def upstart_mailbox(%Mailbox{} = server) do
-    if InboundSupervisor.child_started?(server.id) do
+    if InboundManager.child_started?(server.id) do
       stop_mailbox(server)
     end
 
-    InboundSupervisor.start_child(server.id, server.inbound_config)
+    InboundManager.start_child(server.id, server.inbound_config)
   end
 
   def stop_mailbox(%Mailbox{} = server) do
-    InboundSupervisor.stop_child(server.id)
+    InboundManager.stop_child(server.id)
   end
 
   def mailbox_running?(%Mailbox{id: server_id}) do
-    InboundSupervisor.child_started?(server_id)
+    InboundManager.child_started?(server_id)
   end
 
   # use GenServer
