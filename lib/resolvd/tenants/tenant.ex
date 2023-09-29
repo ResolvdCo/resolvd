@@ -18,6 +18,13 @@ defmodule Resolvd.Tenants.Tenant do
     # Avoiding this for now due to situations like gmail.com
     field :email_domain, :string
 
+    # Billing Fields
+    field :plan_status, Ecto.Enum, values: [:active, :canceling, :expired]
+    field :plan_renewal, :utc_datetime
+    field :plan_expires, :utc_datetime
+    field :stripe_subscription_id, :string
+    field :stripe_customer_id, :string
+
     timestamps()
   end
 
@@ -27,6 +34,17 @@ defmodule Resolvd.Tenants.Tenant do
     |> cast(attrs, [:name, :domain, :email_domain])
     |> validate_required([:name])
     |> cast_slug()
+  end
+
+  def billing_changeset(tenant, attrs) do
+    tenant
+    |> cast(attrs, [
+      :plan_status,
+      :plan_renewal,
+      :plan_expires,
+      :stripe_subscription_id,
+      :stripe_customer_id
+    ])
   end
 
   def cast_slug(changeset) do

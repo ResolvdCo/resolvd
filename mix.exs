@@ -47,6 +47,8 @@ defmodule Resolvd.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
+      # Payments
+      {:stripity_stripe, "~> 2.17"},
       # Databasery
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.10"},

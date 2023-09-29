@@ -35,7 +35,12 @@ defmodule Resolvd.CustomersTest do
 
     test "update_customer/2 with valid data updates the customer" do
       customer = customer_fixture()
-      update_attrs = %{email: "some updated email", name: "some updated name", phone: "some updated phone"}
+
+      update_attrs = %{
+        email: "some updated email",
+        name: "some updated name",
+        phone: "some updated phone"
+      }
 
       assert {:ok, %Customer{} = customer} = Customers.update_customer(customer, update_attrs)
       assert customer.email == "some updated email"

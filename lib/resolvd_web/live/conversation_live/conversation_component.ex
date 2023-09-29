@@ -22,7 +22,11 @@ defmodule ResolvdWeb.ConversationLive.ConversationComponent do
         <.input field={@form[:customer_email]} type="email" label="Customer Email" autofocus />
         <.input field={@form[:subject]} type="text" label="Subject" />
         <.input field={@form[:body]} type="textarea" label="Body" />
-        <.input field={@form[:send_email]} type="checkbox" label="Notify Customer about this Conversation" />
+        <.input
+          field={@form[:send_email]}
+          type="checkbox"
+          label="Notify Customer about this Conversation"
+        />
         <:actions>
           <.button phx-disable-with="Saving...">Save Conversation</.button>
         </:actions>

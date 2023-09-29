@@ -94,6 +94,14 @@ defmodule ResolvdWeb.UserAuth do
     assign(conn, :current_user, user)
   end
 
+  @doc """
+  Grabs the current tenant for the user
+  """
+  def fetch_current_tenant(conn, _opts) do
+    tenant = Resolvd.Tenants.get_tenant_for_user!(conn.assigns.current_user)
+    assign(conn, :current_tenant, tenant)
+  end
+
   defp ensure_user_token(conn) do
     if token = get_session(conn, :user_token) do
       {token, conn}
@@ -188,10 +196,14 @@ defmodule ResolvdWeb.UserAuth do
   end
 
   defp mount_current_user(session, socket) do
-    Phoenix.Component.assign_new(socket, :current_user, fn ->
+    socket
+    |> Phoenix.Component.assign_new(:current_user, fn ->
       if user_token = session["user_token"] do
         Accounts.get_user_by_session_token(user_token)
       end
+    end)
+    |> Phoenix.Component.assign_new(:current_tenant, fn %{current_user: current_user} ->
+      Resolvd.Tenants.get_tenant_for_user!(current_user)
     end)
   end
 
