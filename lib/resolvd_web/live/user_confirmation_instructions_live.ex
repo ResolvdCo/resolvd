@@ -34,10 +34,14 @@ defmodule ResolvdWeb.UserConfirmationInstructionsLive do
 
   def handle_event("send_instructions", %{"user" => %{"email" => email}}, socket) do
     if user = Accounts.get_user_by_email(email) do
-      Accounts.deliver_user_confirmation_instructions(
-        user,
-        &url(~p"/users/confirm/#{&1}")
-      )
+      %{
+        action: :confirmation_instructions,
+        user_id: user.id,
+        user_email: user.email,
+        confirmed_at: user.confirmed_at
+      }
+      |> Resolvd.Workers.SendUserEmail.new()
+      |> Oban.insert()
     end
 
     info =

@@ -51,14 +51,16 @@ defmodule ResolvdWeb.Admin.UserLive.Index do
 
     tenant = Resolvd.Tenants.get_tenant!(user.tenant_id)
 
-    Accounts.deliver_user_invite(
-      user,
-      tenant,
-      &url(~p"/users/confirm/#{&1}")
-    )
+    %{
+      action: :invite,
+      user_id: user.id,
+      user_email: user.email,
+      confirmed_at: user.confirmed_at,
+      tenant_name: tenant.name
+    }
+    |> Resolvd.Workers.SendUserEmail.new()
+    |> Oban.insert()
 
-    {:noreply,
-     socket
-     |> put_flash(:info, "User invitation sent.")}
+    {:noreply, socket |> put_flash(:info, "User invitation sent.")}
   end
 end

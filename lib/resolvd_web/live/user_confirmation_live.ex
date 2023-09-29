@@ -45,7 +45,7 @@ defmodule ResolvdWeb.UserConfirmationLive do
   # Do not log in the user after confirmation to avoid a
   # leaked token giving the user access to the account.
   def handle_event("validate", %{"user" => params}, socket) do
-    changeset = Accounts.User.confirm_changeset(socket.assigns.user, params)
+    changeset = Accounts.User.confirm_password_changeset(socket.assigns.user, params)
 
     {:noreply,
      socket

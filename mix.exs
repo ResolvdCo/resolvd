@@ -60,7 +60,9 @@ defmodule Resolvd.MixProject do
       # Permissions
       {:bodyguard, "~> 2.4"},
       # Time
-      {:timex, "~> 3.7"}
+      {:timex, "~> 3.7"},
+      # Jobs
+      {:oban, "~> 2.16"}
     ]
   end
 
