@@ -18,8 +18,10 @@ defmodule Resolvd.Application do
       {Finch, name: Resolvd.Finch},
       # Start the Endpoint (http/https)
       ResolvdWeb.Endpoint,
-      {Registry, [keys: :unique, name: :inbound_processors]},
-      Resolvd.Mailboxes.InboundSupervisor
+      {Registry, [keys: :unique, name: :inbound_pair_supervisors]},
+      Resolvd.Mailboxes.Inbound.Supervisor,
+      Resolvd.Mailboxes.Inbound.Manager,
+      {Oban, Application.fetch_env!(:resolvd, Oban)}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -60,7 +60,11 @@ defmodule Resolvd.MixProject do
       # Sluggin'
       {:slugify, "~> 1.3"},
       # Permissions
-      {:bodyguard, "~> 2.4"}
+      {:bodyguard, "~> 2.4"},
+      # Time
+      {:timex, "~> 3.7"},
+      # Jobs
+      {:oban, "~> 2.16"}
     ]
   end
 

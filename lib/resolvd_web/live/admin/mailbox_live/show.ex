@@ -1,4 +1,5 @@
 defmodule ResolvdWeb.Admin.MailboxLive.Show do
+  alias Phoenix.PubSub
   use ResolvdWeb, :admin_live_view
 
   alias Resolvd.Mailboxes
@@ -10,10 +11,14 @@ defmodule ResolvdWeb.Admin.MailboxLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
+    mailbox = Mailboxes.get_mailbox!(socket.assigns.current_user, id)
+    PubSub.subscribe(Resolvd.PubSub, id)
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:mailbox, Mailboxes.get_mailbox!(socket.assigns.current_user, id))}
+     |> assign(:mailbox, mailbox)
+     |> assign(:mailbox_running, Mailboxes.mailbox_running?(mailbox))}
   end
 
   @impl true
@@ -64,6 +69,11 @@ defmodule ResolvdWeb.Admin.MailboxLive.Show do
         dbg(err)
         {:noreply, socket |> put_flash(:error, "There was an error sending to this inbox.")}
     end
+  end
+
+  @impl true
+  def handle_info({:update_status, mailbox_running}, socket) do
+    {:noreply, assign(socket, :mailbox_running, mailbox_running)}
   end
 
   defp page_title(:show), do: "Show Mailbox"

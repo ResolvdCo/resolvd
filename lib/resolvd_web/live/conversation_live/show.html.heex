@@ -55,7 +55,11 @@
                   <% end %>
                 </a>
               </div>
-              <p class="mt-0.5 text-sm text-gray-500">Commented <%= message.inserted_at %> ago</p>
+              <p class="mt-0.5 text-sm text-gray-500">
+                Commented <%= message.inserted_at
+                |> Timex.format("{relative}", :relative)
+                |> elem(1) %>
+              </p>
             </div>
             <div class="mt-2 text-sm text-gray-700">
               <article class="prose max-w-none">

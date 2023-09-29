@@ -144,11 +144,16 @@ defmodule Resolvd.Accounts.User do
   @doc """
   Confirms the account by setting `confirmed_at`.
   """
-  def confirm_changeset(user, attrs \\ %{}) do
+  def confirm_changeset(user) do
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 
     user
     |> change(confirmed_at: now)
+  end
+
+  def confirm_password_changeset(user, attrs \\ %{}) do
+    user
+    |> confirm_changeset()
     |> password_changeset(attrs)
   end
 

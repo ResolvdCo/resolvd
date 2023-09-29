@@ -5,14 +5,16 @@
     <.link patch={~p"/admin/mailboxes/#{@mailbox}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit mailbox</.button>
     </.link>
-    <.button phx-click="start">Start</.button>
-    <.button phx-click="stop">Stop</.button>
+    <.button phx-click="start"><%= if @mailbox_running, do: "Restart", else: "Start" %></.button>
+    <.button phx-click="stop" class="disabled:bg-gray-300" disabled={not @mailbox_running}>
+      Stop
+    </.button>
   </:actions>
 </.header>
 
 <.list>
   <:item title="Status">
-    <%= if(Resolvd.Mailboxes.mailbox_running?(@mailbox), do: "Running", else: "Not Running") %>
+    <%= if @mailbox_running, do: "Running", else: "Not Running" %>
   </:item>
   <:item title="Inbound type"><%= @mailbox.inbound_type %></:item>
   <:item title="Inbound config">
