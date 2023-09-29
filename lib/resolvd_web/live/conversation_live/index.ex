@@ -6,7 +6,8 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :conversations, Conversations.list_conversations())}
+    {:ok,
+     stream(socket, :conversations, Conversations.list_conversations(socket.assigns.current_user))}
   end
 
   @impl true

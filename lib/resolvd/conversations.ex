@@ -17,12 +17,14 @@ defmodule Resolvd.Conversations do
 
   ## Examples
 
-      iex> list_conversations()
+      iex> list_conversations(user)
       [%Conversation{}, ...]
 
   """
-  def list_conversations do
-    Repo.all(from(c in Conversation, order_by: [desc: c.inserted_at]))
+  def list_conversations(%User{tenant_id: tenant_id}) do
+    Repo.all(
+      from(c in Conversation, where: [tenant_id: ^tenant_id], order_by: [desc: c.inserted_at])
+    )
   end
 
   @doc """

@@ -8,18 +8,19 @@ defmodule Resolvd.Customers do
 
   alias Resolvd.Customers.Customer
   alias Resolvd.Tenants.Tenant
+  alias Resolvd.Accounts.User
 
   @doc """
   Returns the list of customers.
 
   ## Examples
 
-      iex> list_customers()
+      iex> list_customers(user)
       [%Customer{}, ...]
 
   """
-  def list_customers do
-    Repo.all(Customer)
+  def list_customers(%User{tenant_id: tenant_id}) do
+    Repo.all(from(c in Customer, where: [tenant_id: ^tenant_id]))
   end
 
   @doc """

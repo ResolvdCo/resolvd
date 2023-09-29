@@ -6,7 +6,7 @@ defmodule ResolvdWeb.CustomerLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :customers, Customers.list_customers())}
+    {:ok, stream(socket, :customers, Customers.list_customers(socket.assigns.current_user))}
   end
 
   @impl true
