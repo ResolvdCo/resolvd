@@ -91,7 +91,12 @@ defmodule Resolvd.ArticlesTest do
 
     test "update_article/2 with valid data updates the article" do
       article = article_fixture()
-      update_attrs = %{body: "some updated body", slug: "some updated slug", subject: "some updated subject"}
+
+      update_attrs = %{
+        body: "some updated body",
+        slug: "some updated slug",
+        subject: "some updated subject"
+      }
 
       assert {:ok, %Article{} = article} = Articles.update_article(article, update_attrs)
       assert article.body == "some updated body"

@@ -54,4 +54,16 @@ defmodule Resolvd.Tenants do
         err
     end
   end
+
+  def update_billing(%Tenant{} = tenant, attrs) do
+    # raise "Permissions check"
+
+    tenant
+    |> Tenant.billing_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def change_billing(%Tenant{} = tenant, attrs \\ %{}) do
+    Tenant.billing_changeset(tenant, attrs)
+  end
 end

@@ -140,12 +140,9 @@ defmodule Resolvd.Mailboxes do
   def update_mailbox(%User{} = _user, %Mailbox{} = mailbox, attrs) do
     # raise "Permissions check"
 
-    {:ok, server} =
-      mailbox
-      |> Mailbox.changeset(attrs)
-      |> Repo.update()
-
-    {:ok, server}
+    mailbox
+    |> Mailbox.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -193,72 +190,4 @@ defmodule Resolvd.Mailboxes do
   def mailbox_running?(%Mailbox{id: server_id}) do
     InboundSupervisor.child_started?(server_id)
   end
-
-  # use GenServer
-
-  # require Logger
-
-  # def start_link(start_from, opts \\ []) do
-  #   GenServer.start_link(__MODULE__, start_from, opts)
-  # end
-
-  # def init(start_from) do
-  #   Yugo.subscribe(:resolvd)
-
-  #   # started = NaiveDateTime.utc_now()
-
-  #   # email =
-  #   #   Swoosh.Email.new()
-  #   #   |> Swoosh.Email.to("luke@axxim.net")
-  #   #   |> Swoosh.Email.from({"Resolvd", "resolvd@axxim.net"})
-  #   #   |> Swoosh.Email.subject("Server Started")
-  #   #   |> Swoosh.Email.text_body("Server started at #{NaiveDateTime.to_string(started)}!")
-
-  #   # Resolvd.Mailer.deliver(email) |> dbg()
-
-  #   {:ok, %{start_from: start_from}}
-  # end
-
-  # def handle_info({:email, client, message}, state) do
-  #   # client #=> :resolvd
-  #   # message #=> %{
-  #   #   bcc: [],
-  #   #   body: [
-  #   #     {"text/plain", %{"CHARSET" => "UTF-8"},
-  #   #      "This is a test ticket!\r\n\r\nThanks,\r\nLuke Strickland\r\n"},
-  #   #     {"text/html", %{"CHARSET" => "UTF-8"},
-  #   #      "<div dir=\"ltr\"><div>This is a test ticket!</div><div><br></div><div><div><div dir=\"ltr\" class=\"gmail_signature\" data-smartmail=\"gmail_signature\"><div dir=\"ltr\"><font face=\"&#39;courier new&#39;, monospace\">Thanks,</font><div><font face=\"&#39;courier new&#39;, monospace\">Luke Strickland</font></div></div></div></div></div></div>\r\n"}
-  #   #   ],
-  #   #   cc: [],
-  #   #   date: ~U[2023-05-12 05:30:19Z],
-  #   #   flags: [],
-  #   #   in_reply_to: nil,
-  #   #   message_id: "<CAAEjmzwKXGLKHCN4CUF_EfxtCogqPcH9r2yfQTy1hgQfzg6gLg@mail.gmail.com>",
-  #   #   reply_to: ["luke@axxim.net"],
-  #   #   sender: ["luke@axxim.net"],
-  #   #   subject: "Hello world",
-  #   #   to: ["resolvd@axxim.net"]
-  #   # }
-  #   dbg(client)
-  #   dbg(message)
-
-  #   # Resolvd.Conversations.create_conversation(%{
-  #   #   subject: message.subject,
-  #   #   body: text_body(message.body)
-  #   # })
-  #   # |> dbg()
-
-  #   email =
-  #     Swoosh.Email.new()
-  #     |> Swoosh.Email.to(message.reply_to)
-  #     |> Swoosh.Email.from({"Resolvd", "aida@axxim.net"})
-  #     |> Swoosh.Email.subject(message.subject)
-  #     |> Swoosh.Email.text_body("We got your ticket bruv! Will respond soon.")
-  #     |> Swoosh.Email.header("In-Reply-To", message.message_id)
-  #     |> Swoosh.Email.header("References", message.message_id)
-
-  #   Resolvd.Mailer.deliver(email) |> dbg()
-
-  #   {:noreply, state}
-  # end
 end
