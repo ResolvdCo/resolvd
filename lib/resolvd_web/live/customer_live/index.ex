@@ -17,7 +17,7 @@ defmodule ResolvdWeb.CustomerLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Customer")
-    |> assign(:customer, Customers.get_customer!(id))
+    |> assign(:customer, Customers.get_customer!(socket.assigns.current_user, id))
   end
 
   defp apply_action(socket, :new, _params) do

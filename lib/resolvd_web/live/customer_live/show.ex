@@ -13,7 +13,7 @@ defmodule ResolvdWeb.CustomerLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:customer, Customers.get_customer!(id))}
+     |> assign(:customer, Customers.get_customer!(socket.assigns.current_user, id))}
   end
 
   defp page_title(:show), do: "Show Customer"

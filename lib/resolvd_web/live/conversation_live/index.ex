@@ -18,7 +18,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Conversation")
-    |> assign(:conversation, Conversations.get_conversation!(id))
+    |> assign(:conversation, Conversations.get_conversation!(socket.assigns.current_user, id))
   end
 
   defp apply_action(socket, :new, _params) do
@@ -40,7 +40,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    conversation = Conversations.get_conversation!(id)
+    conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
     {:ok, _} = Conversations.delete_conversation(conversation)
 
     {:noreply, stream_delete(socket, :conversations, conversation)}

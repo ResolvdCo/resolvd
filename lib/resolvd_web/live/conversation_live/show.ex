@@ -11,7 +11,7 @@ defmodule ResolvdWeb.ConversationLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
-    conversation = Conversations.get_conversation!(id)
+    conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
 
     {:noreply,
      socket

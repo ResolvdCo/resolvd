@@ -11,7 +11,14 @@ defmodule Resolvd.Customers do
   alias Resolvd.Accounts.User
 
   @doc """
-  Returns the list of customers.
+  List all customers
+  """
+  def all_customers() do
+    Customer |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of customers the user is allowed to see.
 
   ## Examples
 
@@ -19,8 +26,10 @@ defmodule Resolvd.Customers do
       [%Customer{}, ...]
 
   """
-  def list_customers(%User{tenant_id: tenant_id}) do
-    Repo.all(from(c in Customer, where: [tenant_id: ^tenant_id]))
+  def list_customers(%User{} = user) do
+    Customer
+    |> Bodyguard.scope(user)
+    |> Repo.all()
   end
 
   @doc """
@@ -38,6 +47,13 @@ defmodule Resolvd.Customers do
 
   """
   def get_customer!(id), do: Repo.get!(Customer, id)
+
+  def get_customer!(%User{} = user, id) do
+    Customer
+    |> Bodyguard.scope(user)
+    |> where(id: ^id)
+    |> Repo.one!()
+  end
 
   @doc """
   Creates a customer.

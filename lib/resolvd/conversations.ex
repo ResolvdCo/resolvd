@@ -21,10 +21,10 @@ defmodule Resolvd.Conversations do
       [%Conversation{}, ...]
 
   """
-  def list_conversations(%User{tenant_id: tenant_id}) do
-    Repo.all(
-      from(c in Conversation, where: [tenant_id: ^tenant_id], order_by: [desc: c.inserted_at])
-    )
+  def list_conversations(%User{} = user) do
+    from(c in Conversation, order_by: [desc: c.inserted_at])
+    |> Bodyguard.scope(user)
+    |> Repo.all()
   end
 
   @doc """
@@ -50,6 +50,14 @@ defmodule Resolvd.Conversations do
     do:
       Repo.get(Conversation, id)
       |> Repo.preload([:messages, :customer, messages: [:customer, :user]])
+
+  def get_conversation!(%User{} = user, id) do
+    Conversation
+    |> Bodyguard.scope(user)
+    |> where(id: ^id)
+    |> Repo.one!()
+    |> Repo.preload([:messages, :customer, messages: [:customer, :user]])
+  end
 
   @doc """
   Creates a conversation.

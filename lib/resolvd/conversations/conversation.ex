@@ -2,6 +2,8 @@ defmodule Resolvd.Conversations.Conversation do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @behaviour Bodyguard.Schema
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "conversations" do
@@ -18,6 +20,8 @@ defmodule Resolvd.Conversations.Conversation do
 
     timestamps()
   end
+
+  defdelegate scope(query, user, params), to: Resolvd.Mailboxes.Mailbox
 
   @doc false
   def changeset(conversation, attrs) do
