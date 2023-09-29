@@ -1,4 +1,4 @@
-# Resolv'd
+# Resolvd
 
 To start your Phoenix server:
 

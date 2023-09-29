@@ -291,7 +291,7 @@ defmodule ResolvdWeb.Nav do
       >
         <div class="flex h-16 shrink-0 justify-center text-center">
           <img class="h-16 w-auto" src={~p"/images/wip-logo.png"} alt="Resolvd" />
-          <%!-- <h2 class="sriracha text-3xl text-white pl-4 text-center w-full">Resolv'd</h2> --%>
+          <%!-- <h2 class="sriracha text-3xl text-white pl-4 text-center w-full">Resolvd</h2> --%>
         </div>
         <nav class="flex flex-1 flex-col">
           <ul role="list" class="flex flex-1 flex-col gap-y-7">

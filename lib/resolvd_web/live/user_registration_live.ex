@@ -9,7 +9,7 @@ defmodule ResolvdWeb.UserRegistrationLive do
     ~H"""
     <div class="relative pt-24 mx-auto max-w-sm">
       <.header class="text-center">
-        Sign up for Resolv'd
+        Sign up for Resolvd
         <:subtitle>
           Already registered?
           <.link navigate={~p"/users/log_in"} class="font-semibold text-brand hover:underline">

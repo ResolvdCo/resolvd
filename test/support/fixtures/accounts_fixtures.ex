@@ -14,11 +14,25 @@ defmodule Resolvd.AccountsFixtures do
     })
   end
 
+  def valid_tenant_creation_attributes(attrs \\ %{}) do
+    Enum.into(attrs, %{
+      email: unique_user_email(),
+      password: valid_user_password(),
+      company_name: "ExampleCompany#{System.unique_integer()}",
+      full_name: "Dave ##{System.unique_integer()} Example"
+    })
+  end
+
   def user_fixture(attrs \\ %{}) do
-    {:ok, user} =
-      attrs
-      |> valid_user_attributes()
-      |> Resolvd.Accounts.register_user()
+    # For now this creates a tenant each time too
+    # Should be refactored though for better testing
+
+    attrs = valid_tenant_creation_attributes(attrs)
+
+    {:ok, _tenant, user} =
+      Resolvd.Tenants.create_tenant(
+        Resolvd.Tenants.TenantCreation.changeset(%Resolvd.Tenants.TenantCreation{}, attrs)
+      )
 
     user
   end

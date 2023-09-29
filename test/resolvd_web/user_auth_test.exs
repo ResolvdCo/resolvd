@@ -136,6 +136,7 @@ defmodule ResolvdWeb.UserAuthTest do
         UserAuth.on_mount(:mount_current_user, %{}, session, %LiveView.Socket{})
 
       assert updated_socket.assigns.current_user == nil
+      assert updated_socket.assigns.current_tenant == nil
     end
 
     test "assigns nil to current_user assign if there isn't a user_token", %{conn: conn} do

@@ -98,8 +98,12 @@ defmodule ResolvdWeb.UserAuth do
   Grabs the current tenant for the user
   """
   def fetch_current_tenant(conn, _opts) do
-    tenant = Resolvd.Tenants.get_tenant_for_user!(conn.assigns.current_user)
-    assign(conn, :current_tenant, tenant)
+    if conn.assigns.current_user do
+      tenant = Resolvd.Tenants.get_tenant_for_user!(conn.assigns.current_user)
+      assign(conn, :current_tenant, tenant)
+    else
+      conn
+    end
   end
 
   defp ensure_user_token(conn) do
@@ -203,7 +207,9 @@ defmodule ResolvdWeb.UserAuth do
       end
     end)
     |> Phoenix.Component.assign_new(:current_tenant, fn %{current_user: current_user} ->
-      Resolvd.Tenants.get_tenant_for_user!(current_user)
+      if current_user do
+        Resolvd.Tenants.get_tenant_for_user!(current_user)
+      end
     end)
   end
 
