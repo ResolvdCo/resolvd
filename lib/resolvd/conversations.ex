@@ -230,6 +230,16 @@ defmodule Resolvd.Conversations do
       |> Message.changeset(attrs)
       |> Repo.insert()
 
+    conversation =
+      if is_nil(conversation.user_id) do
+        conversation
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.put_assoc(:user, user)
+        |> Repo.update!()
+      else
+        conversation
+      end
+
     case creation do
       {:ok, message} ->
         %{
