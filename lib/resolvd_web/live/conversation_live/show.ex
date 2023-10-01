@@ -18,7 +18,8 @@ defmodule ResolvdWeb.ConversationLive.Show do
      |> assign(:page_title, page_title(socket.assigns.live_action))
      |> assign(:conversation, conversation)
      |> assign(:message, %Message{})
-     |> stream(:messages, Conversations.list_messages_for_conversation(conversation))}
+     # |> stream(:messages, Conversations.list_messages_for_conversation(conversation))}
+     |> stream(:messages, conversation.messages)}
   end
 
   @impl true

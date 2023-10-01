@@ -56,7 +56,11 @@ defmodule Resolvd.Conversations do
     |> Bodyguard.scope(user)
     |> where(id: ^id)
     |> Repo.one!()
-    |> Repo.preload([:messages, :customer, messages: [:customer, :user]])
+    |> Repo.preload([
+      :customer,
+      :user,
+      messages: from(Message, order_by: [asc: :inserted_at], preload: [:customer, :user])
+    ])
   end
 
   @doc """
@@ -100,18 +104,16 @@ defmodule Resolvd.Conversations do
     |> Repo.insert()
 
     if notify_customer do
-      mailbox = Resolvd.Mailboxes.get_mailbox!(conversation.mailbox_id)
-
-      email =
-        Swoosh.Email.new(headers: %{"Message-ID" => message_id})
-        |> Swoosh.Email.to(customer.email)
-        |> Swoosh.Email.subject(subject)
-        |> Swoosh.Email.html_body(body)
-        |> Swoosh.Email.text_body(body)
-
-      with {:ok, _metadata} <- Resolvd.Mailboxes.send_customer_email(mailbox, email) do
-        {:ok, email}
-      end
+      %{
+        mailbox_id: conversation.mailbox_id,
+        headers: %{"Message-ID" => message_id},
+        customer_email: customer.email,
+        subject: subject,
+        html_body: body,
+        text_body: body
+      }
+      |> Resolvd.Workers.SendCustomerEmail.new()
+      |> Oban.insert()
     end
 
     {:ok, get_conversation!(conversation.id)}
@@ -230,17 +232,16 @@ defmodule Resolvd.Conversations do
 
     case creation do
       {:ok, message} ->
-        mailbox = Resolvd.Mailboxes.get_mailbox!(conversation.mailbox_id)
-
-        email =
-          Swoosh.Email.new(headers: %{"Message-ID" => message_id, "In-Reply-To" => in_reply_to})
-          |> Swoosh.Email.to(conversation.customer.email)
-          |> Swoosh.Email.subject(conversation.subject)
-          |> Swoosh.Email.html_body(message.html_body)
-
-        with {:ok, _metadata} <- Resolvd.Mailboxes.send_customer_email(mailbox, email) do
-          {:ok, email}
-        end
+        %{
+          mailbox_id: conversation.mailbox_id,
+          headers: %{"Message-ID" => message_id, "In-Reply-To" => in_reply_to},
+          customer_email: conversation.customer.email,
+          subject: conversation.subject,
+          html_body: message.html_body,
+          text_body: message.text_body
+        }
+        |> Resolvd.Workers.SendCustomerEmail.new()
+        |> Oban.insert()
 
       _ ->
         nil
