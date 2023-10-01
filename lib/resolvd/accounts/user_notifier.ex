@@ -20,12 +20,12 @@ defmodule Resolvd.Accounts.UserNotifier do
   @doc """
   Deliver instructions to confirm account.
   """
-  def deliver_confirmation_instructions(user, url) do
-    deliver(user.email, "Confirmation instructions", """
+  def deliver_confirmation_instructions(user_email, url) do
+    deliver(user_email, "Confirmation instructions", """
 
     ==============================
 
-    Hi #{user.email},
+    Hi #{user_email},
 
     You can confirm your account by visiting the URL below:
 
@@ -40,14 +40,14 @@ defmodule Resolvd.Accounts.UserNotifier do
   @doc """
   Deliver instructions to sign up for a Resolvd account.
   """
-  def deliver_invite_instructions(user, tenant, url) do
-    deliver(user.email, "You've been invited to join #{tenant.name} on Resolvd", """
+  def deliver_invite_instructions(user_email, tenant_name, url) do
+    deliver(user_email, "You've been invited to join #{tenant_name} on Resolvd", """
 
     ==============================
 
-    Hi #{user.email},
+    Hi #{user_email},
 
-    You've been invited you to join #{tenant.name} on Resolvd.
+    You've been invited you to join #{tenant_name} on Resolvd.
 
     To accept this invite click the URL below to setup your password:
 
@@ -60,12 +60,12 @@ defmodule Resolvd.Accounts.UserNotifier do
   @doc """
   Deliver instructions to reset a user password.
   """
-  def deliver_reset_password_instructions(user, url) do
-    deliver(user.email, "Reset password instructions", """
+  def deliver_reset_password_instructions(user_email, url) do
+    deliver(user_email, "Reset password instructions", """
 
     ==============================
 
-    Hi #{user.email},
+    Hi #{user_email},
 
     You can reset your password by visiting the URL below:
 
@@ -80,12 +80,12 @@ defmodule Resolvd.Accounts.UserNotifier do
   @doc """
   Deliver instructions to update a user email.
   """
-  def deliver_update_email_instructions(user, url) do
-    deliver(user.email, "Update email instructions", """
+  def deliver_update_email_instructions(user_email, url) do
+    deliver(user_email, "Update email instructions", """
 
     ==============================
 
-    Hi #{user.email},
+    Hi #{user_email},
 
     You can change your email by visiting the URL below:
 

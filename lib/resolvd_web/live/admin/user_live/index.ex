@@ -48,18 +48,9 @@ defmodule ResolvdWeb.Admin.UserLive.Index do
 
   def handle_event("resend_invite", %{"id" => user_id}, socket) do
     user = Accounts.get_user!(user_id)
-
     tenant = Resolvd.Tenants.get_tenant!(user.tenant_id)
 
-    %{
-      action: :invite,
-      user_id: user.id,
-      user_email: user.email,
-      confirmed_at: user.confirmed_at,
-      tenant_name: tenant.name
-    }
-    |> Resolvd.Workers.SendUserEmail.new()
-    |> Oban.insert()
+    Accounts.deliver_user_invite(user, tenant, &url(~p"/users/confirm/#{&1}"))
 
     {:noreply, socket |> put_flash(:info, "User invitation sent.")}
   end

@@ -1,22 +1,18 @@
 defmodule Resolvd.Workers.SendUserEmail do
   use Oban.Worker, queue: :mailers
-  use ResolvdWeb, :verified_routes
 
-  alias Resolvd.Accounts
+  alias Resolvd.Accounts.UserNotifier
 
   require Logger
 
   def perform(%Oban.Job{
         args: %{
-          "action" => "confirmation_instructions",
-          "user_id" => user_id,
+          "action" => "deliver_confirmation_instructions",
           "user_email" => user_email,
-          "confirmed_at" => confirmed_at
+          "url" => url
         }
       }) do
-    user = %{id: user_id, email: user_email, confirmed_at: confirmed_at}
-
-    case Accounts.deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}")) do
+    case UserNotifier.deliver_confirmation_instructions(user_email, url) do
       {:ok, result} ->
         Logger.info("Successfully sent user confirmation instructions: #{inspect(result)}")
 
@@ -30,17 +26,13 @@ defmodule Resolvd.Workers.SendUserEmail do
   @impl Oban.Worker
   def perform(%Oban.Job{
         args: %{
-          "action" => "invite",
-          "user_id" => user_id,
+          "action" => "deliver_invite_instructions",
           "user_email" => user_email,
-          "confirmed_at" => confirmed_at,
-          "tenant_name" => tenant_name
+          "tenant_name" => tenant_name,
+          "url" => url
         }
       }) do
-    user = %{id: user_id, email: user_email, confirmed_at: confirmed_at}
-    tenant = %{name: tenant_name}
-
-    case Accounts.deliver_user_invite(user, tenant, &url(~p"/users/confirm/#{&1}")) do
+    case UserNotifier.deliver_invite_instructions(user_email, tenant_name, url) do
       {:ok, result} ->
         Logger.info("Successfully sent user invite: #{inspect(result)}")
 
@@ -53,17 +45,12 @@ defmodule Resolvd.Workers.SendUserEmail do
 
   def perform(%Oban.Job{
         args: %{
-          "action" => "reset_password_instructions",
-          "user_id" => user_id,
-          "user_email" => user_email
+          "action" => "deliver_reset_password_instructions",
+          "user_email" => user_email,
+          "url" => url
         }
       }) do
-    user = %{id: user_id, email: user_email}
-
-    case Accounts.deliver_user_reset_password_instructions(
-           user,
-           &url(~p"/users/reset_password/#{&1}")
-         ) do
+    case UserNotifier.deliver_reset_password_instructions(user_email, url) do
       {:ok, result} ->
         Logger.info("Successfully sent user reset password instructions: #{inspect(result)}")
 
@@ -76,19 +63,12 @@ defmodule Resolvd.Workers.SendUserEmail do
 
   def perform(%Oban.Job{
         args: %{
-          "action" => "update_email_instructions",
-          "user_id" => user_id,
+          "action" => "deliver_update_email_instructions",
           "user_email" => user_email,
-          "current_email" => current_email
+          "url" => url
         }
       }) do
-    user = %{id: user_id, email: user_email}
-
-    case Accounts.deliver_user_update_email_instructions(
-           user,
-           current_email,
-           &url(~p"/users/settings/confirm_email/#{&1}")
-         ) do
+    case UserNotifier.deliver_update_email_instructions(user_email, url) do
       {:ok, result} ->
         Logger.info("Successfully sent user update email instructions: #{inspect(result)}")
 

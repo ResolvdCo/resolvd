@@ -7,7 +7,8 @@ defmodule Resolvd.Accounts do
   import Ecto.Query, warn: false
   alias Resolvd.Repo
 
-  alias Resolvd.Accounts.{User, UserToken, UserNotifier}
+  alias Resolvd.Accounts.{User, UserToken}
+  alias Resolvd.Tenants.Tenant
 
   def gravatar_avatar(%User{email: email}) do
     hash = :crypto.hash(:md5, email) |> Base.encode16(case: :lower)
@@ -32,15 +33,7 @@ defmodule Resolvd.Accounts do
         )
       )
 
-    %{
-      action: :invite,
-      user_id: user.id,
-      user_email: user.email,
-      confirmed_at: user.confirmed_at,
-      tenant_name: tenant.name
-    }
-    |> Resolvd.Workers.SendUserEmail.new()
-    |> Oban.insert()
+    deliver_user_invite(user, tenant, &url(~p"/users/confirm/#{&1}"))
 
     {:ok, user}
   end
@@ -222,12 +215,19 @@ defmodule Resolvd.Accounts do
       {:ok, %{to: ..., body: ...}}
 
   """
-  def deliver_user_update_email_instructions(user, current_email, update_email_url_fun)
+  def deliver_user_update_email_instructions(%User{} = user, current_email, update_email_url_fun)
       when is_function(update_email_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
 
     Repo.insert!(user_token)
-    UserNotifier.deliver_update_email_instructions(user, update_email_url_fun.(encoded_token))
+
+    %{
+      action: :deliver_update_email_instructions,
+      user_email: user.email,
+      url: update_email_url_fun.(encoded_token)
+    }
+    |> Resolvd.Workers.SendUserEmail.new()
+    |> Oban.insert()
   end
 
   @doc """
@@ -312,14 +312,21 @@ defmodule Resolvd.Accounts do
       {:error, :already_confirmed}
 
   """
-  def deliver_user_confirmation_instructions(user, confirmation_url_fun)
+  def deliver_user_confirmation_instructions(%User{} = user, confirmation_url_fun)
       when is_function(confirmation_url_fun, 1) do
     if user.confirmed_at do
       {:error, :already_confirmed}
     else
       {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
       Repo.insert!(user_token)
-      UserNotifier.deliver_confirmation_instructions(user, confirmation_url_fun.(encoded_token))
+
+      %{
+        action: :deliver_confirmation_instructions,
+        user_email: user.email,
+        url: confirmation_url_fun.(encoded_token)
+      }
+      |> Resolvd.Workers.SendUserEmail.new()
+      |> Oban.insert()
     end
   end
 
@@ -335,14 +342,22 @@ defmodule Resolvd.Accounts do
       {:error, :already_confirmed}
 
   """
-  def deliver_user_invite(user, tenant, confirmation_url_fun)
+  def deliver_user_invite(%User{} = user, %Tenant{} = tenant, confirmation_url_fun)
       when is_function(confirmation_url_fun, 1) do
     if user.confirmed_at do
       {:error, :already_confirmed}
     else
       {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
       Repo.insert!(user_token)
-      UserNotifier.deliver_invite_instructions(user, tenant, confirmation_url_fun.(encoded_token))
+
+      %{
+        action: :deliver_invite_instructions,
+        user_email: user.email,
+        tenant_name: tenant.name,
+        url: confirmation_url_fun.(encoded_token)
+      }
+      |> Resolvd.Workers.SendUserEmail.new()
+      |> Oban.insert()
     end
   end
 
@@ -384,11 +399,18 @@ defmodule Resolvd.Accounts do
       {:ok, %{to: ..., body: ...}}
 
   """
-  def deliver_user_reset_password_instructions(user, reset_password_url_fun)
+  def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
       when is_function(reset_password_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
-    UserNotifier.deliver_reset_password_instructions(user, reset_password_url_fun.(encoded_token))
+
+    %{
+      action: :deliver_reset_password_instructions,
+      user_email: user.email,
+      url: reset_password_url_fun.(encoded_token)
+    }
+    |> Resolvd.Workers.SendUserEmail.new()
+    |> Oban.insert()
   end
 
   @doc """

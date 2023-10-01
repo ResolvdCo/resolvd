@@ -33,9 +33,10 @@ defmodule ResolvdWeb.UserForgotPasswordLive do
 
   def handle_event("send_email", %{"user" => %{"email" => email}}, socket) do
     if user = Accounts.get_user_by_email(email) do
-      %{action: :reset_password_instructions, user_id: user.id, user_email: user.email}
-      |> Resolvd.Workers.SendUserEmail.new()
-      |> Oban.insert()
+      Accounts.deliver_user_reset_password_instructions(
+        user,
+        &url(~p"/users/reset_password/#{&1}")
+      )
     end
 
     info =

@@ -5,6 +5,7 @@ defmodule Resolvd.Tenants do
 
   alias Resolvd.Repo
 
+  alias Resolvd.Accounts
   alias Resolvd.Accounts.User
   alias Resolvd.Tenants.Tenant
   alias Resolvd.Mailboxes.Mailbox
@@ -42,14 +43,7 @@ defmodule Resolvd.Tenants do
                }
              )
            ) do
-      %{
-        action: :confirmation_instructions,
-        user_id: user.id,
-        user_email: user.email,
-        confirmed_at: user.confirmed_at
-      }
-      |> Resolvd.Workers.SendUserEmail.new()
-      |> Oban.insert()
+      Accounts.deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}"))
 
       {:ok, tenant, user}
     else
