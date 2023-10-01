@@ -23,32 +23,29 @@ defmodule Resolvd.Tenants do
   Create a tenant and a user from a %TenantCreation{} changeset
   """
   def create_tenant(%Ecto.Changeset{} = tc) do
-    with {:ok, tenant} <-
-           Repo.insert(
-             Tenant.changeset(%Tenant{}, %{
-               name: get_field(tc, :company_name)
-             })
-           ),
-         {:ok, user} <-
-           Repo.insert(
-             User.registration_changeset(
-               %User{
-                 tenant_id: tenant.id
-               },
-               %{
-                 name: get_field(tc, :full_name),
-                 email: get_field(tc, :email),
-                 password: get_field(tc, :password),
-                 is_admin: true
-               }
-             )
-           ) do
-      Accounts.deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}"))
+    tenant_params = %{
+      name: get_field(tc, :company_name),
+      users: [
+        %{
+          name: get_field(tc, :full_name),
+          email: get_field(tc, :email),
+          password: get_field(tc, :password),
+          is_admin: true
+        }
+      ]
+    }
 
-      {:ok, tenant, user}
-    else
-      err ->
-        err
+    case %Tenant{} |> Tenant.changeset(tenant_params) |> Repo.insert() do
+      {:ok, %Tenant{users: [user]}} ->
+        Accounts.deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}"))
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{changes: %{users: [user]}} = changeset} ->
+        (changeset.errors ++ user.errors)
+        |> Enum.reduce(tc, fn {err_key, {message, keys}}, ch ->
+          Ecto.Changeset.add_error(ch, err_key, message, keys)
+        end)
+        |> Ecto.Changeset.apply_action(:insert)
     end
   end
 

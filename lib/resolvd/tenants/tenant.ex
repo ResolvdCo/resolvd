@@ -18,6 +18,8 @@ defmodule Resolvd.Tenants.Tenant do
     # Avoiding this for now due to situations like gmail.com
     field :email_domain, :string
 
+    has_many :users, Resolvd.Accounts.User
+
     # Billing Fields
     field :plan_status, Ecto.Enum, values: [:active, :canceling, :expired]
     field :plan_renewal, :utc_datetime
@@ -34,6 +36,9 @@ defmodule Resolvd.Tenants.Tenant do
     |> cast(attrs, [:name, :domain, :email_domain])
     |> validate_required([:name])
     |> cast_slug()
+    |> unsafe_validate_unique(:slug, Resolvd.Repo, error_key: :company_name)
+    |> unique_constraint(:slug, error_key: :company_name)
+    |> cast_assoc(:users, with: &Resolvd.Accounts.User.registration_changeset/2)
   end
 
   def billing_changeset(tenant, attrs) do

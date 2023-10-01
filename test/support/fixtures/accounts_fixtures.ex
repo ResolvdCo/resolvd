@@ -29,7 +29,7 @@ defmodule Resolvd.AccountsFixtures do
 
     attrs = valid_tenant_creation_attributes(attrs)
 
-    {:ok, _tenant, user} =
+    {:ok, user} =
       Resolvd.Tenants.create_tenant(
         Resolvd.Tenants.TenantCreation.changeset(%Resolvd.Tenants.TenantCreation{}, attrs)
       )
