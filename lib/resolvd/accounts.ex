@@ -23,19 +23,13 @@ defmodule Resolvd.Accounts do
   def invite_user(%User{tenant_id: user_tenant}, params) do
     tenant = Resolvd.Tenants.get_tenant!(user_tenant)
 
-    {:ok, user} =
-      Repo.insert(
-        User.invite_changeset(
-          %User{
-            tenant_id: tenant.id
-          },
-          params
-        )
-      )
+    case %User{tenant_id: tenant.id} |> User.invite_changeset(params) |> Repo.insert() do
+      {:ok, user} ->
+        deliver_user_invite(user, tenant, &url(~p"/users/confirm/#{&1}"))
 
-    deliver_user_invite(user, tenant, &url(~p"/users/confirm/#{&1}"))
-
-    {:ok, user}
+      error ->
+        error
+    end
   end
 
   ## Database getters
