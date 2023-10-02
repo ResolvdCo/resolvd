@@ -67,7 +67,7 @@ defmodule ResolvdWeb.UserConfirmationLive do
         # then odds are that the confirmation link was already visited, either
         # by some automation or by the user themselves, so we redirect without
         # a warning message.
-        case socket.assigns do
+        case socket.assigns |> dbg() do
           %{current_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
             {:noreply, redirect(socket, to: ~p"/")}
 

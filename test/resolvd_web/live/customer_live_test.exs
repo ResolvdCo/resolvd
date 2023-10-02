@@ -2,6 +2,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
   use ResolvdWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Resolvd.AccountsFixtures
   import Resolvd.CustomersFixtures
 
   @create_attrs %{email: "some email", name: "some name", phone: "some phone"}
@@ -13,12 +14,13 @@ defmodule ResolvdWeb.CustomerLiveTest do
   @invalid_attrs %{email: nil, name: nil, phone: nil}
 
   defp create_customer(_) do
-    customer = customer_fixture()
+    tenant = tenant_fixture()
+    customer = customer_fixture(tenant)
     %{customer: customer}
   end
 
   describe "Index" do
-    setup [:create_customer]
+    setup [:register_and_log_in_user, :create_customer]
 
     test "lists all customers", %{conn: conn, customer: customer} do
       {:ok, _index_live, html} = live(conn, ~p"/customers")

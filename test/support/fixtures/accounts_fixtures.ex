@@ -37,6 +37,20 @@ defmodule Resolvd.AccountsFixtures do
     user
   end
 
+  def tenant_fixture(attrs \\ %{}) do
+    # For now this creates a tenant each time too
+    # Should be refactored though for better testing
+
+    attrs = valid_tenant_creation_attributes(attrs)
+
+    {:ok, tenant, _user} =
+      Resolvd.Tenants.create_tenant(
+        Resolvd.Tenants.TenantCreation.changeset(%Resolvd.Tenants.TenantCreation{}, attrs)
+      )
+
+    tenant
+  end
+
   def extract_user_token(fun) do
     {:ok, captured_email} = fun.(&"[TOKEN]#{&1}[TOKEN]")
     [_, token | _] = String.split(captured_email.text_body, "[TOKEN]")

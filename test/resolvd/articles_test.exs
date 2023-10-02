@@ -64,7 +64,7 @@ defmodule Resolvd.ArticlesTest do
 
     import Resolvd.ArticlesFixtures
 
-    @invalid_attrs %{body: nil, slug: nil, subject: nil}
+    @invalid_attrs %{body: nil, subject: nil}
 
     test "list_articles/0 returns all articles" do
       article = article_fixture()
@@ -77,11 +77,11 @@ defmodule Resolvd.ArticlesTest do
     end
 
     test "create_article/1 with valid data creates a article" do
-      valid_attrs = %{body: "some body", slug: "some slug", subject: "some subject"}
+      valid_attrs = %{body: "some body", subject: "some subject"}
 
       assert {:ok, %Article{} = article} = Articles.create_article(valid_attrs)
       assert article.body == "some body"
-      assert article.slug == "some slug"
+      assert article.slug == "some-subject"
       assert article.subject == "some subject"
     end
 
@@ -94,13 +94,13 @@ defmodule Resolvd.ArticlesTest do
 
       update_attrs = %{
         body: "some updated body",
-        slug: "some updated slug",
+        slug: "some-updated-slug",
         subject: "some updated subject"
       }
 
       assert {:ok, %Article{} = article} = Articles.update_article(article, update_attrs)
       assert article.body == "some updated body"
-      assert article.slug == "some updated slug"
+      assert article.slug == "some-updated-subject"
       assert article.subject == "some updated subject"
     end
 

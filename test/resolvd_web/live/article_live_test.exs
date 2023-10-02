@@ -18,7 +18,7 @@ defmodule ResolvdWeb.ArticleLiveTest do
   end
 
   describe "Index" do
-    setup [:create_article]
+    setup [:register_and_log_in_user, :create_article]
 
     test "lists all articles", %{conn: conn, article: article} do
       {:ok, _index_live, html} = live(conn, ~p"/articles")
@@ -82,7 +82,7 @@ defmodule ResolvdWeb.ArticleLiveTest do
   end
 
   describe "Show" do
-    setup [:create_article]
+    setup [:register_and_log_in_user, :create_article]
 
     test "displays article", %{conn: conn, article: article} do
       {:ok, _show_live, html} = live(conn, ~p"/articles/#{article}")
