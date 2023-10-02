@@ -231,13 +231,12 @@ defmodule Resolvd.Conversations do
       |> Repo.insert()
 
     conversation =
-      if is_nil(conversation.user_id) do
+      with %Conversation{user_id: nil, id: conversation_id} <- conversation,
+           %Conversation{user_id: nil} = conversation <- get_conversation!(user, conversation_id) do
         conversation
         |> Ecto.Changeset.change()
         |> Ecto.Changeset.put_assoc(:user, user)
         |> Repo.update!()
-      else
-        conversation
       end
 
     case creation do
