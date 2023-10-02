@@ -7,15 +7,16 @@ defmodule Resolvd.CustomersFixtures do
   @doc """
   Generate a customer.
   """
-  def customer_fixture(attrs \\ %{}) do
-    {:ok, customer} =
+  def customer_fixture(tenant, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         email: "some email",
         name: "some name",
         phone: "some phone"
       })
-      |> Resolvd.Customers.create_customer()
+
+    {:ok, customer} = Resolvd.Customers.create_customer(tenant, attrs)
 
     customer
   end

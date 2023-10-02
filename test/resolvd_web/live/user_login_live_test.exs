@@ -4,12 +4,12 @@ defmodule ResolvdWeb.UserLoginLiveTest do
   import Phoenix.LiveViewTest
   import Resolvd.AccountsFixtures
 
-  describe "Log in page" do
-    test "renders log in page", %{conn: conn} do
+  describe "Sign in page" do
+    test "renders sign in page", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/log_in")
 
-      assert html =~ "Log in"
-      assert html =~ "Register"
+      assert html =~ "Sign in"
+      assert html =~ "Sign up"
       assert html =~ "Forgot your password?"
     end
 

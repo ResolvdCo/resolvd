@@ -3,24 +3,30 @@ defmodule Resolvd.CustomersTest do
 
   alias Resolvd.Customers
 
+  defp create_tenant(_) do
+    tenant = Resolvd.AccountsFixtures.tenant_fixture()
+    %{tenant: tenant}
+  end
+
   describe "customers" do
     alias Resolvd.Customers.Customer
+    setup [:create_tenant]
 
     import Resolvd.CustomersFixtures
 
     @invalid_attrs %{email: nil, name: nil, phone: nil}
 
-    test "list_customers/0 returns all customers" do
-      customer = customer_fixture()
+    test "list_customers/0 returns all customers", %{tenant: tenant} do
+      customer = customer_fixture(tenant)
       assert Customers.list_customers() == [customer]
     end
 
-    test "get_customer!/1 returns the customer with given id" do
-      customer = customer_fixture()
+    test "get_customer!/1 returns the customer with given id", %{tenant: tenant} do
+      customer = customer_fixture(tenant)
       assert Customers.get_customer!(customer.id) == customer
     end
 
-    test "create_customer/1 with valid data creates a customer" do
+    test "create_customer/1 with valid data creates a customer", %{tenant: tenant} do
       valid_attrs = %{email: "some email", name: "some name", phone: "some phone"}
 
       assert {:ok, %Customer{} = customer} = Customers.create_customer(valid_attrs)
@@ -29,12 +35,12 @@ defmodule Resolvd.CustomersTest do
       assert customer.phone == "some phone"
     end
 
-    test "create_customer/1 with invalid data returns error changeset" do
+    test "create_customer/1 with invalid data returns error changeset", %{tenant: tenant} do
       assert {:error, %Ecto.Changeset{}} = Customers.create_customer(@invalid_attrs)
     end
 
-    test "update_customer/2 with valid data updates the customer" do
-      customer = customer_fixture()
+    test "update_customer/2 with valid data updates the customer", %{tenant: tenant} do
+      customer = customer_fixture(tenant)
 
       update_attrs = %{
         email: "some updated email",
@@ -48,20 +54,20 @@ defmodule Resolvd.CustomersTest do
       assert customer.phone == "some updated phone"
     end
 
-    test "update_customer/2 with invalid data returns error changeset" do
-      customer = customer_fixture()
+    test "update_customer/2 with invalid data returns error changeset", %{tenant: tenant} do
+      customer = customer_fixture(tenant)
       assert {:error, %Ecto.Changeset{}} = Customers.update_customer(customer, @invalid_attrs)
       assert customer == Customers.get_customer!(customer.id)
     end
 
-    test "delete_customer/1 deletes the customer" do
-      customer = customer_fixture()
+    test "delete_customer/1 deletes the customer", %{tenant: tenant} do
+      customer = customer_fixture(tenant)
       assert {:ok, %Customer{}} = Customers.delete_customer(customer)
       assert_raise Ecto.NoResultsError, fn -> Customers.get_customer!(customer.id) end
     end
 
-    test "change_customer/1 returns a customer changeset" do
-      customer = customer_fixture()
+    test "change_customer/1 returns a customer changeset", %{tenant: tenant} do
+      customer = customer_fixture(tenant)
       assert %Ecto.Changeset{} = Customers.change_customer(customer)
     end
   end
