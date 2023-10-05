@@ -32,7 +32,7 @@ defmodule ResolvdWeb.Nav do
               alt="Resolvd"
             />
           </div>
-          <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+          <div class="flex-1 flex flex-col pt-10 pb-4 overflow-y-auto">
             <div class="flex-1 px-3 bg-white divide-y space-y-1">
               <div class="flex flex-1 flex-col space-y-2 pb-2 h-full justify-between">
                 <div class="flex flex-col space-y-2 pb-2">
@@ -63,31 +63,48 @@ defmodule ResolvdWeb.Nav do
                     </.link>
                   </div>
                 </div>
-                <div :if={@current_user.is_admin}>
-                  <.link
-                    navigate={~p"/admin"}
-                    class={[
-                      "text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto",
-                      if(active_admin(@view),
-                        do: "bg-gray-800 text-white",
-                        else: "hover:bg-gray-100"
-                      )
-                    ]}
-                  >
-                    <.icon
-                      name="hero-cog-6-tooth"
+                <div class="flex flex-col space-y-2 pb-2">
+                  <div :if={@current_user.is_admin}>
+                    <.link
+                      navigate={~p"/admin"}
                       class={[
-                        "w-6 h-6 text-gray-500 shrink-0  transition duration-75",
+                        "text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto",
                         if(active_admin(@view),
-                          do: "text-white",
-                          else: "group-hover:text-gray-900"
+                          do: "bg-gray-800 text-white",
+                          else: "hover:bg-gray-100"
                         )
                       ]}
-                    />
-                    <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-                      Admin
-                    </span>
-                  </.link>
+                    >
+                      <.icon
+                        name="hero-cog-6-tooth"
+                        class={[
+                          "w-6 h-6 text-gray-500 shrink-0  transition duration-75",
+                          if(active_admin(@view),
+                            do: "text-white",
+                            else: "group-hover:text-gray-900"
+                          )
+                        ]}
+                      />
+                      <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
+                        Admin
+                      </span>
+                    </.link>
+                  </div>
+                  <div>
+                    <.link
+                      href={~p"/users/log_out"}
+                      method="delete"
+                      class="text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto hover:bg-gray-100"
+                    >
+                      <.icon
+                        name="hero-power"
+                        class="w-6 h-6 text-gray-500 shrink-0 transition duration-75 group-hover:text-gray-900"
+                      />
+                      <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
+                        <%= "Logout" %>
+                      </span>
+                    </.link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -162,7 +179,105 @@ defmodule ResolvdWeb.Nav do
 
   def top(assigns) do
     ~H"""
+    <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+      <button
+        phx-click={JS.show(to: "#mobile-nav")}
+        type="button"
+        class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+      >
+        <span class="sr-only">Open sidebar</span>
+        <svg
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+          />
+        </svg>
+      </button>
+      <!-- Separator -->
+      <div class="h-6 w-px bg-gray-900/10 lg:hidden" aria-hidden="true"></div>
 
+      <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+        <.live_component id="global-search" module={ResolvdWeb.Components.GlobalSearch} />
+        <div class="flex items-center gap-x-4 lg:gap-x-6">
+          <div class="relative">
+            <button
+              type="button"
+              class="-m-1.5 flex items-center p-1.5"
+              id="user-menu-button"
+              aria-expanded="false"
+              aria-haspopup="true"
+              phx-click={toggle_dropdown("#user-menu")}
+            >
+              <span class="sr-only">Open user menu</span>
+              <img
+                class="h-8 w-8 rounded-full bg-gray-50"
+                src={Resolvd.Accounts.gravatar_avatar(@current_user)}
+                alt=""
+              />
+              <span class="hidden lg:flex lg:items-center">
+                <span class="ml-4 text-sm font-semibold leading-6 text-gray-900" aria-hidden="true">
+                  Luke Strickland
+                </span>
+                <svg
+                  class="ml-2 h-5 w-5 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </span>
+            </button>
+            <!--
+              Dropdown menu, show/hide based on menu state.
+
+              Entering: "transition ease-out duration-100"
+                From: "transform opacity-0 scale-95"
+                To: "transform opacity-100 scale-100"
+              Leaving: "transition ease-in duration-75"
+                From: "transform opacity-100 scale-100"
+                To: "transform opacity-0 scale-95"
+            -->
+            <div
+              id="user-menu"
+              class="hidden absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="user-menu-button"
+              tabindex="-1"
+            >
+              <.link
+                navigate={~p"/users/settings"}
+                class="block px-3 py-1 text-sm leading-6 text-gray-900"
+                role="menuitem"
+              >
+                Your profile
+              </.link>
+              <.link
+                href={~p"/users/log_out"}
+                method="delete"
+                class="block px-3 py-1 text-sm leading-6 text-gray-900"
+                role="menuitem"
+              >
+                Log out
+              </.link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     """
   end
 
