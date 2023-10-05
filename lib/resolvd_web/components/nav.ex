@@ -6,79 +6,77 @@ defmodule ResolvdWeb.Nav do
 
   def sidebar(assigns) do
     ~H"""
-    <div>
-      <div class="flex overflow-hidden bg-white pt-0">
-        <div
-          id="sidebar"
-          class="fixed z-20 h-full top-0 left-0 pt-0 flex flex-shrink-0 flex-col w-16 xl:w-64 transition-width duration-75"
-          aria-label="Sidebar"
-        >
-          <div class="relative flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-white pt-0">
-            <div class="flex h-16 shrink-0 justify-center align-center mt-5">
-              <img class="hidden xl:flex h-16 w-auto" src={~p"/images/wip-logo.png"} alt="Resolvd" />
-              <img
-                class="xl:hidden pt-3 h-10 w-auto"
-                src={~p"/images/wip-logo-small.png"}
-                alt="Resolvd"
-              />
-            </div>
-            <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-              <div class="flex-1 px-3 bg-white divide-y space-y-1">
-                <div class="flex flex-1 flex-col space-y-2 pb-2 h-full justify-between">
-                  <div class="flex flex-col space-y-2 pb-2">
-                    <div :for={item <- sidebar_items()}>
-                      <.link
-                        navigate={item.to}
-                        class={[
-                          "text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto",
-                          if(active_path(@view, item.module),
-                            do: "bg-gray-800 text-white",
-                            else: "hover:bg-gray-100"
-                          )
-                        ]}
-                      >
-                        <.icon
-                          name={item.icon}
-                          class={[
-                            "w-6 h-6 text-gray-500 shrink-0 transition duration-75",
-                            if(active_path(@view, item.module),
-                              do: "text-white",
-                              else: "group-hover:text-gray-900"
-                            )
-                          ]}
-                        />
-                        <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-                          <%= item.label %>
-                        </span>
-                      </.link>
-                    </div>
-                  </div>
-                  <div :if={@current_user.is_admin}>
+    <div class="flex overflow-hidden bg-white pt-0">
+      <div
+        id="sidebar"
+        class="fixed z-20 h-full top-0 left-0 pt-0 flex flex-shrink-0 flex-col w-16 xl:w-64 transition-width duration-75"
+        aria-label="Sidebar"
+      >
+        <div class="relative flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-white pt-0">
+          <div class="flex h-16 shrink-0 justify-center align-center mt-5">
+            <img class="hidden xl:flex h-16 w-auto" src={~p"/images/wip-logo.png"} alt="Resolvd" />
+            <img
+              class="xl:hidden pt-3 h-10 w-auto"
+              src={~p"/images/wip-logo-small.png"}
+              alt="Resolvd"
+            />
+          </div>
+          <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+            <div class="flex-1 px-3 bg-white divide-y space-y-1">
+              <div class="flex flex-1 flex-col space-y-2 pb-2 h-full justify-between">
+                <div class="flex flex-col space-y-2 pb-2">
+                  <div :for={item <- sidebar_items()}>
                     <.link
-                      navigate={~p"/admin"}
+                      navigate={item.to}
                       class={[
                         "text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto",
-                        if(active_admin(@view),
+                        if(active_path(@view, item.module),
                           do: "bg-gray-800 text-white",
                           else: "hover:bg-gray-100"
                         )
                       ]}
                     >
                       <.icon
-                        name="hero-cog-6-tooth"
+                        name={item.icon}
                         class={[
-                          "w-6 h-6 text-gray-500 shrink-0  transition duration-75",
-                          if(active_admin(@view),
+                          "w-6 h-6 text-gray-500 shrink-0 transition duration-75",
+                          if(active_path(@view, item.module),
                             do: "text-white",
                             else: "group-hover:text-gray-900"
                           )
                         ]}
                       />
                       <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-                        Admin
+                        <%= item.label %>
                       </span>
                     </.link>
                   </div>
+                </div>
+                <div :if={@current_user.is_admin}>
+                  <.link
+                    navigate={~p"/admin"}
+                    class={[
+                      "text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto",
+                      if(active_admin(@view),
+                        do: "bg-gray-800 text-white",
+                        else: "hover:bg-gray-100"
+                      )
+                    ]}
+                  >
+                    <.icon
+                      name="hero-cog-6-tooth"
+                      class={[
+                        "w-6 h-6 text-gray-500 shrink-0  transition duration-75",
+                        if(active_admin(@view),
+                          do: "text-white",
+                          else: "group-hover:text-gray-900"
+                        )
+                      ]}
+                    />
+                    <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
+                      Admin
+                    </span>
+                  </.link>
                 </div>
               </div>
             </div>
