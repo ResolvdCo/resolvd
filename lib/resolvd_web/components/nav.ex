@@ -6,8 +6,8 @@ defmodule ResolvdWeb.Nav do
 
   def sidebar(assigns) do
     ~H"""
-    <div class="flex flex-col items-center w-16 xl:w-64 py-8 space-y-4 bg-white transition-width duration-200">
-      <a href="#" class="pb-8">
+    <div class="flex flex-col items-center w-16 xl:w-64 py-2 space-y-4 bg-white transition-width duration-200 border-r-2 border-slate-100">
+      <a href="#" class="pb-2">
         <img class="hidden xl:block h-16 w-auto" src={~p"/images/wip-logo.png"} alt="Resolvd" />
         <img
           class="block xl:hidden pt-3 h-10 w-auto pb-3 box-content"
@@ -45,9 +45,9 @@ defmodule ResolvdWeb.Nav do
         </div>
       </div>
 
-      <div :if={@current_user.is_admin} class="w-full">
+      <div class="w-full">
         <.link
-          navigate={~p"/admin"}
+          navigate={if @current_user.is_admin, do: ~p"/admin", else: ~p"/users/settings"}
           class={[
             "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto",
             if(active_admin(@view),
@@ -67,12 +67,12 @@ defmodule ResolvdWeb.Nav do
             ]}
           />
           <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-            Admin
+            Settings
           </span>
         </.link>
       </div>
 
-      <div class="w-full">
+      <div class="w-full pb-10">
         <.link
           href={~p"/users/log_out"}
           method="delete"
@@ -91,111 +91,39 @@ defmodule ResolvdWeb.Nav do
     """
   end
 
-  def sidebar_old(assigns) do
+  attr :view, :atom, required: true
+
+  def admin_sidebar(assigns) do
     ~H"""
-    <div class="flex overflow-hidden bg-white pt-0 transition-width duration-300">
-      <div class="fixed z-30 top-5 left-3 p-2 sm:hidden flex">
-        <button type="button" class="-m-2.5 p-2.5 text-gray-700 lg:hidden">
-          <span class="sr-only">Open sidebar</span>
-          <span phx-click={open_sidebar()} id="sidebar-open-button">
-            <.icon name="hero-bars-3" class="w-6 h-6" />
-          </span>
-          <span phx-click={close_sidebar()} class="hidden" id="sidebar-close-button">
-            <.icon name="hero-x-mark" class="w-6 h-6" />
-          </span>
-        </button>
-      </div>
-      <div
-        id="sidebar"
-        class="hidden fixed z-20 h-full top-0 left-0 pt-0 sm:flex flex-shrink-0 flex-col w-16 xl:w-64 transition-width duration-200"
-        aria-label="Sidebar"
-      >
-        <div class="relative flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-white pt-0">
-          <div class="flex h-16 shrink-0 justify-center align-center pt-5">
-            <img class="hidden xl:flex h-16 w-auto" src={~p"/images/wip-logo.png"} alt="Resolvd" />
-            <img
-              class="hidden sm:flex xl:hidden pt-3 h-10 w-auto"
-              src={~p"/images/wip-logo-small.png"}
-              alt="Resolvd"
+    <div class="flex flex-col py-5 space-y-4 bg-white w-16 md:w-64 transition-width duration-200 border-r-2 border-slate-100">
+      <h2 class="px-5 pb-8 text-xl font-medium text-gray-800 items-center">Settings</h2>
+
+      <div class="mt-2">
+        <div :for={item <- admin_items()} class="w-full">
+          <.link
+            navigate={item.to}
+            class={[
+              "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto",
+              if(active_path(@view, item.module),
+                do: "bg-gray-800 text-white",
+                else: "hover:bg-gray-100"
+              )
+            ]}
+          >
+            <.icon
+              name={item.icon}
+              class={[
+                "w-6 h-6 text-gray-500 shrink-0 transition duration-75",
+                if(active_path(@view, item.module),
+                  do: "text-white",
+                  else: "group-hover:text-gray-900"
+                )
+              ]}
             />
-          </div>
-          <div class="flex-1 flex flex-col pt-10 pb-4 overflow-y-auto">
-            <div class="flex-1 px-3 bg-white divide-y space-y-1">
-              <div class="flex flex-1 flex-col space-y-2 pb-2 h-full justify-between">
-                <div class="flex flex-col space-y-2 pb-2">
-                  <div :for={item <- sidebar_items()}>
-                    <.link
-                      navigate={item.to}
-                      class={[
-                        "text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto",
-                        if(active_path(@view, item.module),
-                          do: "bg-gray-800 text-white",
-                          else: "hover:bg-gray-100"
-                        )
-                      ]}
-                    >
-                      <.icon
-                        name={item.icon}
-                        class={[
-                          "w-6 h-6 text-gray-500 shrink-0 transition duration-75",
-                          if(active_path(@view, item.module),
-                            do: "text-white",
-                            else: "group-hover:text-gray-900"
-                          )
-                        ]}
-                      />
-                      <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-                        <%= item.label %>
-                      </span>
-                    </.link>
-                  </div>
-                </div>
-                <div class="flex flex-col space-y-2 pb-2">
-                  <div :if={@current_user.is_admin}>
-                    <.link
-                      navigate={~p"/admin"}
-                      class={[
-                        "text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto",
-                        if(active_admin(@view),
-                          do: "bg-gray-800 text-white",
-                          else: "hover:bg-gray-100"
-                        )
-                      ]}
-                    >
-                      <.icon
-                        name="hero-cog-6-tooth"
-                        class={[
-                          "w-6 h-6 text-gray-500 shrink-0  transition duration-75",
-                          if(active_admin(@view),
-                            do: "text-white",
-                            else: "group-hover:text-gray-900"
-                          )
-                        ]}
-                      />
-                      <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-                        Admin
-                      </span>
-                    </.link>
-                  </div>
-                  <div>
-                    <.link
-                      href={~p"/users/log_out"}
-                      method="delete"
-                      class="text-base text-gray-900 font-normal rounded-lg flex items-center p-2 group w-10 xl:w-auto hover:bg-gray-100"
-                    >
-                      <.icon
-                        name="hero-power"
-                        class="w-6 h-6 text-gray-500 shrink-0 transition duration-75 group-hover:text-gray-900"
-                      />
-                      <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-                        <%= "Logout" %>
-                      </span>
-                    </.link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            <span class="hidden pl-3 md:flex flex-1 whitespace-nowrap">
+              <%= item.label %>
+            </span>
+          </.link>
         </div>
       </div>
     </div>
@@ -243,7 +171,7 @@ defmodule ResolvdWeb.Nav do
       },
       %{
         to: ~p"/customers",
-        icon: "hero-user",
+        icon: "hero-user-group",
         label: gettext("Customers"),
         module: ResolvdWeb.CustomerLive
       },
@@ -262,158 +190,6 @@ defmodule ResolvdWeb.Nav do
     ]
   end
 
-  attr(:current_user, :any)
-
-  def top(assigns) do
-    ~H"""
-    <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-      <button
-        phx-click={JS.show(to: "#mobile-nav")}
-        type="button"
-        class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-      >
-        <span class="sr-only">Open sidebar</span>
-        <svg
-          class="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-          />
-        </svg>
-      </button>
-      <!-- Separator -->
-      <div class="h-6 w-px bg-gray-900/10 lg:hidden" aria-hidden="true"></div>
-
-      <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        <.live_component id="global-search" module={ResolvdWeb.Components.GlobalSearch} />
-        <div class="flex items-center gap-x-4 lg:gap-x-6">
-          <div class="relative">
-            <button
-              type="button"
-              class="-m-1.5 flex items-center p-1.5"
-              id="user-menu-button"
-              aria-expanded="false"
-              aria-haspopup="true"
-              phx-click={toggle_dropdown("#user-menu")}
-            >
-              <span class="sr-only">Open user menu</span>
-              <img
-                class="h-8 w-8 rounded-full bg-gray-50"
-                src={Resolvd.Accounts.gravatar_avatar(@current_user)}
-                alt=""
-              />
-              <span class="hidden lg:flex lg:items-center">
-                <span class="ml-4 text-sm font-semibold leading-6 text-gray-900" aria-hidden="true">
-                  Luke Strickland
-                </span>
-                <svg
-                  class="ml-2 h-5 w-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </span>
-            </button>
-            <!--
-              Dropdown menu, show/hide based on menu state.
-
-              Entering: "transition ease-out duration-100"
-                From: "transform opacity-0 scale-95"
-                To: "transform opacity-100 scale-100"
-              Leaving: "transition ease-in duration-75"
-                From: "transform opacity-100 scale-100"
-                To: "transform opacity-0 scale-95"
-            -->
-            <div
-              id="user-menu"
-              class="hidden absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="user-menu-button"
-              tabindex="-1"
-            >
-              <.link
-                navigate={~p"/users/settings"}
-                class="block px-3 py-1 text-sm leading-6 text-gray-900"
-                role="menuitem"
-              >
-                Your profile
-              </.link>
-              <.link
-                href={~p"/users/log_out"}
-                method="delete"
-                class="block px-3 py-1 text-sm leading-6 text-gray-900"
-                role="menuitem"
-              >
-                Log out
-              </.link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  attr(:view, :atom, required: true)
-
-  def admin(assigns) do
-    ~H"""
-    <div class="border-b border-gray-200 pb-5 sm:pb-0">
-      <h3 class="text-base font-semibold leading-6 text-gray-900">Admin</h3>
-      <div class="mt-3 sm:mt-4">
-        <!-- Dropdown menu on small screens -->
-        <div class="sm:hidden">
-          <label for="current-tab" class="sr-only">Select a tab</label>
-          <select
-            id="current-tab"
-            name="current-tab"
-            class="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-          >
-            <option>Settings</option>
-            <option>Billing</option>
-            <option selected>Mailboxes</option>
-            <option>Offer</option>
-            <option>Hired</option>
-          </select>
-        </div>
-        <!-- Tabs at small breakpoint and up -->
-        <div class="hidden sm:block">
-          <nav class="-mb-px flex space-x-8">
-            <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-            <.link
-              :for={item <- admin_items()}
-              navigate={item.to}
-              class={[
-                "text-gray-500 hover:border-gray-300 hover:text-gray-700 whitespace-nowrap border-b-2 px-1 pb-4 text-sm font-medium",
-                if(active_path(@view, item.module),
-                  do: "border-indigo-500 text-indigo-600 ",
-                  else: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                )
-              ]}
-            >
-              <%= item.label %>
-            </.link>
-          </nav>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
   defp admin_items do
     [
       %{
@@ -423,26 +199,32 @@ defmodule ResolvdWeb.Nav do
         module: ResolvdWeb.Admin.IndexLive
       },
       %{
+        to: ~p"/users/settings",
+        icon: "hero-user-circle",
+        label: gettext("Profile"),
+        module: ResolvdWeb.UserSettingsLive
+      },
+      %{
         to: ~p"/admin/categories",
-        icon: "hero-home",
+        icon: "hero-tag",
         label: gettext("Categories"),
         module: ResolvdWeb.Admin.CategoryLive
       },
       %{
         to: ~p"/admin/users",
-        icon: "hero-home",
+        icon: "hero-user-plus",
         label: gettext("Users"),
         module: ResolvdWeb.Admin.UserLive
       },
       %{
         to: ~p"/admin/billing",
-        icon: "hero-chat-bubble-left-right",
+        icon: "hero-credit-card",
         label: gettext("Billing"),
         module: ResolvdWeb.Admin.BillingLive
       },
       %{
         to: ~p"/admin/mailboxes",
-        icon: "hero-user",
+        icon: "hero-at-symbol",
         label: gettext("Mailboxes"),
         module: ResolvdWeb.Admin.MailboxLive
       }
