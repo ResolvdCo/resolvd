@@ -6,6 +6,88 @@ defmodule ResolvdWeb.Nav do
 
   def sidebar(assigns) do
     ~H"""
+    <div class="flex flex-col items-center w-16 xl:w-64 h-screen py-8 space-y-4 bg-white border-gray-200 transition-width duration-200">
+      <a href="#" class="pb-8">
+        <img class="w-auto h-6" src="https://merakiui.com/images/logo.svg" alt="" />
+      </a>
+
+      <div class="flex flex-col flex-1 w-full">
+        <div :for={item <- sidebar_items()} class="w-full">
+          <.link
+            navigate={item.to}
+            class={[
+              "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto",
+              if(active_path(@view, item.module),
+                do: "bg-gray-800 text-white",
+                else: "hover:bg-gray-100"
+              )
+            ]}
+          >
+            <.icon
+              name={item.icon}
+              class={[
+                "w-6 h-6 text-gray-500 shrink-0 transition duration-75",
+                if(active_path(@view, item.module),
+                  do: "text-white",
+                  else: "group-hover:text-gray-900"
+                )
+              ]}
+            />
+            <span class="hidden pl-3 xl:flex flex-1 whitespace-nowrap">
+              <%= item.label %>
+            </span>
+          </.link>
+        </div>
+      </div>
+
+      <div :if={@current_user.is_admin} class="w-full">
+        <.link
+          navigate={~p"/admin"}
+          class={[
+            "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto",
+            if(active_admin(@view),
+              do: "bg-gray-800 text-white",
+              else: "hover:bg-gray-100"
+            )
+          ]}
+        >
+          <.icon
+            name="hero-cog-6-tooth"
+            class={[
+              "w-6 h-6 text-gray-500 shrink-0  transition duration-75",
+              if(active_admin(@view),
+                do: "text-white",
+                else: "group-hover:text-gray-900"
+              )
+            ]}
+          />
+          <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
+            Admin
+          </span>
+        </.link>
+      </div>
+
+      <div class="w-full">
+        <.link
+          href={~p"/users/log_out"}
+          method="delete"
+          class="text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto hover:bg-gray-100"
+        >
+          <.icon
+            name="hero-power"
+            class="w-6 h-6 text-gray-500 shrink-0 transition duration-75 group-hover:text-gray-900"
+          />
+          <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
+            <%= "Logout" %>
+          </span>
+        </.link>
+      </div>
+    </div>
+    """
+  end
+
+  def sidebar2(assigns) do
+    ~H"""
     <div class="flex overflow-hidden bg-white pt-0 transition-width duration-300">
       <div class="fixed z-30 top-5 left-3 p-2 sm:hidden flex">
         <button type="button" class="-m-2.5 p-2.5 text-gray-700 lg:hidden">
