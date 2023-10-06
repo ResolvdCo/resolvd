@@ -6,9 +6,14 @@ defmodule ResolvdWeb.Nav do
 
   def sidebar(assigns) do
     ~H"""
-    <div class="flex flex-col items-center w-16 xl:w-64 h-screen py-8 space-y-4 bg-white border-gray-200 transition-width duration-200">
+    <div class="flex flex-col items-center w-16 xl:w-64 py-8 space-y-4 bg-white transition-width duration-200">
       <a href="#" class="pb-8">
-        <img class="w-auto h-6" src="https://merakiui.com/images/logo.svg" alt="" />
+        <img class="hidden xl:block h-16 w-auto" src={~p"/images/wip-logo.png"} alt="Resolvd" />
+        <img
+          class="block xl:hidden pt-3 h-10 w-auto pb-3 box-content"
+          src={~p"/images/wip-logo-small.png"}
+          alt="Resolvd"
+        />
       </a>
 
       <div class="flex flex-col flex-1 w-full">
@@ -86,7 +91,7 @@ defmodule ResolvdWeb.Nav do
     """
   end
 
-  def sidebar2(assigns) do
+  def sidebar_old(assigns) do
     ~H"""
     <div class="flex overflow-hidden bg-white pt-0 transition-width duration-300">
       <div class="fixed z-30 top-5 left-3 p-2 sm:hidden flex">

@@ -8,6 +8,6 @@ defmodule ResolvdWeb.DashboardLive.Index do
 
   @impl true
   def render(assigns) do
-    ~H"<h2>Dashboard</h2>"
+    ~H"<.header>Dashboard</.header>"
   end
 end

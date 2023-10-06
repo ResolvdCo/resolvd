@@ -1,8 +1,6 @@
-<div>
+<div class="flex h-screen">
   <ResolvdWeb.Nav.sidebar view={@socket.view} current_user={@current_user} />
-
-  <div class="sm:pl-16 xl:pl-64 transition-width duration-300">
-    <!-- <ResolvdWeb.Nav.top current_user={@current_user} /> -->
+  <div class="flex flex-1 h-full transition-width duration-300 overflow-scroll">
     <main class="py-5">
       <div class="px-4 sm:px-6">
         <.flash_group flash={@flash} />
