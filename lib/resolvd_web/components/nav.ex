@@ -95,8 +95,11 @@ defmodule ResolvdWeb.Nav do
 
   def admin_sidebar(assigns) do
     ~H"""
-    <div class="flex flex-col py-5 space-y-4 bg-white w-16 md:w-64 transition-width duration-200 border-r-2 border-slate-100">
-      <h2 class="px-5 pb-8 text-xl font-medium text-gray-800 items-center">Settings</h2>
+    <div class="flex flex-col py-5 space-y-4 bg-white w-16 lg:w-64 transition-width duration-200 border-r-2 border-slate-100">
+      <div class="flex px-5 pb-8 text-xl font-medium text-gray-800">
+        <.icon name="hero-cog-6-tooth" class="shrink-0 w-6 h-7 mr-3" />
+        <span class="hidden mal-3 lg:flex">Settings</span>
+      </div>
 
       <div class="mt-2">
         <div :for={item <- admin_items()} class="w-full">
@@ -120,7 +123,7 @@ defmodule ResolvdWeb.Nav do
                 )
               ]}
             />
-            <span class="hidden pl-3 md:flex flex-1 whitespace-nowrap">
+            <span class="hidden pl-3 lg:flex flex-1 whitespace-nowrap">
               <%= item.label %>
             </span>
           </.link>
