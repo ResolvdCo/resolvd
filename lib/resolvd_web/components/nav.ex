@@ -21,7 +21,7 @@ defmodule ResolvdWeb.Nav do
           <.link
             navigate={item.to}
             class={[
-              "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto",
+              "text-base text-gray-900 font-normal flex items-center p-4 group w-full transition-colors duration-500",
               if(active_path(@view, item.module),
                 do: "bg-gray-800 text-white",
                 else: "hover:bg-gray-100"
@@ -106,7 +106,7 @@ defmodule ResolvdWeb.Nav do
           <.link
             navigate={item.to}
             class={[
-              "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto",
+              "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto transition-colors duration-200",
               if(active_path(@view, item.module),
                 do: "bg-gray-800 text-white",
                 else: "hover:bg-gray-100"

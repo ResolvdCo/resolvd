@@ -108,6 +108,7 @@ defmodule ResolvdWeb.Router do
       live "/conversations", ConversationLive.Index, :index
       live "/conversations/new", ConversationLive.Index, :new
       live "/conversations/:id/edit", ConversationLive.Index, :edit
+      live "/conversations/show/:id", ConversationLive.Index, :show
 
       live "/conversations/:id", ConversationLive.Show, :show
       live "/conversations/:id/show/edit", ConversationLive.Show, :edit
