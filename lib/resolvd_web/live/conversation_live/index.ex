@@ -56,6 +56,11 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   @impl true
+  def handle_info({ResolvdWeb.ConversationLive.MessageComponent, {:saved, message}}, socket) do
+    {:noreply, stream_insert(socket, :messages, message)}
+  end
+
+  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
     {:ok, _} = Conversations.delete_conversation(conversation)

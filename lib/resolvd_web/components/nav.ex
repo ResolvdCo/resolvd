@@ -6,7 +6,7 @@ defmodule ResolvdWeb.Nav do
 
   def sidebar(assigns) do
     ~H"""
-    <div class="flex flex-col items-center w-16 xl:w-64 py-2 space-y-4 bg-white transition-width duration-200 border-r-2 border-slate-100">
+    <div class="flex flex-col items-center w-16 xl:w-56 py-2 space-y-4 bg-white transition-width duration-200 border-r-2 border-slate-100">
       <a href="#" class="pb-2">
         <img class="hidden xl:block h-16 w-auto" src={~p"/images/wip-logo.png"} alt="Resolvd" />
         <img
@@ -95,7 +95,7 @@ defmodule ResolvdWeb.Nav do
 
   def admin_sidebar(assigns) do
     ~H"""
-    <div class="flex flex-col py-5 space-y-4 bg-white w-16 lg:w-64 transition-width duration-200 border-r-2 border-slate-100">
+    <div class="flex flex-col py-5 space-y-4 bg-white w-16 lg:w-56 transition-width duration-200 border-r-2 border-slate-100">
       <div class="flex px-5 pb-8 text-xl font-medium text-gray-800">
         <.icon name="hero-cog-6-tooth" class="shrink-0 w-6 h-7 mr-3" />
         <span class="hidden mal-3 lg:flex">Settings</span>

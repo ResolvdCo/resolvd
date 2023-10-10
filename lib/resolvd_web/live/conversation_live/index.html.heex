@@ -1,17 +1,16 @@
 <div class="flex flex-1 h-full w-full">
   <div class="flex flex-col py-5 space-y-4 bg-white w-56 transition-width duration-200 border-r-2 border-slate-100 shrink-0">
     <div class="flex px-5 pb-8 text-xl font-medium text-gray-800">
-      <.icon name="hero-chat-bubble-left-right" class="shrink-0 w-6 h-6 mr-3" />
+      <!-- <.icon name="hero-chat-bubble-left-right" class="shrink-0 w-6 h-6 mr-3" /> -->
       <span>Conversations</span>
     </div>
-
     <div class="mt-2">
       <div :for={item <- conversation_items()} class="w-full">
         <.link
           navigate={item.to}
           class="text-base text-gray-900 font-normal flex items-center p-4 group w-full w-auto hover:bg-gray-100"
         >
-          <span class="pl-10 flex flex-1 whitespace-nowrap">
+          <span class="pl-2 flex flex-1 whitespace-nowrap">
             <%= item.label %>
           </span>
         </.link>
@@ -19,7 +18,7 @@
     </div>
   </div>
 
-  <div class="flex flex-col py-5 space-y-4 bg-white w-64 transition-width duration-200 border-r-2 border-slate-100 shrink-0">
+  <div class="flex flex-col py-5 space-y-4 bg-white w-72 transition-width duration-200 border-r-2 border-slate-100 shrink-0">
     <div class="flex px-5 pb-8 text-xl font-medium text-gray-800">
       <span>All Conversations</span>
     </div>
@@ -29,7 +28,7 @@
         <.link
           id={dom_id}
           navigate={~p"/conversations/show/#{conversation}"}
-          class="flex items-center w-full pl-5 p-2 transition-colors duration-200 gap-x-2 hover:bg-gray-100 focus:outline-none"
+          class="flex items-center w-full px-5 p-2 transition-colors duration-200 gap-x-2 hover:bg-gray-100 focus:outline-none"
         >
           <img
             class="object-cover w-10 h-10 rounded-full"
