@@ -17,11 +17,11 @@ defmodule ResolvdWeb.Nav do
       </a>
 
       <div class="flex flex-col flex-1 w-full">
-        <div :for={item <- sidebar_items()} class="w-full">
+        <div :for={item <- sidebar_items()}>
           <.link
             navigate={item.to}
             class={[
-              "text-base text-gray-900 font-normal flex items-center p-4 group w-full transition-colors duration-500",
+              "text-base text-gray-900 font-normal flex items-center  p-4 group transition-colors duration-500",
               if(active_path(@view, item.module),
                 do: "bg-gray-800 text-white",
                 else: "hover:bg-gray-100"
@@ -49,7 +49,7 @@ defmodule ResolvdWeb.Nav do
         <.link
           navigate={if @current_user.is_admin, do: ~p"/admin", else: ~p"/users/settings"}
           class={[
-            "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto",
+            "text-base text-gray-900 font-normal flex items-center p-4 group xl:w-auto",
             if(active_admin(@view),
               do: "bg-gray-800 text-white",
               else: "hover:bg-gray-100"
@@ -76,7 +76,7 @@ defmodule ResolvdWeb.Nav do
         <.link
           href={~p"/users/log_out"}
           method="delete"
-          class="text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto hover:bg-gray-100"
+          class="text-base text-gray-900 font-normal flex items-center p-4 group xl:w-auto hover:bg-gray-100"
         >
           <.icon
             name="hero-power"
@@ -102,11 +102,11 @@ defmodule ResolvdWeb.Nav do
       </div>
 
       <div class="mt-2">
-        <div :for={item <- admin_items()} class="w-full">
+        <div :for={item <- admin_items()} class="grow">
           <.link
             navigate={item.to}
             class={[
-              "text-base text-gray-900 font-normal flex items-center p-4 group w-full xl:w-auto transition-colors duration-200",
+              "text-base text-gray-900 font-normal flex items-center p-4 group xl:w-auto transition-colors duration-200",
               if(active_path(@view, item.module),
                 do: "bg-gray-800 text-white",
                 else: "hover:bg-gray-100"

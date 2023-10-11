@@ -1,16 +1,16 @@
-<div class="flex flex-1 h-full w-full">
+<div class="flex flex-1 h-full">
   <div class="flex flex-col py-5 space-y-4 bg-white w-56 transition-width duration-200 border-r-2 border-slate-100 shrink-0">
     <div class="flex px-5 pb-8 text-xl font-medium text-gray-800">
       <!-- <.icon name="hero-chat-bubble-left-right" class="shrink-0 w-6 h-6 mr-3" /> -->
       <span>Conversations</span>
     </div>
     <div class="mt-2">
-      <div :for={item <- conversation_items()} class="w-full">
+      <div :for={item <- conversation_items()}>
         <.link
           navigate={item.to}
-          class="text-base text-gray-900 font-normal flex items-center p-4 group w-full w-auto hover:bg-gray-100"
+          class="text-base text-gray-900 font-normal flex items-center p-4 group grow w-auto hover:bg-gray-100"
         >
-          <span class="pl-2 flex flex-1 whitespace-nowrap">
+          <span class="pl-2 whitespace-nowrap">
             <%= item.label %>
           </span>
         </.link>
@@ -23,12 +23,18 @@
       <span>All Conversations</span>
     </div>
 
-    <div class="mt-2">
+    <div class="mt-2" phx-update="stream" id="conversations">
       <%= for {dom_id, conversation} <- @streams.conversations do %>
         <.link
           id={dom_id}
           navigate={~p"/conversations/show/#{conversation}"}
-          class="flex items-center w-full px-5 p-2 transition-colors duration-200 gap-x-2 hover:bg-gray-100 focus:outline-none"
+          class={[
+            "flex items-center grow p-2 transition-colors duration-200 gap-x-2 focus:outline-none",
+            if(active_conversation?(conversation, @conversation),
+              do: "bg-gray-800 text-white",
+              else: "hover:bg-gray-100"
+            )
+          ]}
         >
           <img
             class="object-cover w-10 h-10 rounded-full"
@@ -37,11 +43,23 @@
           />
 
           <div class="text-left rtl:text-right overflow-hidden">
-            <h1 class="text-sm font-medium text-gray-700 truncate">
+            <h1 class={[
+              "text-sm font-medium truncate",
+              if(active_conversation?(conversation, @conversation),
+                do: "text-gray-100",
+                else: "text-gray-700"
+              )
+            ]}>
               <%= display_name(conversation.customer) %>
             </h1>
 
-            <p class="text-sm text-gray-500 truncate">
+            <p class={[
+              "text-sm truncate",
+              if(active_conversation?(conversation, @conversation),
+                do: "text-gray-300",
+                else: "text-gray-500"
+              )
+            ]}>
               <%= conversation.subject %>
             </p>
           </div>
@@ -51,7 +69,7 @@
   </div>
 
   <%= if not is_nil(@conversation) do %>
-    <div class="flex flex-col h-full overflow-hidden justify-between w-full">
+    <div class="flex flex-col h-full overflow-auto justify-between grow px-10">
       <div class="overflow-scroll">
         <.live_component
           module={ResolvdWeb.ConversationLive.ShowMessage}

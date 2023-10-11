@@ -116,4 +116,8 @@ defmodule ResolvdWeb.ConversationLive.Index do
       true -> "Customer"
     end
   end
+
+  defp active_conversation?(element, conversation) do
+    not is_nil(conversation) and element.id == conversation.id
+  end
 end
