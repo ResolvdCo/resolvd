@@ -14,11 +14,12 @@ defmodule Resolvd.TenantsTest do
           password: "foobar123Iam12chars!"
         })
 
-      assert {:ok, tenant, user} = Tenants.create_tenant(changeset)
+      assert {:ok, user} = Tenants.create_tenant(changeset)
+      assert user.email == "luke@example.com"
+
+      tenant = Tenants.get_tenant_for_user!(user)
       assert tenant.name == "Test Company"
       assert tenant.slug == "test-company"
-
-      assert user.email == "luke@example.com"
     end
   end
 end

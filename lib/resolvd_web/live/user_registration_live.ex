@@ -76,6 +76,8 @@ defmodule ResolvdWeb.UserRegistrationLive do
   def handle_event("save", %{"user" => user_params}, socket) do
     case Tenants.create_tenant(TenantCreation.changeset(%TenantCreation{}, user_params)) do
       {:ok, user} ->
+        Accounts.deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}"))
+
         changeset = Accounts.change_user_registration(user)
         {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
 

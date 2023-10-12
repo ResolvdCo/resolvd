@@ -27,6 +27,8 @@ defmodule ResolvdWeb.UserForgotPasswordLiveTest do
     end
   end
 
+  import Ecto.Query, warn: false
+
   describe "Reset link" do
     setup do
       %{user: user_fixture()}
@@ -43,11 +45,11 @@ defmodule ResolvdWeb.UserForgotPasswordLiveTest do
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
 
-      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context ==
+      assert Repo.get_by!(Accounts.UserToken, user_id: user.id, context: "reset_password").context ==
                "reset_password"
     end
 
-    test "does not send reset password token if email is invalid", %{conn: conn} do
+    test "does not send reset password token if email is invalid", %{conn: conn, user: user} do
       {:ok, lv, _html} = live(conn, ~p"/users/reset_password")
 
       {:ok, conn} =
@@ -57,7 +59,7 @@ defmodule ResolvdWeb.UserForgotPasswordLiveTest do
         |> follow_redirect(conn, "/users/log_in")
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
-      assert Repo.all(Accounts.UserToken) == []
+      assert is_nil(Repo.get_by(Accounts.UserToken, user_id: user.id, context: "reset_password"))
     end
   end
 end

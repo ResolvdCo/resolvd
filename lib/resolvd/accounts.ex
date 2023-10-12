@@ -372,7 +372,8 @@ defmodule Resolvd.Accounts do
          {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user, attrs)) do
       {:ok, user}
     else
-      _ -> :error
+      _ ->
+        :error
     end
   end
 

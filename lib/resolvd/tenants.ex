@@ -37,7 +37,6 @@ defmodule Resolvd.Tenants do
 
     case %Tenant{} |> Tenant.changeset(tenant_params) |> Repo.insert() do
       {:ok, %Tenant{users: [user]}} ->
-        Accounts.deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}"))
         {:ok, user}
 
       {:error, %Ecto.Changeset{changes: %{users: [user]}} = changeset} ->
