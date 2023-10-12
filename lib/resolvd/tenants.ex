@@ -5,7 +5,6 @@ defmodule Resolvd.Tenants do
 
   alias Resolvd.Repo
 
-  alias Resolvd.Accounts
   alias Resolvd.Accounts.User
   alias Resolvd.Tenants.Tenant
   alias Resolvd.Mailboxes.Mailbox
@@ -13,6 +12,7 @@ defmodule Resolvd.Tenants do
   import Ecto.Changeset, only: [get_field: 2]
 
   def get_tenant!(id), do: Repo.get!(Tenant, id)
+  def get_tenant(id), do: Repo.get(Tenant, id)
 
   def get_tenant_from_mailbox!(mailbox_id),
     do: Repo.one!(from(t in Tenant, left_join: m in Mailbox, on: m.id == ^mailbox_id))

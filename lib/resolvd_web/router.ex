@@ -78,19 +78,6 @@ defmodule ResolvdWeb.Router do
     post "/users/log_in", UserSessionController, :create
   end
 
-  scope "/", ResolvdWeb do
-    pipe_through [:browser]
-
-    delete "/users/log_out", UserSessionController, :delete
-
-    live_session :current_user,
-      layout: {ResolvdWeb.Layouts, :auth},
-      on_mount: [{ResolvdWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
-    end
-  end
-
   # App Routes
   scope "/", ResolvdWeb do
     pipe_through [:browser, :require_authenticated_user]
@@ -164,6 +151,19 @@ defmodule ResolvdWeb.Router do
 
       live "/users/:id", UserLive.Show, :show
       live "/users/:id/show/edit", UserLive.Show, :edit
+    end
+  end
+
+  scope "/", ResolvdWeb do
+    pipe_through [:browser]
+
+    delete "/users/log_out", UserSessionController, :delete
+
+    live_session :current_user,
+      layout: {ResolvdWeb.Layouts, :auth},
+      on_mount: [{ResolvdWeb.UserAuth, :mount_current_user}] do
+      live "/users/confirm/:token", UserConfirmationLive, :edit
+      live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
   end
 

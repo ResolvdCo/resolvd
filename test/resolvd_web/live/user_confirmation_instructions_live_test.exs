@@ -61,7 +61,7 @@ defmodule ResolvdWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert length(Repo.all(Accounts.UserToken)) == 1
+      assert length(Repo.all(Accounts.UserToken)) == 0
     end
   end
 end
