@@ -42,9 +42,6 @@ defmodule Resolvd.Accounts.UserNotifier do
   """
   def deliver_invite_instructions(user_email, tenant_name, url) do
     deliver(user_email, "You've been invited to join #{tenant_name} on Resolvd", """
-
-    ==============================
-
     Hi #{user_email},
 
     You've been invited you to join #{tenant_name} on Resolvd.
@@ -52,8 +49,6 @@ defmodule Resolvd.Accounts.UserNotifier do
     To accept this invite click the URL below to setup your password:
 
     #{url}
-
-    ==============================
     """)
   end
 

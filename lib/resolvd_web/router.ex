@@ -68,7 +68,7 @@ defmodule ResolvdWeb.Router do
     live_session :redirect_if_user_is_authenticated,
       layout: {ResolvdWeb.Layouts, :auth},
       on_mount: [{ResolvdWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      # live "/", UserRegistrationLive, :new
+      live "/users/invite/:token", UserInviteLive
       live "/users/register", UserRegistrationLive, :new
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
