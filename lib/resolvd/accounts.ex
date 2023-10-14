@@ -25,10 +25,27 @@ defmodule Resolvd.Accounts do
 
     case %User{tenant_id: tenant.id} |> User.invite_changeset(params) |> Repo.insert() do
       {:ok, user} ->
-        deliver_user_invite(user, tenant, &url(~p"/users/confirm/#{&1}"))
+        deliver_user_invite(user, tenant, &url(~p"/users/invite/#{&1}"))
+
+        user
 
       error ->
         error
+    end
+  end
+
+  def accept_invite(%User{} = user, attrs) do
+    changeset =
+      user
+      |> User.password_changeset(attrs)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, changeset)
+    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
 
@@ -135,6 +152,12 @@ defmodule Resolvd.Accounts do
   def update_user_profile(%User{} = user, attrs) do
     user
     |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def update_user_admin(%User{} = user, is_admin) do
+    user
+    |> User.admin_changeset(%{is_admin: is_admin})
     |> Repo.update()
   end
 

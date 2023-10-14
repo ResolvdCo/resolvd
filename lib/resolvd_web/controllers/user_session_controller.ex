@@ -14,6 +14,12 @@ defmodule ResolvdWeb.UserSessionController do
     |> create(params, "Password updated successfully!")
   end
 
+  def create(conn, %{"_action" => "accepted_invite"} = params) do
+    conn
+    |> put_session(:user_return_to, ~p"/")
+    |> create(params, "Welcome to Resolvd!")
+  end
+
   def create(conn, params) do
     create(conn, params, "Welcome back!")
   end

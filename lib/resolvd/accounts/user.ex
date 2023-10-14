@@ -192,4 +192,9 @@ defmodule Resolvd.Accounts.User do
     |> cast(attrs, [:name, :is_admin])
     |> validate_name()
   end
+
+  def admin_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:is_admin])
+  end
 end
