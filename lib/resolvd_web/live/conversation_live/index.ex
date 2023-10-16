@@ -4,21 +4,31 @@ defmodule ResolvdWeb.ConversationLive.Index do
   alias Resolvd.Conversations
   alias Resolvd.Conversations.Conversation
   alias Resolvd.Conversations.Message
-  alias Resolvd.Customers.Customer
+  alias Resolvd.Accounts
+  alias Resolvd.Mailboxes
 
   alias Resolvd.Repo
 
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
-     stream(
-       socket,
+     socket
+     |> stream(
        :conversations,
-       Conversations.list_conversations(socket.assigns.current_user) |> Repo.preload([:customer])
-     )}
+       Conversations.list_conversations(socket.assigns.current_user)
+       |> Repo.preload([:customer])
+     )
+     |> assign(:users, Accounts.list_users(socket.assigns.current_user))
+     |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))}
   end
 
   @impl true
+  def handle_params(%{"id" => id}, _url, socket) do
+    conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
+
+    {:noreply, switch_to_conversation(socket, conversation)}
+  end
+
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -41,15 +51,6 @@ defmodule ResolvdWeb.ConversationLive.Index do
     |> assign(:conversation, nil)
   end
 
-  defp apply_action(socket, :show, %{"id" => id}) do
-    conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
-
-    socket
-    |> assign(:conversation, conversation)
-    |> assign(:message, %Message{})
-    |> stream(:messages, conversation.messages)
-  end
-
   @impl true
   def handle_info({ResolvdWeb.ConversationLive.FormComponent, {:saved, conversation}}, socket) do
     {:noreply, stream_insert(socket, :conversations, conversation)}
@@ -68,56 +69,42 @@ defmodule ResolvdWeb.ConversationLive.Index do
     {:noreply, stream_delete(socket, :conversations, conversation)}
   end
 
-  defp conversation_items do
-    [
-      %{
-        to: ~p"/conversations",
-        label: gettext("All"),
-        module: ResolvdWeb.ConversationLive
-      },
-      %{
-        to: ~p"/conversations",
-        label: gettext("Assigned to me"),
-        module: ResolvdWeb.ConversationLive
-      },
-      %{
-        to: ~p"/conversations",
-        label: gettext("Unassigned"),
-        module: ResolvdWeb.ConversationLive
-      },
-      %{
-        to: ~p"/conversations",
-        label: gettext("Prioritized"),
-        module: ResolvdWeb.ConversationLive
-      },
-      %{
-        to: ~p"/conversations",
-        label: gettext("On hold"),
-        module: ResolvdWeb.ConversationLive
-      },
-      %{
-        to: ~p"/conversations",
-        label: gettext("Resolved"),
-        module: ResolvdWeb.Admin.MailboxLive
-      }
-    ]
-  end
+  # FIXME: Swiching conversation quickly when the previous request hasn't
+  # completed doesn't remove the highlight from the old conversation
+  defp switch_to_conversation(socket, conversation) do
+    # Update new conversation and old conversation in the stream when:
+    # - Conversation stream is empty
+    # - Old conversation exists
+    # - Old conversation is different from new conversation
+    with [] <- socket.assigns.streams.conversations.inserts,
+         %Conversation{} = old_conversation when old_conversation != conversation <-
+           Map.get(socket.assigns, :conversation) do
+      socket
+      |> stream_insert(:conversations, conversation)
+      |> stream_insert(:conversations, old_conversation)
+      |> apply_assigns(conversation)
+    else
+      # Return the socket if conversation doesn't change
+      ^conversation ->
+        socket
 
-  defp gravatar_avatar(email) do
-    hash = :crypto.hash(:md5, email) |> Base.encode16(case: :lower)
-    "https://www.gravatar.com/avatar/#{hash}"
-  end
+      # Insert new conversation when old conversation doesn't exist
+      nil ->
+        socket
+        |> stream_insert(:conversations, conversation)
+        |> apply_assigns(conversation)
 
-  defp display_name(%Customer{} = customer) do
-    cond do
-      not is_nil(customer.name) -> customer.name
-      not is_nil(customer.email) -> customer.email
-      not is_nil(customer.phone) -> customer.phone
-      true -> "Customer"
+      # New mount
+      _ ->
+        apply_assigns(socket, conversation)
     end
   end
 
-  defp active_conversation?(element, conversation) do
-    not is_nil(conversation) and element.id == conversation.id
+  defp apply_assigns(socket, conversation) do
+    socket
+    |> assign(:conversation, conversation)
+    |> assign(:message, %Message{})
+    |> assign(:page_title, conversation.subject)
+    |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)
   end
 end

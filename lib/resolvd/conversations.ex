@@ -58,8 +58,8 @@ defmodule Resolvd.Conversations do
     |> Repo.one!()
     |> Repo.preload([
       :customer,
-      :user,
-      messages: from(Message, order_by: [asc: :inserted_at], preload: [:customer, :user])
+      :user
+      # messages: from(Message, order_by: [asc: :inserted_at], preload: [:customer, :user])
     ])
   end
 

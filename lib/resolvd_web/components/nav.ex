@@ -6,85 +6,71 @@ defmodule ResolvdWeb.Nav do
 
   def sidebar(assigns) do
     ~H"""
-    <div class="flex flex-col items-center w-16 xl:w-56 py-2 space-y-4 bg-white transition-width duration-200 border-r-2 border-slate-100">
-      <a href="#" class="pb-2">
-        <img class="hidden xl:block h-16 w-auto" src={~p"/images/wip-logo.png"} alt="Resolvd" />
+    <div class="flex flex-col items-center py-4 flex-shrink-0 w-20 bg-gray-800 rounded-3xl text-gray-200 m-2 mr-0">
+      <a href="#" class="flex items-center justify-center h-12 w-12">
         <img
-          class="block xl:hidden pt-3 h-10 w-auto pb-3 box-content"
+          class="pt-3 h-8 w-auto pb-3 box-content"
           src={~p"/images/wip-logo-small.png"}
           alt="Resolvd"
         />
       </a>
-
-      <div class="flex flex-col flex-1 w-full">
-        <div :for={item <- sidebar_items()}>
+      <ul class="flex flex-col space-y-2 mt-12">
+        <li :for={item <- sidebar_items()}>
           <.link
             navigate={item.to}
             class={[
-              "text-base text-gray-900 font-normal flex items-center  p-4 group transition-colors duration-500",
+              "flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl",
               if(active_path(@view, item.module),
-                do: "bg-gray-800 text-white",
-                else: "hover:bg-gray-100"
+                do: "bg-gray-500 text-white",
+                else: "hover:bg-gray-700"
               )
             ]}
           >
             <.icon
               name={item.icon}
               class={[
-                "w-6 h-6 text-gray-500 shrink-0 transition duration-75",
+                "w-6 h-6 shrink-0 transition-colors duration-200",
                 if(active_path(@view, item.module),
                   do: "text-white",
-                  else: "group-hover:text-gray-900"
+                  else: "group-hover:text-gray-100"
                 )
               ]}
             />
-            <span class="hidden pl-3 xl:flex flex-1 whitespace-nowrap">
-              <%= item.label %>
-            </span>
           </.link>
-        </div>
-      </div>
-
-      <div class="w-full">
+        </li>
+      </ul>
+      <div class="mt-auto space-y-2">
         <.link
           navigate={if @current_user.is_admin, do: ~p"/admin", else: ~p"/users/settings"}
           class={[
-            "text-base text-gray-900 font-normal flex items-center p-4 group xl:w-auto",
+            "flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl",
             if(active_admin(@view),
-              do: "bg-gray-800 text-white",
-              else: "hover:bg-gray-100"
+              do: "bg-gray-500 text-white",
+              else: "hover:bg-gray-700"
             )
           ]}
         >
           <.icon
             name="hero-cog-6-tooth"
             class={[
-              "w-6 h-6 text-gray-500 shrink-0  transition duration-75",
+              "w-6 h-6 shrink-0 transition-colors duration-200",
               if(active_admin(@view),
                 do: "text-white",
-                else: "group-hover:text-gray-900"
+                else: "group-hover:text-gray-100"
               )
             ]}
           />
-          <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-            Settings
-          </span>
         </.link>
-      </div>
 
-      <div class="w-full pb-10">
         <.link
           href={~p"/users/log_out"}
           method="delete"
-          class="text-base text-gray-900 font-normal flex items-center p-4 group xl:w-auto hover:bg-gray-100"
+          class="flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl hover:bg-gray-700"
         >
           <.icon
             name="hero-power"
-            class="w-6 h-6 text-gray-500 shrink-0 transition duration-75 group-hover:text-gray-900"
+            class="w-6 h-6 shrink-0 transition-colors duration-200 group-hover:text-gray-100"
           />
-          <span class="hidden ml-3 xl:flex flex-1 whitespace-nowrap">
-            <%= "Logout" %>
-          </span>
         </.link>
       </div>
     </div>
@@ -133,30 +119,30 @@ defmodule ResolvdWeb.Nav do
     """
   end
 
-  defp open_sidebar(js \\ %JS{}) do
-    js
-    |> toggle_sidebar()
-    |> JS.add_class("pl-16", to: "#content")
-  end
+  # defp open_sidebar(js \\ %JS{}) do
+  #   js
+  #   |> toggle_sidebar()
+  #   |> JS.add_class("pl-16", to: "#content")
+  # end
 
-  defp close_sidebar(js \\ %JS{}) do
-    js
-    |> toggle_sidebar()
-    |> JS.remove_class("pl-16", to: "#content")
-  end
+  # defp close_sidebar(js \\ %JS{}) do
+  #   js
+  #   |> toggle_sidebar()
+  #   |> JS.remove_class("pl-16", to: "#content")
+  # end
 
-  defp toggle_sidebar(js) do
-    js
-    |> JS.toggle(
-      to: "#sidebar",
-      display: "flex",
-      in: {"ease-in-out duration-200", "-translate-x-16", "translate-x-0"},
-      out: {"ease-in-out duration-200", "translate-x-0", "-translate-x-16"},
-      time: 200
-    )
-    |> JS.toggle(to: "#sidebar-open-button")
-    |> JS.toggle(to: "#sidebar-close-button")
-  end
+  # defp toggle_sidebar(js) do
+  #   js
+  #   |> JS.toggle(
+  #     to: "#sidebar",
+  #     display: "flex",
+  #     in: {"ease-in-out duration-200", "-translate-x-16", "translate-x-0"},
+  #     out: {"ease-in-out duration-200", "translate-x-0", "-translate-x-16"},
+  #     time: 200
+  #   )
+  #   |> JS.toggle(to: "#sidebar-open-button")
+  #   |> JS.toggle(to: "#sidebar-close-button")
+  # end
 
   defp sidebar_items do
     [
