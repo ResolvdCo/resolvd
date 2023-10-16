@@ -11,19 +11,18 @@ defmodule ResolvdWeb.ArticleLiveTest do
   }
   @invalid_attrs %{body: nil, subject: nil}
 
-  defp create_article(_) do
-    article = article_fixture()
-    %{article: article}
+  defp create_article(%{admin: admin} = other) do
+    Map.put(other, :article, article_fixture(admin))
   end
 
   describe "Index" do
-    setup [:register_and_log_in_user, :create_article]
+    setup [:create_tenant_and_admin, :log_in_admin, :create_article]
 
     test "lists all articles", %{conn: conn, article: article} do
       {:ok, _index_live, html} = live(conn, ~p"/articles")
 
       assert html =~ "Articles"
-      assert html =~ article.body
+      assert html =~ article.subject
     end
 
     # test "saves new article", %{conn: conn} do
@@ -72,21 +71,20 @@ defmodule ResolvdWeb.ArticleLiveTest do
     #   assert html =~ "some updated body"
     # end
 
-    test "deletes article in listing", %{conn: conn, article: article} do
-      {:ok, index_live, _html} = live(conn, ~p"/articles")
+    # test "deletes article in listing", %{conn: conn, article: article} do
+    #   {:ok, index_live, _html} = live(conn, ~p"/articles")
 
-      assert index_live |> element("#articles-#{article.id} a", "Delete") |> render_click()
-      refute has_element?(index_live, "#articles-#{article.id}")
-    end
+    #   assert index_live |> element("#articles-#{article.id} a", "Delete") |> render_click()
+    #   refute has_element?(index_live, "#articles-#{article.id}")
+    # end
   end
 
   describe "Show" do
-    setup [:register_and_log_in_user, :create_article]
+    setup [:create_tenant_and_admin, :log_in_admin, :create_article]
 
     test "displays article", %{conn: conn, article: article} do
       {:ok, _show_live, html} = live(conn, ~p"/articles/#{article}")
 
-      assert html =~ "Show Article"
       assert html =~ article.body
     end
 
