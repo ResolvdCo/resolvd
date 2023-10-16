@@ -6,7 +6,7 @@ defmodule ResolvdWeb.Admin.CategoryLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :categories, Articles.list_categories())}
+    {:ok, stream(socket, :categories, Articles.list_categories(socket.assigns.current_user))}
   end
 
   @impl true

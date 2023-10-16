@@ -54,12 +54,12 @@ defmodule ResolvdWeb.ConnCase do
 
       setup :create_tenant_and_admin
   """
-  def create_tenant_and_admin(%{conn: conn}) do
+  def create_tenant_and_admin(attrs) do
     user = Resolvd.AccountsFixtures.user_fixture()
     {:ok, user} = Resolvd.Accounts.update_user_admin(user, true)
     tenant = Resolvd.Tenants.get_tenant_for_user!(user)
 
-    %{conn: conn, admin: user, tenant: tenant}
+    attrs |> Map.put(:admin, user) |> Map.put(:tenant, tenant)
   end
 
   @doc """

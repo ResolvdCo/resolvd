@@ -4,23 +4,22 @@ defmodule ResolvdWeb.Admin.CategoryLiveTest do
   import Phoenix.LiveViewTest
   import Resolvd.ArticlesFixtures
 
-  @create_attrs %{slug: "some slug", title: "some title"}
-  @update_attrs %{slug: "some updated slug", title: "some updated title"}
-  @invalid_attrs %{slug: nil, title: nil}
+  @create_attrs %{title: "some title"}
+  @update_attrs %{title: "some updated title"}
+  @invalid_attrs %{title: nil}
 
-  defp create_category(_) do
-    category = category_fixture()
-    %{category: category}
+  defp create_category(%{admin: admin} = other) do
+    Map.put(other, :category, category_fixture(admin))
   end
 
   describe "Index" do
-    setup [:register_and_log_in_user, :create_category]
+    setup [:create_tenant_and_admin, :log_in_admin, :create_category]
 
     test "lists all categories", %{conn: conn, category: category} do
       {:ok, _index_live, html} = live(conn, ~p"/admin/categories")
 
       assert html =~ "Categories"
-      assert html =~ category.slug
+      assert html =~ category.title
     end
 
     test "saves new category", %{conn: conn} do
@@ -43,7 +42,7 @@ defmodule ResolvdWeb.Admin.CategoryLiveTest do
 
       html = render(index_live)
       assert html =~ "Category created successfully"
-      assert html =~ "some slug"
+      assert html =~ "some title"
     end
 
     test "updates category in listing", %{conn: conn, category: category} do
@@ -66,7 +65,7 @@ defmodule ResolvdWeb.Admin.CategoryLiveTest do
 
       html = render(index_live)
       assert html =~ "Category updated successfully"
-      assert html =~ "some updated slug"
+      assert html =~ "some updated title"
     end
 
     test "deletes category in listing", %{conn: conn, category: category} do
@@ -78,13 +77,13 @@ defmodule ResolvdWeb.Admin.CategoryLiveTest do
   end
 
   describe "Show" do
-    setup [:register_and_log_in_user, :create_category]
+    setup [:create_tenant_and_admin, :log_in_admin, :create_category]
 
     test "displays category", %{conn: conn, category: category} do
       {:ok, _show_live, html} = live(conn, ~p"/admin/categories/#{category}")
 
       assert html =~ "Show Category"
-      assert html =~ category.slug
+      assert html =~ category.title
     end
 
     test "updates category within modal", %{conn: conn, category: category} do
@@ -107,7 +106,7 @@ defmodule ResolvdWeb.Admin.CategoryLiveTest do
 
       html = render(show_live)
       assert html =~ "Category updated successfully"
-      assert html =~ "some updated slug"
+      assert html =~ "some updated title"
     end
   end
 end

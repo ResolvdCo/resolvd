@@ -15,31 +15,31 @@ defmodule ResolvdWeb.DashboardLive.Index do
         <div class="border-b border-b-gray-900/10 lg:border-t lg:border-t-gray-900/5">
           <dl class="mx-auto grid max-w-7xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:px-2 xl:px-0">
             <div class="flex items-baseline flex-wrap justify-between gap-y-2 gap-x-4 border-t border-gray-900/5 px-4 py-10 sm:px-6 lg:border-t-0 xl:px-8">
-              <dt class="text-sm font-medium leading-6 text-gray-500">Revenue</dt>
+              <dt class="text-sm font-medium leading-6 text-gray-500">Some Metrics</dt>
               <dd class="text-xs font-medium text-gray-700">+4.75%</dd>
               <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                $405,091.00
+                404
               </dd>
             </div>
             <div class="flex items-baseline flex-wrap justify-between gap-y-2 gap-x-4 border-t border-gray-900/5 px-4 py-10 sm:px-6 lg:border-t-0 xl:px-8 sm:border-l">
-              <dt class="text-sm font-medium leading-6 text-gray-500">Overdue invoices</dt>
+              <dt class="text-sm font-medium leading-6 text-gray-500">That We May</dt>
               <dd class="text-xs font-medium text-rose-600">+54.02%</dd>
               <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                $12,787.00
+                3 hours
               </dd>
             </div>
             <div class="flex items-baseline flex-wrap justify-between gap-y-2 gap-x-4 border-t border-gray-900/5 px-4 py-10 sm:px-6 lg:border-t-0 xl:px-8 lg:border-l">
-              <dt class="text-sm font-medium leading-6 text-gray-500">Outstanding invoices</dt>
+              <dt class="text-sm font-medium leading-6 text-gray-500">Want To Show</dt>
               <dd class="text-xs font-medium text-gray-700">-1.39%</dd>
               <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                $245,988.00
+                245
               </dd>
             </div>
             <div class="flex items-baseline flex-wrap justify-between gap-y-2 gap-x-4 border-t border-gray-900/5 px-4 py-10 sm:px-6 lg:border-t-0 xl:px-8 sm:border-l">
-              <dt class="text-sm font-medium leading-6 text-gray-500">Expenses</dt>
+              <dt class="text-sm font-medium leading-6 text-gray-500">To Our Users</dt>
               <dd class="text-xs font-medium text-rose-600">+10.18%</dd>
               <dd class="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-                $30,156.00
+                30
               </dd>
             </div>
           </dl>

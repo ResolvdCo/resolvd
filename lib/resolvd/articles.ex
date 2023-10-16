@@ -6,6 +6,7 @@ defmodule Resolvd.Articles do
   import Ecto.Query, warn: false
   alias Resolvd.Repo
 
+  alias Resolvd.Accounts.User
   alias Resolvd.Articles.Category
 
   @doc """
@@ -13,12 +14,20 @@ defmodule Resolvd.Articles do
 
   ## Examples
 
-      iex> list_categories()
+      iex> list_categories(user)
       [%Category{}, ...]
 
   """
-  def list_categories do
-    Repo.all(Category)
+  def list_categories(%User{} = user) do
+    from(c in Category, order_by: [asc: c.title])
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+  end
+
+  def list_categories_for_select(%User{} = user) do
+    list_categories(user)
+    |> Enum.map(&{&1.title, &1.id})
+    |> List.insert_at(0, {"Select One", nil})
   end
 
   @doc """
@@ -42,15 +51,17 @@ defmodule Resolvd.Articles do
 
   ## Examples
 
-      iex> create_category(%{field: value})
+      iex> create_category(user, %{field: value})
       {:ok, %Category{}}
 
-      iex> create_category(%{field: bad_value})
+      iex> create_category(user, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_category(attrs \\ %{}) do
-    %Category{}
+  def create_category(%User{} = user, attrs \\ %{}) do
+    %Category{
+      tenant_id: user.tenant_id
+    }
     |> Category.changeset(attrs)
     |> Repo.insert()
   end
@@ -113,8 +124,11 @@ defmodule Resolvd.Articles do
       [%Article{}, ...]
 
   """
-  def list_articles do
-    Repo.all(Article)
+  def list_articles(%User{} = user) do
+    from(a in Article, order_by: [asc: a.subject])
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+    |> Repo.preload(:category)
   end
 
   @doc """
@@ -145,8 +159,10 @@ defmodule Resolvd.Articles do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_article(attrs \\ %{}) do
-    %Article{}
+  def create_article(%User{} = user, attrs \\ %{}) do
+    %Article{
+      tenant_id: user.tenant_id
+    }
     |> Article.changeset(attrs)
     |> Repo.insert()
   end
@@ -163,7 +179,7 @@ defmodule Resolvd.Articles do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_article(%Article{} = article, attrs) do
+  def update_article(%User{} = _user, %Article{} = article, attrs) do
     article
     |> Article.changeset(attrs)
     |> Repo.update()

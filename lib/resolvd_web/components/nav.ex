@@ -477,7 +477,7 @@ defmodule ResolvdWeb.Nav do
               />
               <span class="hidden lg:flex lg:items-center">
                 <span class="ml-4 text-sm font-semibold leading-6 text-gray-900" aria-hidden="true">
-                  Luke Strickland
+                  <%= @current_user.name %>
                 </span>
                 <svg
                   class="ml-2 h-5 w-5 text-gray-400"

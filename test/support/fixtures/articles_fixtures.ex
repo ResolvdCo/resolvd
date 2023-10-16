@@ -7,14 +7,15 @@ defmodule Resolvd.ArticlesFixtures do
   @doc """
   Generate a category.
   """
-  def category_fixture(attrs \\ %{}) do
-    {:ok, category} =
+  def category_fixture(user, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         slug: "some slug",
         title: "some title"
       })
-      |> Resolvd.Articles.create_category()
+
+    {:ok, category} = Resolvd.Articles.create_category(user, attrs)
 
     category
   end
@@ -22,15 +23,16 @@ defmodule Resolvd.ArticlesFixtures do
   @doc """
   Generate a article.
   """
-  def article_fixture(attrs \\ %{}) do
-    {:ok, article} =
+  def article_fixture(user, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         body: "some body",
         slug: "some slug",
         subject: "some subject"
       })
-      |> Resolvd.Articles.create_article()
+
+    {:ok, article} = Resolvd.Articles.create_article(user, attrs)
 
     article
   end

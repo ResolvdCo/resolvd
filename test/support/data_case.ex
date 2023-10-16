@@ -24,6 +24,8 @@ defmodule Resolvd.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Resolvd.DataCase
+
+      import ResolvdWeb.ConnCase, only: [create_tenant_and_admin: 1]
     end
   end
 

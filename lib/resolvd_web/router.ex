@@ -114,11 +114,10 @@ defmodule ResolvdWeb.Router do
       live "/customers/:id/show/edit", CustomerLive.Show, :edit
 
       live "/articles", ArticleLive.Index, :index
-      live "/articles/new", ArticleLive.Index, :new
-      live "/articles/:id/edit", ArticleLive.Index, :edit
+      live "/articles/new", ArticleLive.Edit, :new
+      live "/articles/:id/edit", ArticleLive.Edit, :edit
 
       live "/articles/:id", ArticleLive.Show, :show
-      live "/articles/:id/show/edit", ArticleLive.Show, :edit
     end
   end
 
