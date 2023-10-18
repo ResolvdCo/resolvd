@@ -20,7 +20,6 @@ defmodule ResolvdWeb.Admin.CategoryLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:title]} type="text" label="Title" />
-        <.input field={@form[:slug]} type="text" label="Slug" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Category</.button>
         </:actions>
@@ -69,7 +68,7 @@ defmodule ResolvdWeb.Admin.CategoryLive.FormComponent do
   end
 
   defp save_category(socket, :new, category_params) do
-    case Articles.create_category(category_params) do
+    case Articles.create_category(socket.assigns.current_user, category_params) do
       {:ok, category} ->
         notify_parent({:saved, category})
 

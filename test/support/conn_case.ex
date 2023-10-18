@@ -50,6 +50,31 @@ defmodule ResolvdWeb.ConnCase do
   end
 
   @doc """
+  Setup helper that creates a new tenant & associated admin. It does not login the admin.
+
+      setup :create_tenant_and_admin
+  """
+  def create_tenant_and_admin(attrs) do
+    user = Resolvd.AccountsFixtures.user_fixture()
+    {:ok, user} = Resolvd.Accounts.update_user_admin(user, true)
+    tenant = Resolvd.Tenants.get_tenant_for_user!(user)
+
+    attrs |> Map.put(:admin, user) |> Map.put(:tenant, tenant)
+  end
+
+  @doc """
+  Logs in the admin that was created with create_tenant_and_admin
+
+      setup [:create_tenant_and_admin, :log_in_admin]
+
+  It stores an updated connection and a registered user in the
+  test context.
+  """
+  def log_in_admin(%{conn: conn, admin: user}) do
+    %{conn: log_in_user(conn, user), user: user}
+  end
+
+  @doc """
   Logs the given `user` into the `conn`.
 
   It returns an updated `conn`.

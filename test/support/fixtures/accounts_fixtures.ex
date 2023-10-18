@@ -43,12 +43,12 @@ defmodule Resolvd.AccountsFixtures do
 
     attrs = valid_tenant_creation_attributes(attrs)
 
-    {:ok, tenant, _user} =
+    {:ok, user} =
       Resolvd.Tenants.create_tenant(
         Resolvd.Tenants.TenantCreation.changeset(%Resolvd.Tenants.TenantCreation{}, attrs)
       )
 
-    tenant
+    Resolvd.Tenants.get_tenant_for_user!(user)
   end
 
   def extract_user_token(fun) do

@@ -46,7 +46,7 @@ defmodule ResolvdWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      refute Repo.get_by(Accounts.UserToken, user_id: user.id)
+      refute Repo.get_by(Accounts.UserToken, user_id: user.id, context: "confirm")
     end
 
     test "does not send confirmation token if email is invalid", %{conn: conn} do
@@ -61,7 +61,7 @@ defmodule ResolvdWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.all(Accounts.UserToken) == []
+      assert length(Repo.all(Accounts.UserToken)) == 0
     end
   end
 end

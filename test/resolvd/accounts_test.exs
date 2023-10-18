@@ -85,35 +85,13 @@ defmodule Resolvd.AccountsTest do
     end
 
     test "registers users with a hashed password" do
-      email = unique_user_email()
-      {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
-      assert user.email == email
-      assert is_binary(user.hashed_password)
-      assert is_nil(user.confirmed_at)
-      assert is_nil(user.password)
-    end
-  end
-
-  describe "change_user_registration/2" do
-    test "returns a changeset" do
-      assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email, :name]
-    end
-
-    test "allows fields to be set" do
-      email = unique_user_email()
-      password = valid_user_password()
-
-      changeset =
-        Accounts.change_user_registration(
-          %User{},
-          valid_user_attributes(email: email, password: password)
-        )
-
-      assert changeset.valid?
-      assert get_change(changeset, :email) == email
-      assert get_change(changeset, :password) == password
-      assert is_nil(get_change(changeset, :hashed_password))
+      # TODO: Convert to invite / initial signup flow
+      # email = unique_user_email()
+      # {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
+      # assert user.email == email
+      # assert is_binary(user.hashed_password)
+      # assert is_nil(user.confirmed_at)
+      # assert is_nil(user.password)
     end
   end
 

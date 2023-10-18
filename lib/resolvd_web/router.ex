@@ -68,7 +68,7 @@ defmodule ResolvdWeb.Router do
     live_session :redirect_if_user_is_authenticated,
       layout: {ResolvdWeb.Layouts, :auth},
       on_mount: [{ResolvdWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      # live "/", UserRegistrationLive, :new
+      live "/users/invite/:token", UserInviteLive
       live "/users/register", UserRegistrationLive, :new
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
@@ -76,19 +76,6 @@ defmodule ResolvdWeb.Router do
     end
 
     post "/users/log_in", UserSessionController, :create
-  end
-
-  scope "/", ResolvdWeb do
-    pipe_through [:browser]
-
-    delete "/users/log_out", UserSessionController, :delete
-
-    live_session :current_user,
-      layout: {ResolvdWeb.Layouts, :auth},
-      on_mount: [{ResolvdWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
-    end
   end
 
   # App Routes
@@ -127,11 +114,10 @@ defmodule ResolvdWeb.Router do
       live "/customers/:id/show/edit", CustomerLive.Show, :edit
 
       live "/articles", ArticleLive.Index, :index
-      live "/articles/new", ArticleLive.Index, :new
-      live "/articles/:id/edit", ArticleLive.Index, :edit
+      live "/articles/new", ArticleLive.Edit, :new
+      live "/articles/:id/edit", ArticleLive.Edit, :edit
 
       live "/articles/:id", ArticleLive.Show, :show
-      live "/articles/:id/show/edit", ArticleLive.Show, :edit
     end
   end
 
@@ -164,6 +150,19 @@ defmodule ResolvdWeb.Router do
 
       live "/users/:id", UserLive.Show, :show
       live "/users/:id/show/edit", UserLive.Show, :edit
+    end
+  end
+
+  scope "/", ResolvdWeb do
+    pipe_through [:browser]
+
+    delete "/users/log_out", UserSessionController, :delete
+
+    live_session :current_user,
+      layout: {ResolvdWeb.Layouts, :auth},
+      on_mount: [{ResolvdWeb.UserAuth, :mount_current_user}] do
+      live "/users/confirm/:token", UserConfirmationLive, :edit
+      live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
   end
 
