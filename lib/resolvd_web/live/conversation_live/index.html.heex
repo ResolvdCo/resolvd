@@ -1,47 +1,40 @@
-<.header>
-  Conversations
-  <:actions>
-    <.link patch={~p"/conversations/new"}>
-      <.button>New Conversation</.button>
-    </.link>
-  </:actions>
-</.header>
-
-<.table
-  id="conversations"
-  rows={@streams.conversations}
-  row_click={fn {_id, conversation} -> JS.navigate(~p"/conversations/#{conversation}") end}
->
-  <:col :let={{_id, conversation}} label="Subject"><%= conversation.subject %></:col>
-  <:action :let={{_id, conversation}}>
-    <div class="sr-only">
-      <.link navigate={~p"/conversations/#{conversation}"}>Show</.link>
+<div class="flex flex-shrink-0 w-96 p-4 overflow-hidden rounded-3xl my-2 pb-0 bg-gray-100">
+  <div class="flex flex-col h-full pt-4 w-full">
+    <div class="flex items-center">
+      <div class="flex items-center">
+        <div class="text-xl font-semibold">Conversations</div>
+        <div class="hidden flex items-center justify-center ml-2 text-xs h-5 w-5 text-white bg-red-500 rounded-full font-medium">
+          9+
+        </div>
+      </div>
+      <div class="hidden ml-auto">
+        <button class="flex items-center justify-center h-7 w-7 bg-gray-200 text-gray-500 rounded-full">
+          <.icon name="hero-magnifying-glass" class="h-4 w-4" />
+        </button>
+      </div>
     </div>
-    <.link patch={~p"/conversations/#{conversation}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, conversation}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: conversation.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.link>
-  </:action>
-</.table>
 
-<.modal
-  :if={@live_action in [:new, :edit]}
-  id="conversation-modal"
-  show
-  on_cancel={JS.patch(~p"/conversations")}
->
-  <.live_component
-    module={ResolvdWeb.ConversationLive.ConversationComponent}
-    id={@conversation.id || :new}
-    title={@page_title}
-    action={@live_action}
-    conversation={@conversation}
-    patch={~p"/conversations"}
-    current_user={@current_user}
-  />
-</.modal>
+    <ResolvdWeb.ConversationLive.Components.conversation_categories />
+
+    <div class="mt-5 pb-2">
+      <div class="text-xs text-gray-400 font-semibold">Mailbox One</div>
+    </div>
+    <ResolvdWeb.ConversationLive.Components.conversation_list
+      conversations={@streams.conversations}
+      conversation={@conversation}
+    />
+  </div>
+</div>
+
+<.live_component
+  :if={not is_nil(@conversation)}
+  module={ResolvdWeb.ConversationLive.ShowMessage}
+  title={@page_title}
+  id="show_conversation"
+  users={@users}
+  mailboxes={@mailboxes}
+  message={@message}
+  current_user={@current_user}
+  conversation={@conversation}
+  messages={@streams.messages}
+/>

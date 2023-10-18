@@ -3,9 +3,11 @@ defmodule ResolvdWeb.Admin.IndexLive do
 
   def render(assigns) do
     ~H"""
-    <.header>
-      Admin
-    </.header>
+    <div class="p-10">
+      <.header>
+        Admin
+      </.header>
+    </div>
     """
   end
 end

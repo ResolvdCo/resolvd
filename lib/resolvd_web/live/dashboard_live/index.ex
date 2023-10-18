@@ -9,7 +9,7 @@ defmodule ResolvdWeb.DashboardLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <main>
+    <div class="flex flex-col grow justify-center">
       <div class="relative isolate overflow-hidden">
         <!-- Stats -->
         <div class="border-b border-b-gray-900/10 lg:border-t lg:border-t-gray-900/5">
@@ -552,7 +552,7 @@ defmodule ResolvdWeb.DashboardLive.Index do
           </div>
         </div>
       </div>
-    </main>
+    </div>
     """
   end
 end

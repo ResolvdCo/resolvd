@@ -1,14 +1,8 @@
-<div>
+<!-- component -->
+<div class="flex h-[100dvh] text-gray-800">
   <ResolvdWeb.Nav.sidebar view={@socket.view} current_user={@current_user} />
-
-  <div class="lg:pl-72">
-    <ResolvdWeb.Nav.top current_user={@current_user} />
-
-    <main class="py-10">
-      <div class="px-4 sm:px-6 lg:px-8">
-        <.flash_group flash={@flash} />
-        <%= @inner_content %>
-      </div>
-    </main>
-  </div>
+  <main class="flex w-full overflow-hidden">
+    <.flash_group flash={@flash} />
+    <%= @inner_content %>
+  </main>
 </div>

@@ -41,3 +41,7 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+window.addEventListener("phx:input", event => {
+  event.target.style.height = '10px';
+  event.target.style.height = `${event.target.scrollHeight + 2}px`;
+})

@@ -1,57 +1,61 @@
-<.header>
-  Mailboxes
-  <:actions>
-    <.link patch={~p"/admin/mailboxes/new"}>
-      <.button>Add Mailbox</.button>
-    </.link>
-  </:actions>
-</.header>
+<div class="flex grow justify-center p-10">
+  <div class="flex flex-col w-auto min-w-[50%]">
+    <.header>
+      Mailboxes
+      <:actions>
+        <.link patch={~p"/admin/mailboxes/new"}>
+          <.button>Add Mailbox</.button>
+        </.link>
+      </:actions>
+    </.header>
 
-<.table
-  id="mailboxes"
-  rows={@streams.mailboxes}
-  row_click={fn {_id, mailbox} -> JS.navigate(~p"/admin/mailboxes/#{mailbox}") end}
->
-  <:col :let={{_id, mailbox}} label="Name"><%= mailbox.name %></:col>
-  <:col :let={{_id, mailbox}} label="From"><%= mailbox.from %></:col>
-  <:col :let={{_id, mailbox}} label="Email Address"><%= mailbox.email_address %></:col>
-  <:col :let={{_id, mailbox}} label="Inbound type"><%= mailbox.inbound_type %></:col>
-  <:col :let={{_id, mailbox}} label="Inbound config">
-    <%= Jason.encode!(mailbox.inbound_config) %>
-  </:col>
-  <:col :let={{_id, mailbox}} label="Outbound type"><%= mailbox.outbound_type %></:col>
-  <:col :let={{_id, mailbox}} label="Outbound config">
-    <%= Jason.encode!(mailbox.outbound_config) %>
-  </:col>
-  <:action :let={{_id, mailbox}}>
-    <div class="sr-only">
-      <.link navigate={~p"/admin/mailboxes/#{mailbox}"}>Show</.link>
-    </div>
-    <.link patch={~p"/admin/mailboxes/#{mailbox}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, mailbox}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: mailbox.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
+    <.table
+      id="mailboxes"
+      rows={@streams.mailboxes}
+      row_click={fn {_id, mailbox} -> JS.navigate(~p"/admin/mailboxes/#{mailbox}") end}
     >
-      Delete
-    </.link>
-  </:action>
-</.table>
+      <:col :let={{_id, mailbox}} label="Name"><%= mailbox.name %></:col>
+      <:col :let={{_id, mailbox}} label="From"><%= mailbox.from %></:col>
+      <:col :let={{_id, mailbox}} label="Email Address"><%= mailbox.email_address %></:col>
+      <:col :let={{_id, mailbox}} label="Inbound type"><%= mailbox.inbound_type %></:col>
+      <:col :let={{_id, mailbox}} label="Inbound config">
+        <%= Jason.encode!(mailbox.inbound_config) %>
+      </:col>
+      <:col :let={{_id, mailbox}} label="Outbound type"><%= mailbox.outbound_type %></:col>
+      <:col :let={{_id, mailbox}} label="Outbound config">
+        <%= Jason.encode!(mailbox.outbound_config) %>
+      </:col>
+      <:action :let={{_id, mailbox}}>
+        <div class="sr-only">
+          <.link navigate={~p"/admin/mailboxes/#{mailbox}"}>Show</.link>
+        </div>
+        <.link patch={~p"/admin/mailboxes/#{mailbox}/edit"}>Edit</.link>
+      </:action>
+      <:action :let={{id, mailbox}}>
+        <.link
+          phx-click={JS.push("delete", value: %{id: mailbox.id}) |> hide("##{id}")}
+          data-confirm="Are you sure?"
+        >
+          Delete
+        </.link>
+      </:action>
+    </.table>
 
-<.modal
-  :if={@live_action in [:new, :edit]}
-  id="mailbox-modal"
-  show
-  on_cancel={JS.patch(~p"/admin/mailboxes")}
->
-  <.live_component
-    module={ResolvdWeb.Admin.MailboxLive.FormComponent}
-    id={@mailbox.id || :new}
-    title={@page_title}
-    action={@live_action}
-    mailbox={@mailbox}
-    patch={~p"/admin/mailboxes"}
-    current_user={@current_user}
-  />
-</.modal>
+    <.modal
+      :if={@live_action in [:new, :edit]}
+      id="mailbox-modal"
+      show
+      on_cancel={JS.patch(~p"/admin/mailboxes")}
+    >
+      <.live_component
+        module={ResolvdWeb.Admin.MailboxLive.FormComponent}
+        id={@mailbox.id || :new}
+        title={@page_title}
+        action={@live_action}
+        mailbox={@mailbox}
+        patch={~p"/admin/mailboxes"}
+        current_user={@current_user}
+      />
+    </.modal>
+  </div>
+</div>
