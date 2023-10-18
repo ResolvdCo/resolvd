@@ -18,6 +18,7 @@ defmodule ResolvdWeb.Nav do
         <li :for={item <- sidebar_items()}>
           <.link
             navigate={item.to}
+            aria-label={item.label}
             class={[
               "flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl",
               if(active_path(@view, item.module),
@@ -42,6 +43,7 @@ defmodule ResolvdWeb.Nav do
       <div class="mt-auto space-y-2">
         <.link
           navigate={if @current_user.is_admin, do: ~p"/admin", else: ~p"/users/settings"}
+          aria-label="Settings"
           class={[
             "flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl",
             if(active_admin(@view),
@@ -64,6 +66,7 @@ defmodule ResolvdWeb.Nav do
 
         <.link
           href={~p"/users/log_out"}
+          aria-label="Log out"
           method="delete"
           class="flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl hover:bg-gray-700"
         >
