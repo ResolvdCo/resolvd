@@ -33,144 +33,150 @@ defmodule ResolvdWeb.Admin.BillingLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <%= if @current_tenant.plan_status == :canceling do %>
-        <.warning>
-          <p>
-            Your subscription to Resolvd will expire on <%= format_datetime(
-              @current_tenant.plan_expires
-            ) %>. Resolvd will continue to store all of your historical data and accept new conversations, but you will not be able to respond to customers.
-          </p>
-          <br />
-          <p>
-            You can continue your subscription by clicking the Continue Subscription button below.
-          </p>
-        </.warning>
-      <% end %>
-
-      <div class="mx-auto mt-8 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-10 lg:mx-0 lg:flex lg:max-w-none">
-        <div class="p-8 sm:p-10 lg:flex-auto">
-          <h3 class="text-2xl font-bold tracking-tight text-gray-900">Introductory Pricing</h3>
-          <p class="mt-6 text-base leading-7 text-gray-600">
-            Our limited time introductory pricing for customers before our official launch. Once we officially hit the Go button we'll switch to support seat based pricing.
-          </p>
-          <div class="mt-10 flex items-center gap-x-4">
-            <h4 class="flex-none text-sm font-semibold leading-6 text-indigo-600">
-              What’s included
-            </h4>
-            <div class="h-px flex-auto bg-gray-100"></div>
-          </div>
-          <ul
-            role="list"
-            class="mt-8 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-6"
-          >
-            <li class="flex gap-x-3">
-              <svg
-                class="h-6 w-5 flex-none text-indigo-600"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              Unlimited conversations
-            </li>
-            <li class="flex gap-x-3">
-              <svg
-                class="h-6 w-5 flex-none text-indigo-600"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              Knowledge Base
-            </li>
-            <li class="flex gap-x-3">
-              <svg
-                class="h-6 w-5 flex-none text-indigo-600"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              Unlimited support users
-            </li>
-            <li class="flex gap-x-3">
-              <svg
-                class="h-6 w-5 flex-none text-indigo-600"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              Dedicated onboarding
-            </li>
-          </ul>
-        </div>
-        <div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0">
-          <div class="rounded-2xl bg-gray-50 py-10 text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
-            <div class="mx-auto max-w-xs px-8">
-              <%= if @current_tenant.plan_status == :active do %>
-                <p class="text-base font-semibold text-gray-600">Your Current Plan</p>
-              <% else %>
-                <p class="text-base font-semibold text-gray-600">Simple Monthly Pricing</p>
-              <% end %>
-              <p class="mt-6 flex items-baseline justify-center gap-x-2">
-                <span class="text-5xl font-bold tracking-tight text-gray-900">$30</span>
-                <span class="text-sm font-semibold leading-6 tracking-wide text-gray-600">USD</span>
+    <div class="flex grow justify-center p-10">
+      <div class="flex flex-col w-auto">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <%= if @current_tenant.plan_status == :canceling do %>
+            <.warning>
+              <p>
+                Your subscription to Resolvd will expire on <%= format_datetime(
+                  @current_tenant.plan_expires
+                ) %>. Resolvd will continue to store all of your historical data and accept new conversations, but you will not be able to respond to customers.
               </p>
-
-              <.convert_button
-                plan_status={@current_tenant.plan_status}
-                plan_renewal={@current_tenant.plan_renewal}
-              />
-
-              <p class="mt-6 text-xs leading-5 text-gray-600">
-                <%= if @current_tenant.plan_status == :active do %>
-                  Renews on <%= format_datetime(@current_tenant.plan_renewal) %>
-                <% else %>
-                  Invoices and receipts available for easy company reimbursement
-                <% end %>
+              <br />
+              <p>
+                You can continue your subscription by clicking the Continue Subscription button below.
               </p>
+            </.warning>
+          <% end %>
+
+          <div class="mx-auto mt-8 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-10 lg:mx-0 lg:flex lg:max-w-none">
+            <div class="p-8 sm:p-10 lg:flex-auto">
+              <h3 class="text-2xl font-bold tracking-tight text-gray-900">Introductory Pricing</h3>
+              <p class="mt-6 text-base leading-7 text-gray-600">
+                Our limited time introductory pricing for customers before our official launch. Once we officially hit the Go button we'll switch to support seat based pricing.
+              </p>
+              <div class="mt-10 flex items-center gap-x-4">
+                <h4 class="flex-none text-sm font-semibold leading-6 text-indigo-600">
+                  What’s included
+                </h4>
+                <div class="h-px flex-auto bg-gray-100"></div>
+              </div>
+              <ul
+                role="list"
+                class="mt-8 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-6"
+              >
+                <li class="flex gap-x-3">
+                  <svg
+                    class="h-6 w-5 flex-none text-indigo-600"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Unlimited conversations
+                </li>
+                <li class="flex gap-x-3">
+                  <svg
+                    class="h-6 w-5 flex-none text-indigo-600"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Knowledge Base
+                </li>
+                <li class="flex gap-x-3">
+                  <svg
+                    class="h-6 w-5 flex-none text-indigo-600"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Unlimited support users
+                </li>
+                <li class="flex gap-x-3">
+                  <svg
+                    class="h-6 w-5 flex-none text-indigo-600"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Dedicated onboarding
+                </li>
+              </ul>
+            </div>
+            <div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0">
+              <div class="rounded-2xl bg-gray-50 py-10 text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
+                <div class="mx-auto max-w-xs px-8">
+                  <%= if @current_tenant.plan_status == :active do %>
+                    <p class="text-base font-semibold text-gray-600">Your Current Plan</p>
+                  <% else %>
+                    <p class="text-base font-semibold text-gray-600">Simple Monthly Pricing</p>
+                  <% end %>
+                  <p class="mt-6 flex items-baseline justify-center gap-x-2">
+                    <span class="text-5xl font-bold tracking-tight text-gray-900">$30</span>
+                    <span class="text-sm font-semibold leading-6 tracking-wide text-gray-600">
+                      USD
+                    </span>
+                  </p>
+
+                  <.convert_button
+                    plan_status={@current_tenant.plan_status}
+                    plan_renewal={@current_tenant.plan_renewal}
+                  />
+
+                  <p class="mt-6 text-xs leading-5 text-gray-600">
+                    <%= if @current_tenant.plan_status == :active do %>
+                      Renews on <%= format_datetime(@current_tenant.plan_renewal) %>
+                    <% else %>
+                      Invoices and receipts available for easy company reimbursement
+                    <% end %>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        <h2 class="text-lg font-semibold leading-7 text-zinc-800 mt-10">
+          Payment History
+        </h2>
+        <.table id="payment-history" rows={@payment_history}>
+          <:col :let={payment} label="Date / Time"><%= format_datetime(payment.created) %></:col>
+          <:col :let={_payment} label="Plan">Introductory Pricing</:col>
+          <:col :let={payment} label="Amount">$<%= format_price(payment.amount) %></:col>
+          <:col :let={payment} label="Status"><%= String.capitalize(payment.status) %></:col>
+          <:action :let={payment}>
+            <%= unless payment.status == "failed" do %>
+              <.link href={payment.receipt_url} target="_blank">Receipt</.link>
+            <% end %>
+          </:action>
+        </.table>
       </div>
     </div>
-
-    <h2 class="text-lg font-semibold leading-7 text-zinc-800 mt-10">
-      Payment History
-    </h2>
-    <.table id="payment-history" rows={@payment_history}>
-      <:col :let={payment} label="Date / Time"><%= format_datetime(payment.created) %></:col>
-      <:col :let={_payment} label="Plan">Introductory Pricing</:col>
-      <:col :let={payment} label="Amount">$<%= format_price(payment.amount) %></:col>
-      <:col :let={payment} label="Status"><%= String.capitalize(payment.status) %></:col>
-      <:action :let={payment}>
-        <%= unless payment.status == "failed" do %>
-          <.link href={payment.receipt_url} target="_blank">Receipt</.link>
-        <% end %>
-      </:action>
-    </.table>
     """
   end
 

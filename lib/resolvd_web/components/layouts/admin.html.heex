@@ -1,13 +1,11 @@
 <div class="flex h-[100dvh] transition-width duration-200">
   <ResolvdWeb.Nav.sidebar view={@socket.view} current_user={@current_user} />
   <div class="flex flex-1 h-full transition-width duration-300 overflow-hidden">
-    <main>
-      <div class="flex flex-1 h-full">
-        <ResolvdWeb.Nav.admin_sidebar view={@socket.view} />
-        <div class="flex flex-1 overflow-scroll">
-          <.flash_group flash={@flash} />
-          <%= @inner_content %>
-        </div>
+    <main class="flex flex-1">
+      <ResolvdWeb.Nav.admin_sidebar view={@socket.view} />
+      <div class="flex flex-1 overflow-scroll">
+        <.flash_group flash={@flash} />
+        <%= @inner_content %>
       </div>
     </main>
   </div>
