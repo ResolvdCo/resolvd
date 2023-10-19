@@ -9,7 +9,16 @@ defmodule ResolvdWeb.ConversationLive.ShowMessage do
         conversation={@conversation}
         mailboxes={@mailboxes}
         users={@users}
-      />
+      >
+        <.live_component
+          module={ResolvdWeb.ConversationLive.HeaderForm}
+          id="header_form"
+          users={@users}
+          mailboxes={@mailboxes}
+          conversation={@conversation}
+          current_user={@current_user}
+        />
+      </ResolvdWeb.ConversationLive.Components.header>
 
       <div class="flex h-full overflow-hidden">
         <div class="flex flex-col w-full">

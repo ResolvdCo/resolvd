@@ -4,13 +4,14 @@ defmodule Resolvd.Conversations do
   """
 
   import Ecto.Query, warn: false
-  alias Resolvd.Tenants
   alias Resolvd.Repo
 
+  alias Resolvd.Tenants
   alias Resolvd.Tenants.Tenant
   alias Resolvd.Accounts.User
   alias Resolvd.Conversations.Conversation
   alias Resolvd.Conversations.Message
+  alias Resolvd.Mailboxes.Mailbox
 
   @doc """
   Returns the list of conversations.
@@ -117,6 +118,33 @@ defmodule Resolvd.Conversations do
     end
 
     {:ok, get_conversation!(conversation.id)}
+  end
+
+  @doc """
+  Updates a conversation's associated mailbox
+  """
+  def update_conversation_mailbox(%Conversation{} = conversation, %Mailbox{} = mailbox) do
+    conversation
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_change(:mailbox_id, mailbox.id)
+    |> Repo.update!()
+  end
+
+  @doc """
+  Updates a conversation's associated user
+  """
+  def update_conversation_user(%Conversation{} = conversation, %User{} = user) do
+    conversation
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_change(:user_id, user.id)
+    |> Repo.update!()
+  end
+
+  def update_conversation_user(%Conversation{} = conversation, nil) do
+    conversation
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_change(:user_id, nil)
+    |> Repo.update!()
   end
 
   @doc """
@@ -256,7 +284,7 @@ defmodule Resolvd.Conversations do
         nil
     end
 
-    creation
+    {creation, conversation}
   end
 
   def get_probable_in_reply_to_for_conversation(%Conversation{} = conversation) do
