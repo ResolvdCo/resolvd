@@ -185,7 +185,6 @@ defmodule ResolvdWeb.ConversationLive.Components do
   end
 
   attr :messages, :any, required: true
-  attr :conversation, :map, required: true
 
   def messages(assigns) do
     ~H"""
@@ -193,12 +192,12 @@ defmodule ResolvdWeb.ConversationLive.Components do
       <div class="h-full w-full overflow-y-auto">
         <div class="grid grid-cols-12 gap-y-2 py-4" id="messages" phx-update="stream">
           <%= for {dom_id, message} <- @messages do %>
-            <%= if is_nil(message.user_id) do %>
+            <%= if is_nil(message.user) do %>
               <div class="col-start-1 col-end-8 p-3 rounded-lg" id={dom_id}>
                 <div class="flex flex-row items-center">
                   <img
                     class="object-cover w-10 h-10 rounded-full"
-                    src={gravatar_avatar(@conversation.customer.email)}
+                    src={gravatar_avatar(message.customer.email)}
                     alt=""
                   />
                   <div class="relative ml-3 text-sm bg-blue-50 py-2 px-4 shadow rounded-xl">
@@ -216,7 +215,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
                 <div class="flex items-center justify-start flex-row-reverse">
                   <img
                     class="object-cover w-10 h-10 rounded-full"
-                    src={gravatar_avatar(@conversation.user.email)}
+                    src={gravatar_avatar(message.user.email)}
                     alt=""
                   />
                   <div class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl">

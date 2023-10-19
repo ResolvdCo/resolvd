@@ -13,10 +13,7 @@ defmodule ResolvdWeb.ConversationLive.ShowMessage do
 
       <div class="flex h-full overflow-hidden">
         <div class="flex flex-col w-full">
-          <ResolvdWeb.ConversationLive.Components.messages
-            messages={@messages}
-            conversation={@conversation}
-          />
+          <ResolvdWeb.ConversationLive.Components.messages messages={@messages} />
 
           <.live_component
             module={ResolvdWeb.ConversationLive.MessageComponent}
