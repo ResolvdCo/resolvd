@@ -76,6 +76,10 @@ defmodule ResolvdWeb.Admin.MailboxLive.Show do
     {:noreply, assign(socket, :mailbox_running, mailbox_running)}
   end
 
+  def handle_info({ResolvdWeb.Admin.MailboxLive.FormComponent, {:saved, mailbox}}, socket) do
+    {:noreply, assign(socket, :mailbox, mailbox)}
+  end
+
   defp page_title(:show), do: "Show Mailbox"
   defp page_title(:edit), do: "Edit Mailbox"
 end
