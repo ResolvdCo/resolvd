@@ -80,10 +80,8 @@ defmodule ResolvdWeb.ConversationLive.ConversationComponent do
          "send_email" => send_customer_email,
          "customer_email" => customer_email
        }) do
-    tenant = Resolvd.Tenants.get_tenant_for_user!(socket.assigns.current_user)
-
     case Conversations.create_conversation(
-           tenant,
+           socket.assigns.current_user,
            customer_email,
            subject,
            body,

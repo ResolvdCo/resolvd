@@ -7,7 +7,6 @@ defmodule Resolvd.Conversations do
   alias Resolvd.Repo
 
   alias Resolvd.Tenants
-  alias Resolvd.Tenants.Tenant
   alias Resolvd.Accounts.User
   alias Resolvd.Conversations.Conversation
   alias Resolvd.Conversations.Message
@@ -77,20 +76,25 @@ defmodule Resolvd.Conversations do
 
   """
   def create_conversation(
-        %Tenant{} = tenant,
+        %User{} = user,
         customer_email,
         subject,
         body,
         notify_customer \\ false
       ) do
+    tenant = Resolvd.Tenants.get_tenant_for_user!(user)
     customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, customer_email)
     message_id = to_string(:smtp_util.generate_message_id())
+
+    # FIXME: Accept mailbox from the user creating the conversation
+    mailbox = Resolvd.Mailboxes.get_any_mailbox!(user)
 
     {:ok, conversation} =
       %Conversation{tenant: tenant, customer: customer}
       |> Conversation.changeset(%{
         subject: subject
       })
+      |> Ecto.Changeset.put_assoc(:mailbox, mailbox)
       |> Repo.insert()
 
     %Message{
@@ -247,7 +251,7 @@ defmodule Resolvd.Conversations do
   def create_message(%Conversation{} = conversation, %User{} = user, attrs \\ %{}) do
     # Email message ID
     message_id = to_string(:smtp_util.generate_message_id())
-    in_reply_to = get_probable_in_reply_to_for_conversation(conversation) |> dbg()
+    in_reply_to = get_probable_in_reply_to_for_conversation(conversation)
 
     creation =
       %Message{

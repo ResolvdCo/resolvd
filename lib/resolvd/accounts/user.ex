@@ -13,7 +13,7 @@ defmodule Resolvd.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
 
-    field :is_admin, :boolean
+    field :is_admin, :boolean, default: false
 
     timestamps()
   end
