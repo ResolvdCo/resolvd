@@ -193,7 +193,10 @@ defmodule ResolvdWeb.ConversationLive.Components do
         </div>
       </div>
 
-      <div class="flex flex-col rounded-lg shadow mx-2 p-2 gap-y-1 bg-white oveflow-hidden">
+      <div
+        class="flex flex-col rounded-lg shadow mx-2 p-2 gap-y-1 bg-white oveflow-hidden"
+        id="conversation-details"
+      >
         <h1 class="font-normal text-md truncate pb-2 pl-2">Conversation Details</h1>
         <div class="flex items-center space-x-2 pl-2">
           <span class="font-medium text-sm">Status: </span>
