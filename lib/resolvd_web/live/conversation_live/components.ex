@@ -94,6 +94,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
   attr :conversation, :map, required: true
   attr :mailboxes, :any, required: true
   attr :users, :any, required: true
+  slot :inner_block, required: true
 
   def header(assigns) do
     ~H"""
@@ -114,78 +115,13 @@ defmodule ResolvdWeb.ConversationLive.Components do
         </div>
       </div>
       <div>
-        <ul class="flex flex-row items-center space-x-2">
-          <li>
-            <div class="relative">
-              <select id="mailbox" class="pl-8 text-sm rounded-lg border-white shadow">
-                <%= for mailbox <- @mailboxes do %>
-                  <%= if mailbox.id == @conversation.mailbox_id do %>
-                    <option id={"mailboxes-#{mailbox.id}"} selected>
-                      <%= mailbox.name %>
-                    </option>
-                  <% else %>
-                    <option id={"mailboxes-#{mailbox.id}"}>
-                      <%= mailbox.name %>
-                    </option>
-                  <% end %>
-                <% end %>
-              </select>
-              <.icon name="hero-envelope" class="absolute top-2 left-2" />
-            </div>
-          </li>
-
-          <li>
-            <div class="relative">
-              <select id="user" class="pl-8 text-sm rounded-lg border-white shadow">
-                <option id="none">Not assigned</option>
-                <%= for user <- @users do %>
-                  <%= if user.id == @conversation.user_id do %>
-                    <option id={"users-#{user.id}"} selected>
-                      <%= user.name %>
-                    </option>
-                  <% else %>
-                    <option id={"users-#{user.id}"}>
-                      <%= user.name %>
-                    </option>
-                  <% end %>
-                <% end %>
-              </select>
-              <.icon name="hero-user" class="absolute top-2 left-2" />
-            </div>
-          </li>
-
-          <li>
-            <a
-              href="#"
-              class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 h-10 w-10 rounded-full"
-            >
-              <.icon name="hero-star" />
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 h-10 w-10 rounded-full"
-            >
-              <.icon name="hero-check" />
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 h-10 w-10 rounded-full"
-            >
-              <.icon name="hero-trash" />
-            </a>
-          </li>
-        </ul>
+        <%= render_slot(@inner_block) %>
       </div>
     </div>
     """
   end
 
   attr :messages, :any, required: true
-  attr :conversation, :map, required: true
 
   def messages(assigns) do
     ~H"""
@@ -193,17 +129,17 @@ defmodule ResolvdWeb.ConversationLive.Components do
       <div class="h-full w-full overflow-y-auto">
         <div class="grid grid-cols-12 gap-y-2 py-4" id="messages" phx-update="stream">
           <%= for {dom_id, message} <- @messages do %>
-            <%= if is_nil(message.user_id) do %>
+            <%= if is_nil(message.user) do %>
               <div class="col-start-1 col-end-8 p-3 rounded-lg" id={dom_id}>
                 <div class="flex flex-row items-center">
                   <img
                     class="object-cover w-10 h-10 rounded-full"
-                    src={gravatar_avatar(@conversation.customer.email)}
+                    src={gravatar_avatar(message.customer.email)}
                     alt=""
                   />
                   <div class="relative ml-3 text-sm bg-blue-50 py-2 px-4 shadow rounded-xl">
                     <div><%= message_body(message) %></div>
-                    <div class="absolute text-xs bottom-0 left-0 -mb-5 ml-2 text-gray-500">
+                    <div class="absolute text-xs bottom-0 left-0 -mb-5 ml-2 text-gray-500 whitespace-nowrap">
                       <%= message.inserted_at
                       |> Timex.format("{relative}", :relative)
                       |> elem(1) %>
@@ -216,12 +152,12 @@ defmodule ResolvdWeb.ConversationLive.Components do
                 <div class="flex items-center justify-start flex-row-reverse">
                   <img
                     class="object-cover w-10 h-10 rounded-full"
-                    src={gravatar_avatar(@conversation.user.email)}
+                    src={gravatar_avatar(message.user.email)}
                     alt=""
                   />
                   <div class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl">
                     <div><%= message_body(message) %></div>
-                    <div class="absolute text-xs bottom-0 right-0 -mb-5 mr-2 text-gray-500">
+                    <div class="absolute text-xs bottom-0 right-0 -mb-5 mr-2 text-gray-500 whitespace-nowrap">
                       <%= message.inserted_at
                       |> Timex.format("{relative}", :relative)
                       |> elem(1) %>
@@ -257,7 +193,10 @@ defmodule ResolvdWeb.ConversationLive.Components do
         </div>
       </div>
 
-      <div class="flex flex-col rounded-lg shadow mx-2 p-2 gap-y-1 bg-white oveflow-hidden">
+      <div
+        class="flex flex-col rounded-lg shadow mx-2 p-2 gap-y-1 bg-white oveflow-hidden"
+        id="conversation-details"
+      >
         <h1 class="font-normal text-md truncate pb-2 pl-2">Conversation Details</h1>
         <div class="flex items-center space-x-2 pl-2">
           <span class="font-medium text-sm">Status: </span>
@@ -321,6 +260,14 @@ defmodule ResolvdWeb.ConversationLive.Components do
     """
   end
 
+  attr :email, :string, required: true
+
+  def profile_picture(assigns) do
+    ~H"""
+    <img class="object-cover w-10 h-10 rounded-full" src={gravatar_avatar(@email)} alt="" />
+    """
+  end
+
   defp conversation_items do
     [
       %{
@@ -360,7 +307,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
     "https://www.gravatar.com/avatar/#{hash}"
   end
 
-  defp display_name(%Customer{} = customer) do
+  def display_name(%Customer{} = customer) do
     cond do
       not is_nil(customer.name) -> customer.name
       not is_nil(customer.email) -> customer.email

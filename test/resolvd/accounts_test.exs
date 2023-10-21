@@ -478,6 +478,18 @@ defmodule Resolvd.AccountsTest do
     end
   end
 
+  describe "add more users" do
+    setup do
+      admin = user_fixture()
+      %{admin: admin, user: user_fixture(admin)}
+    end
+
+    test "added user is not admin", %{admin: admin, user: user} do
+      assert admin.is_admin == true
+      assert user.is_admin == false
+    end
+  end
+
   describe "inspect/2 for the User module" do
     test "does not include password" do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""

@@ -11,8 +11,10 @@ defmodule Resolvd.Mailboxes do
   end
 
   def send_customer_email(%Mailbox{} = mailbox, %Swoosh.Email{} = email) do
+    mail_config = Application.get_env(:resolvd, Resolvd.Mailboxes, adapter: Swoosh.Adapters.SMTP)
+
     config = [
-      adapter: Swoosh.Adapters.SMTP,
+      adapter: Keyword.fetch!(mail_config, :adapter),
       relay: mailbox.outbound_config.server,
       username: mailbox.outbound_config.username,
       password: mailbox.outbound_config.password,
@@ -109,6 +111,16 @@ defmodule Resolvd.Mailboxes do
     Mailbox
     |> Bodyguard.scope(user)
     |> where(id: ^id)
+    |> Repo.one()
+  end
+
+  @doc """
+  Gets any one mailbox at random.
+  """
+  def get_any_mailbox!(%User{} = user) do
+    Mailbox
+    |> Bodyguard.scope(user)
+    |> limit(1)
     |> Repo.one()
   end
 

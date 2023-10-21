@@ -107,14 +107,12 @@ defmodule ResolvdWeb.ConversationLive.MessageComponent do
            socket.assigns.current_user,
            message_params
          ) do
-      {:ok, message} ->
-        notify_parent({:saved, message})
+      {{:ok, message}, conversation} ->
+        notify_parent({:saved, message, conversation})
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Message created successfully")}
+        {:noreply, socket |> put_flash(:info, "Message created successfully")}
 
-      {:error, %Ecto.Changeset{} = changeset} ->
+      {{:error, %Ecto.Changeset{} = changeset}, _conversation} ->
         {:noreply, assign_form(socket, changeset)}
     end
   end

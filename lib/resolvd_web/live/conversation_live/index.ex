@@ -57,8 +57,29 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   @impl true
-  def handle_info({ResolvdWeb.ConversationLive.MessageComponent, {:saved, message}}, socket) do
-    {:noreply, stream_insert(socket, :messages, message)}
+  def handle_info(
+        {ResolvdWeb.ConversationLive.MessageComponent, {:saved, message, conversation}},
+        socket
+      ) do
+    {:noreply, socket |> stream_insert(:messages, message) |> assign(:conversation, conversation)}
+  end
+
+  @impl true
+  def handle_info(
+        {ResolvdWeb.ConversationLive.HeaderForm, {:updated_mailbox, conversation}},
+        socket
+      ) do
+    {:noreply, assign(socket, :conversation, conversation)}
+  end
+
+  @impl true
+  def handle_info({ResolvdWeb.ConversationLive.HeaderForm, {:updated_user, conversation}}, socket) do
+    {:noreply, assign(socket, :conversation, conversation)}
+  end
+
+  @impl true
+  def handle_info({ResolvdWeb.ConversationLive.HeaderForm, {:unimplemented, event}}, socket) do
+    {:noreply, put_flash(socket, :error, "Event: #{event} in not implemented yet")}
   end
 
   @impl true

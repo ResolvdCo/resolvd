@@ -4,13 +4,13 @@ defmodule Resolvd.Conversations do
   """
 
   import Ecto.Query, warn: false
-  alias Resolvd.Tenants
   alias Resolvd.Repo
 
-  alias Resolvd.Tenants.Tenant
+  alias Resolvd.Tenants
   alias Resolvd.Accounts.User
   alias Resolvd.Conversations.Conversation
   alias Resolvd.Conversations.Message
+  alias Resolvd.Mailboxes.Mailbox
 
   @doc """
   Returns the list of conversations.
@@ -76,20 +76,25 @@ defmodule Resolvd.Conversations do
 
   """
   def create_conversation(
-        %Tenant{} = tenant,
+        %User{} = user,
         customer_email,
         subject,
         body,
         notify_customer \\ false
       ) do
+    tenant = Resolvd.Tenants.get_tenant_for_user!(user)
     customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, customer_email)
     message_id = to_string(:smtp_util.generate_message_id())
+
+    # FIXME: Accept mailbox from the user creating the conversation
+    mailbox = Resolvd.Mailboxes.get_any_mailbox!(user)
 
     {:ok, conversation} =
       %Conversation{tenant: tenant, customer: customer}
       |> Conversation.changeset(%{
         subject: subject
       })
+      |> Ecto.Changeset.put_assoc(:mailbox, mailbox)
       |> Repo.insert()
 
     %Message{
@@ -117,6 +122,33 @@ defmodule Resolvd.Conversations do
     end
 
     {:ok, get_conversation!(conversation.id)}
+  end
+
+  @doc """
+  Updates a conversation's associated mailbox
+  """
+  def update_conversation_mailbox(%Conversation{} = conversation, %Mailbox{} = mailbox) do
+    conversation
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_change(:mailbox_id, mailbox.id)
+    |> Repo.update!()
+  end
+
+  @doc """
+  Updates a conversation's associated user
+  """
+  def update_conversation_user(%Conversation{} = conversation, %User{} = user) do
+    conversation
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_change(:user_id, user.id)
+    |> Repo.update!()
+  end
+
+  def update_conversation_user(%Conversation{} = conversation, nil) do
+    conversation
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_change(:user_id, nil)
+    |> Repo.update!()
   end
 
   @doc """
@@ -219,7 +251,7 @@ defmodule Resolvd.Conversations do
   def create_message(%Conversation{} = conversation, %User{} = user, attrs \\ %{}) do
     # Email message ID
     message_id = to_string(:smtp_util.generate_message_id())
-    in_reply_to = get_probable_in_reply_to_for_conversation(conversation) |> dbg()
+    in_reply_to = get_probable_in_reply_to_for_conversation(conversation)
 
     creation =
       %Message{
@@ -256,7 +288,7 @@ defmodule Resolvd.Conversations do
         nil
     end
 
-    creation
+    {creation, conversation}
   end
 
   def get_probable_in_reply_to_for_conversation(%Conversation{} = conversation) do
