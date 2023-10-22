@@ -6,7 +6,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   def conversation_categories(assigns) do
     ~H"""
-    <div class="mt-5">
+    <div class="mt-5 px-4">
       <ul class="flex flex-row items-baseline justify-between">
         <li :for={item <- conversation_items()}>
           <.link
@@ -30,16 +30,12 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   def conversation_list(assigns) do
     ~H"""
-    <div class="h-full overflow-hidden relative -ml-4 -mr-10 px-4 shadow-inner">
-      <div
-        class="flex flex-col h-full w-full overflow-y-auto -mx-4"
-        id="conversations"
-        phx-update="stream"
-      >
+    <div class="h-full overflow-hidden relative shadow-inner">
+      <div class="flex flex-col h-full w-full overflow-y-auto " id="conversations" phx-update="stream">
         <%= for {dom_id, conversation} <- @conversations do %>
           <.link
             id={dom_id}
-            patch={~p"/conversations?id=#{conversation}"}
+            patch={~p"/conversations/#{conversation}"}
             class={[
               "flex flex-row items-center p-4 border-l-2",
               if(active_conversation?(conversation, @conversation),

@@ -72,6 +72,9 @@ config :resolvd, ResolvdWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :resolvd, dev_routes: true
 
+# Include HEEx debug annotations as HTML comments in rendered markup
+config :phoenix_live_view, :debug_heex_annotations, true
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 

@@ -9,11 +9,12 @@ import Config
 
 config :resolvd,
   ecto_repos: [Resolvd.Repo],
-  generators: [binary_id: true]
+  generators: [binary_id: true, timestamp_type: :utc_datetime]
 
 # Configures the endpoint
 config :resolvd, ResolvdWeb.Endpoint,
   url: [host: "localhost"],
+  adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [
     formats: [html: ResolvdWeb.ErrorHTML, json: ResolvdWeb.ErrorJSON],
     layout: false
@@ -42,7 +43,7 @@ config :esbuild,
 
 # Configure tailwind (the version is required)
 config :tailwind,
-  version: "3.2.7",
+  version: "3.3.2",
   default: [
     args: ~w(
       --config=tailwind.config.js
