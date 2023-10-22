@@ -12,7 +12,7 @@ defmodule Resolvd.Application do
       ResolvdWeb.Telemetry,
       # Start the Ecto repository
       Resolvd.Repo,
-            {DNSCluster, query: Application.get_env(:resolvd, :dns_cluster_query) || :ignore},
+      {DNSCluster, query: Application.get_env(:resolvd, :dns_cluster_query) || :ignore},
       # Start the PubSub system
       {Phoenix.PubSub, name: Resolvd.PubSub},
       # Start Finch
