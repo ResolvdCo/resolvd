@@ -35,7 +35,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
         <%= for {dom_id, conversation} <- @conversations do %>
           <.link
             id={dom_id}
-            patch={~p"/conversations/#{conversation}"}
+            patch={~p"/conversations?id=#{conversation}"}
             class={[
               "flex flex-row items-center p-4 border-l-2",
               if(active_conversation?(conversation, @conversation),
