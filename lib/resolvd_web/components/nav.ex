@@ -6,7 +6,7 @@ defmodule ResolvdWeb.Nav do
 
   def sidebar(assigns) do
     ~H"""
-    <div class="flex flex-col items-center py-4 flex-shrink-0 w-20 bg-gray-800 rounded-3xl text-gray-200 m-2 mr-0">
+    <div class="flex flex-col items-center py-4 flex-shrink-0 w-20 bg-gray-800  text-gray-200 mr-0">
       <a href="#" class="flex items-center justify-center h-12 w-12">
         <img
           class="pt-3 h-8 w-auto pb-3 box-content"
@@ -85,11 +85,44 @@ defmodule ResolvdWeb.Nav do
   def admin_sidebar(assigns) do
     ~H"""
     <div class="flex flex-col py-5 space-y-4 bg-white w-16 lg:w-56 transition-width duration-200 border-r-2 border-slate-100">
-      <div class="flex px-5 pb-8 text-xl font-medium text-gray-800">
+      <div class="flex px-5 pb-4 text-xl font-medium text-gray-800">
         <.icon name="hero-cog-6-tooth" class="shrink-0 w-6 h-7 mr-3" />
         <span class="hidden mal-3 lg:flex">Settings</span>
       </div>
 
+      <div class="mt-2">
+        <div :for={item <- user_items()} class="grow">
+          <.link
+            navigate={item.to}
+            class={[
+              "text-base text-gray-900 font-normal flex items-center p-4 group xl:w-auto transition-colors duration-200",
+              if(active_path(@view, item.module),
+                do: "bg-gray-800 text-white",
+                else: "hover:bg-gray-100"
+              )
+            ]}
+          >
+            <.icon
+              name={item.icon}
+              class={[
+                "w-6 h-6 text-gray-500 shrink-0 transition duration-75",
+                if(active_path(@view, item.module),
+                  do: "text-white",
+                  else: "group-hover:text-gray-900"
+                )
+              ]}
+            />
+            <span class="hidden pl-3 lg:flex flex-1 whitespace-nowrap">
+              <%= item.label %>
+            </span>
+          </.link>
+        </div>
+      </div>
+
+      <div class="flex px-5 pt-8 pb-4 text-xl font-medium text-gray-800">
+        <.icon name="hero-user-group" class="shrink-0 w-6 h-7 mr-3" />
+        <span class="hidden mal-3 lg:flex">Organization</span>
+      </div>
       <div class="mt-2">
         <div :for={item <- admin_items()} class="grow">
           <.link
@@ -334,6 +367,17 @@ defmodule ResolvdWeb.Nav do
     """
   end
 
+  defp user_items do
+    [
+      %{
+        to: ~p"/users/settings",
+        icon: "hero-user-circle",
+        label: gettext("Profile"),
+        module: ResolvdWeb.UserSettingsLive
+      }
+    ]
+  end
+
   defp admin_items do
     [
       %{
@@ -341,12 +385,6 @@ defmodule ResolvdWeb.Nav do
         icon: "hero-home",
         label: gettext("Home"),
         module: ResolvdWeb.Admin.IndexLive
-      },
-      %{
-        to: ~p"/users/settings",
-        icon: "hero-user-circle",
-        label: gettext("Profile"),
-        module: ResolvdWeb.UserSettingsLive
       },
       %{
         to: ~p"/admin/categories",
