@@ -196,7 +196,14 @@ defmodule ResolvdWeb.ConversationLive.Components do
         <h1 class="font-normal text-md truncate pb-2 pl-2">Conversation Details</h1>
         <div class="flex items-center space-x-2 pl-2">
           <span class="font-medium text-sm">Status: </span>
-          <span class="truncate text-sm bg-indigo-300 p-1 leading-3">Open</span>
+          <%= cond do %>
+            <% @conversation.is_resolved -> %>
+              <span class="truncate text-sm bg-green-300 p-1 leading-3">Resolved</span>
+            <% @conversation.is_prioritized -> %>
+              <span class="truncate text-sm bg-amber-200 p-1 leading-3">Prioritized</span>
+            <% true -> %>
+              <span class="truncate text-sm bg-indigo-300 p-1 leading-3">Open</span>
+          <% end %>
         </div>
         <div class="flex items-center space-x-2 pl-2">
           <span class="font-medium text-sm">Assignee: </span>

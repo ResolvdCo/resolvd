@@ -151,6 +151,18 @@ defmodule Resolvd.Conversations do
     |> Repo.update!()
   end
 
+  def set_priority(%Conversation{} = conversation, prioritized \\ false) do
+    {:ok, conversation} = update_conversation(conversation, %{is_prioritized: prioritized})
+
+    conversation
+  end
+
+  def set_resolved(%Conversation{} = conversation, resolved \\ false) do
+    {:ok, conversation} = update_conversation(conversation, %{is_resolved: resolved})
+
+    conversation
+  end
+
   @doc """
   Updates a conversation.
 

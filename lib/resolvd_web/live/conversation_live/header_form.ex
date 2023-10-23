@@ -38,9 +38,9 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
 
           <li>
             <.checkbox
-              id="priority"
+              id="priority-change"
               name="priority"
-              value="priority"
+              checked={@conversation.is_prioritized}
               class="peer-checked:bg-amber-300 hover:bg-amber-100"
               icon="hero-star"
               phx-change="priority_changed"
@@ -50,9 +50,9 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
 
           <li>
             <.checkbox
-              id="resolve"
+              id="resolve-change"
               name="resolve"
-              value="resolve"
+              checked={@conversation.is_resolved}
               class="peer-checked:bg-green-300 hover:bg-green-100"
               icon="hero-check"
               phx-change="status_changed"
@@ -64,7 +64,7 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
             <.checkbox
               id="delete"
               name="delete"
-              value="delete"
+              checked={false}
               class="peer-checked:bg-red-300 hover:bg-red-100"
               icon="hero-trash"
               phx-change="delete_changed"
@@ -105,9 +105,24 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
     {:noreply, socket}
   end
 
+  def handle_event("priority_changed", %{"priority" => priority}, socket) do
+    conversation = Conversations.set_priority(socket.assigns.conversation, priority == "true")
+
+    notify_parent({:updated_status, conversation})
+
+    {:noreply, socket}
+  end
+
+  def handle_event("status_changed", %{"resolve" => resolved}, socket) do
+    conversation = Conversations.set_resolved(socket.assigns.conversation, resolved == "true")
+
+    notify_parent({:updated_status, conversation})
+
+    {:noreply, socket}
+  end
+
   def handle_event(event, _unsigned_params, socket) do
     notify_parent({:unimplemented, event})
-
     {:noreply, socket}
   end
 
@@ -131,7 +146,7 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
 
   attr :id, :string, required: true
   attr :name, :string, required: true
-  attr :value, :string, required: true
+  attr :checked, :boolean, required: true
   attr :class, :string, required: true
   attr :icon, :string, required: true
   attr :rest, :global
@@ -139,7 +154,16 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
   defp checkbox(assigns) do
     ~H"""
     <div>
-      <input type="checkbox" id={@id} name={@name} value={@value} class="peer hidden" {@rest} />
+      <input type="hidden" name={@name} value="false" />
+      <input
+        type="checkbox"
+        id={@id}
+        name={@name}
+        value="true"
+        class="peer hidden"
+        checked={@checked}
+        {@rest}
+      />
       <label
         for={@id}
         class={[
