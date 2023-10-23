@@ -297,4 +297,118 @@ defmodule ResolvdWeb.ConversationsLiveTest do
              end) =~ "Ecto.Query.CastError"
     end
   end
+
+  describe "Conversation status" do
+    setup [
+      :create_tenant_and_admin,
+      :create_user,
+      :log_in_admin,
+      :create_mailbox,
+      :create_mailbox,
+      :create_conversation,
+      :create_conversation
+    ]
+
+    test "initial status", %{conn: conn, conversations: [conversation | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+    end
+
+    test "prioritize conversation", %{conn: conn, conversations: [conversation | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#priority-change") |> render_change(%{priority: true})
+      assert view |> element("#conversation-details") |> render() =~ "Prioritized"
+    end
+
+    test "toggle priority", %{conn: conn, conversations: [conversation | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#priority-change") |> render_change(%{priority: true})
+      assert view |> element("#conversation-details") |> render() =~ "Prioritized"
+
+      view |> element("#priority-change") |> render_change(%{priority: false})
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#priority-change") |> render_change(%{priority: true})
+      assert view |> element("#conversation-details") |> render() =~ "Prioritized"
+    end
+
+    test "mark resolved from open", %{conn: conn, conversations: [conversation | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#resolve-change") |> render_change(%{resolve: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+    end
+
+    test "toggle resolved from open", %{conn: conn, conversations: [conversation | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#resolve-change") |> render_change(%{resolve: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+
+      view |> element("#resolve-change") |> render_change(%{resolve: false})
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#resolve-change") |> render_change(%{resolve: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+    end
+
+    test "mark resolved from prioritized", %{conn: conn, conversations: [conversation | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#priority-change") |> render_change(%{priority: true})
+      assert view |> element("#conversation-details") |> render() =~ "Prioritized"
+
+      view |> element("#resolve-change") |> render_change(%{resolve: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+    end
+
+    test "mark prioritized from resolved", %{conn: conn, conversations: [conversation | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#resolve-change") |> render_change(%{resolve: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+
+      view |> element("#priority-change") |> render_change(%{priority: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+    end
+
+    test "toggle resolved and prioritized", %{conn: conn, conversations: [conversation | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+
+      view |> element("#priority-change") |> render_change(%{priority: true})
+      assert view |> element("#conversation-details") |> render() =~ "Prioritized"
+
+      view |> element("#resolve-change") |> render_change(%{resolve: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+
+      view |> element("#priority-change") |> render_change(%{priority: false})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+
+      view |> element("#priority-change") |> render_change(%{priority: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+
+      view |> element("#resolve-change") |> render_change(%{resolve: false})
+      assert view |> element("#conversation-details") |> render() =~ "Prioritized"
+
+      view |> element("#priority-change") |> render_change(%{priority: false})
+      assert view |> element("#conversation-details") |> render() =~ "Open"
+    end
+  end
 end

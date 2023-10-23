@@ -8,6 +8,8 @@ defmodule Resolvd.Conversations.Conversation do
   @foreign_key_type :binary_id
   schema "conversations" do
     field :subject, :string
+    field :is_resolved, :boolean, default: false
+    field :is_prioritized, :boolean, default: false
 
     has_many :messages, Resolvd.Conversations.Message
 
@@ -26,7 +28,7 @@ defmodule Resolvd.Conversations.Conversation do
   @doc false
   def changeset(conversation, attrs) do
     conversation
-    |> cast(attrs, [:subject])
+    |> cast(attrs, [:subject, :is_resolved, :is_prioritized])
     |> cast_assoc(:messages)
     |> cast_assoc(:tenant)
     |> cast_assoc(:mailbox)

@@ -78,6 +78,14 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   @impl true
+  def handle_info(
+        {ResolvdWeb.ConversationLive.HeaderForm, {:updated_status, conversation}},
+        socket
+      ) do
+    {:noreply, assign(socket, :conversation, conversation)}
+  end
+
+  @impl true
   def handle_info({ResolvdWeb.ConversationLive.HeaderForm, {:unimplemented, event}}, socket) do
     {:noreply, put_flash(socket, :error, "Event: #{event} in not implemented yet")}
   end

@@ -159,4 +159,59 @@ defmodule Resolvd.ConversationsTest do
       assert conversation.mailbox_id == mailbox_one.id
     end
   end
+
+  describe "Conversation status" do
+    setup do
+      %{conversation: conversation_fixture_user()}
+    end
+
+    test "initial status", %{conversation: conversation} do
+      assert conversation.is_resolved == false
+      assert conversation.is_prioritized == false
+    end
+
+    test "mark as resolved", %{conversation: conversation} do
+      assert conversation.is_resolved == false
+      assert conversation.is_prioritized == false
+
+      conversation = Conversations.set_resolved(conversation, true)
+      assert conversation.is_resolved == true
+    end
+
+    test "toggle resolved status", %{conversation: conversation} do
+      assert conversation.is_resolved == false
+      assert conversation.is_prioritized == false
+
+      conversation = Conversations.set_resolved(conversation, true)
+      assert conversation.is_resolved == true
+
+      conversation = Conversations.set_resolved(conversation, false)
+      assert conversation.is_resolved == false
+
+      conversation = Conversations.set_resolved(conversation, true)
+      assert conversation.is_resolved == true
+    end
+
+    test "prioritize conversation", %{conversation: conversation} do
+      assert conversation.is_resolved == false
+      assert conversation.is_prioritized == false
+
+      conversation = Conversations.set_priority(conversation, true)
+      assert conversation.is_prioritized == true
+    end
+
+    test "toggle priority", %{conversation: conversation} do
+      assert conversation.is_resolved == false
+      assert conversation.is_prioritized == false
+
+      conversation = Conversations.set_priority(conversation, true)
+      assert conversation.is_prioritized == true
+
+      conversation = Conversations.set_priority(conversation, false)
+      assert conversation.is_prioritized == false
+
+      conversation = Conversations.set_priority(conversation, true)
+      assert conversation.is_prioritized == true
+    end
+  end
 end
