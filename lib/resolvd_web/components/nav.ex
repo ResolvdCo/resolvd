@@ -74,6 +74,7 @@ defmodule ResolvdWeb.Nav do
         <.tooltip label="Log out">
           <.link
             href={~p"/users/log_out"}
+            data-confirm="Are you sure you want to log out?"
             aria-label="Log out"
             method="delete"
             class="flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl hover:bg-gray-700"
