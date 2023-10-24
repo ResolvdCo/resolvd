@@ -37,39 +37,45 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
           </li>
 
           <li>
-            <.checkbox
-              id="priority-change"
-              name="priority"
-              checked={@conversation.is_prioritized}
-              class="peer-checked:bg-amber-300 hover:bg-amber-100"
-              icon="hero-star"
-              phx-change="priority_changed"
-              phx-target={@myself}
-            />
+            <ResolvdWeb.Nav.tooltip label="Toggle priority" position="bottom">
+              <.checkbox
+                id="priority-change"
+                name="priority"
+                checked={@conversation.is_prioritized}
+                class="peer-checked:bg-amber-300 hover:bg-amber-100"
+                icon="hero-star"
+                phx-change="priority_changed"
+                phx-target={@myself}
+              />
+            </ResolvdWeb.Nav.tooltip>
           </li>
 
           <li>
-            <.checkbox
-              id="resolve-change"
-              name="resolve"
-              checked={@conversation.is_resolved}
-              class="peer-checked:bg-green-300 hover:bg-green-100"
-              icon="hero-check"
-              phx-change="status_changed"
-              phx-target={@myself}
-            />
+            <ResolvdWeb.Nav.tooltip label="Toggle resolved" position="bottom">
+              <.checkbox
+                id="resolve-change"
+                name="resolve"
+                checked={@conversation.is_resolved}
+                class="peer-checked:bg-green-300 hover:bg-green-100"
+                icon="hero-check"
+                phx-change="status_changed"
+                phx-target={@myself}
+              />
+            </ResolvdWeb.Nav.tooltip>
           </li>
 
           <li>
-            <.checkbox
-              id="delete"
-              name="delete"
-              checked={false}
-              class="peer-checked:bg-red-300 hover:bg-red-100"
-              icon="hero-trash"
-              phx-change="delete_changed"
-              phx-target={@myself}
-            />
+            <ResolvdWeb.Nav.tooltip label="Delete" position="bottom">
+              <.checkbox
+                id="delete"
+                name="delete"
+                checked={false}
+                class="peer-checked:bg-red-300 hover:bg-red-100"
+                icon="hero-trash"
+                phx-change="delete_changed"
+                phx-target={@myself}
+              />
+            </ResolvdWeb.Nav.tooltip>
           </li>
         </ul>
       </form>
