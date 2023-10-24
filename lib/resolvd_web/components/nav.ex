@@ -6,7 +6,7 @@ defmodule ResolvdWeb.Nav do
 
   def sidebar(assigns) do
     ~H"""
-    <div class="flex flex-col items-center py-4 flex-shrink-0 w-20 bg-gray-800  text-gray-200 mr-0">
+    <div class="flex flex-col items-center py-4 flex-shrink-0 w-20 bg-gray-800 text-gray-200 mr-0">
       <a href="#" class="flex items-center justify-center h-12 w-12">
         <img
           class="pt-3 h-8 w-auto pb-3 box-content"
@@ -16,65 +16,74 @@ defmodule ResolvdWeb.Nav do
       </a>
       <ul class="flex flex-col space-y-2 mt-12">
         <li :for={item <- sidebar_items()}>
+          <.tooltip
+            label={item.label}
+            class={if(active_path(@view, item.module), do: "hidden", else: "")}
+          >
+            <.link
+              navigate={item.to}
+              aria-label={item.label}
+              class={[
+                "flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl",
+                if(active_path(@view, item.module),
+                  do: "bg-gray-500 text-white",
+                  else: "hover:bg-gray-700"
+                )
+              ]}
+            >
+              <.icon
+                name={item.icon}
+                class={[
+                  "w-6 h-6 shrink-0 transition-colors duration-200",
+                  if(active_path(@view, item.module),
+                    do: "text-white",
+                    else: "group-hover:text-gray-100"
+                  )
+                ]}
+              />
+            </.link>
+          </.tooltip>
+        </li>
+      </ul>
+      <div class="mt-auto space-y-2">
+        <.tooltip label="Settings" class={if(active_admin(@view), do: "hidden", else: "")}>
           <.link
-            navigate={item.to}
-            aria-label={item.label}
+            navigate={if @current_user.is_admin, do: ~p"/admin", else: ~p"/users/settings"}
+            aria-label="Settings"
             class={[
-              "flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl",
-              if(active_path(@view, item.module),
+              "flex items-center justify-center w-12 h-12 transition-colors duration-200 rounded-2xl",
+              if(active_admin(@view),
                 do: "bg-gray-500 text-white",
                 else: "hover:bg-gray-700"
               )
             ]}
           >
             <.icon
-              name={item.icon}
+              name="hero-cog-6-tooth"
               class={[
                 "w-6 h-6 shrink-0 transition-colors duration-200",
-                if(active_path(@view, item.module),
+                if(active_admin(@view),
                   do: "text-white",
                   else: "group-hover:text-gray-100"
                 )
               ]}
             />
           </.link>
-        </li>
-      </ul>
-      <div class="mt-auto space-y-2">
-        <.link
-          navigate={if @current_user.is_admin, do: ~p"/admin", else: ~p"/users/settings"}
-          aria-label="Settings"
-          class={[
-            "flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl",
-            if(active_admin(@view),
-              do: "bg-gray-500 text-white",
-              else: "hover:bg-gray-700"
-            )
-          ]}
-        >
-          <.icon
-            name="hero-cog-6-tooth"
-            class={[
-              "w-6 h-6 shrink-0 transition-colors duration-200",
-              if(active_admin(@view),
-                do: "text-white",
-                else: "group-hover:text-gray-100"
-              )
-            ]}
-          />
-        </.link>
+        </.tooltip>
 
-        <.link
-          href={~p"/users/log_out"}
-          aria-label="Log out"
-          method="delete"
-          class="flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl hover:bg-gray-700"
-        >
-          <.icon
-            name="hero-power"
-            class="w-6 h-6 shrink-0 transition-colors duration-200 group-hover:text-gray-100"
-          />
-        </.link>
+        <.tooltip label="Log out">
+          <.link
+            href={~p"/users/log_out"}
+            aria-label="Log out"
+            method="delete"
+            class="flex items-center justify-center group w-12 h-12 transition-colors duration-200 rounded-2xl hover:bg-gray-700"
+          >
+            <.icon
+              name="hero-power"
+              class="w-6 h-6 shrink-0 transition-colors duration-200 group-hover:text-gray-100"
+            />
+          </.link>
+        </.tooltip>
       </div>
     </div>
     """
@@ -363,6 +372,26 @@ defmodule ResolvdWeb.Nav do
           </nav>
         </div>
       </div>
+    </div>
+    """
+  end
+
+  attr :class, :any, default: nil
+  attr :label, :string, required: true
+  slot :inner_block, required: true
+
+  def tooltip(assigns) do
+    ~H"""
+    <div class="relative group">
+      <%= render_slot(@inner_block) %>
+
+      <span class={[
+        "opacity-0 group-hover:opacity-100 group-hover:hover:opacity-0 transition-opacity absolute whitespace-nowrap bg-gray-600 text-white text-center rounded-md px-2 py-1 top-2 z-30 left-[120%]",
+        "after:absolute after:top-[50%] after:right-[100%] after:-mt-[5px] after:border-[5px] after:border-transparent after:border-r-gray-600",
+        @class
+      ]}>
+        <%= @label %>
+      </span>
     </div>
     """
   end
