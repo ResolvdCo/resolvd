@@ -378,16 +378,30 @@ defmodule ResolvdWeb.Nav do
 
   attr :class, :any, default: nil
   attr :label, :string, required: true
+  attr :position, :string, default: "right", values: ~w(right left top bottom)
   slot :inner_block, required: true
 
   def tooltip(assigns) do
     ~H"""
-    <div class="relative group">
+    <div class="relative group flex items-center justify-center">
       <%= render_slot(@inner_block) %>
 
       <span class={[
-        "opacity-0 group-hover:opacity-100 group-hover:hover:opacity-0 transition-opacity absolute whitespace-nowrap bg-gray-600 text-white text-center rounded-md px-2 py-1 top-2 z-30 left-[120%]",
-        "after:absolute after:top-[50%] after:right-[100%] after:-mt-[5px] after:border-[5px] after:border-transparent after:border-r-gray-600",
+        "opacity-0 group-hover:opacity-100 group-hover:hover:opacity-0 transition-opacity absolute whitespace-nowrap bg-gray-600 text-white text-center rounded-md px-2 py-1 z-30 ",
+        "after:absolute after:border-[5px] after:border-transparent",
+        case @position do
+          "right" ->
+            "left-[120%] after:top-1/2 after:right-full after:-mt-[5px] after:border-r-gray-600"
+
+          "left" ->
+            "right-[120%] after:top-1/2 after:left-full after:-mt-[5px] after:border-l-gray-600"
+
+          "top" ->
+            "bottom-[125%] after:right-1/2 after:top-full after:-mr-[5px] after:border-t-gray-600"
+
+          "bottom" ->
+            "top-[125%] after:right-1/2 after:bottom-full after:-mr-[5px] after:border-b-gray-600"
+        end,
         @class
       ]}>
         <%= @label %>
