@@ -75,7 +75,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
                     else: "text-gray-600"
                   )
                 ]}>
-                  <%= conversation.subject %>
+                  <%= Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject) %>
                 </p>
                 <div class="hidden h-1 w-1 p-1 bg-red-500 rounded-full"></div>
               </div>
@@ -106,7 +106,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
             <%= display_name(@conversation.customer) %>
           </p>
           <p class="text-sm text-gray-700 whitespace-nowrap truncate">
-            <%= @conversation.subject %>
+            <%= Resolvd.Mailboxes.parse_mime_encoded_word(@conversation.subject) %>
           </p>
         </div>
       </div>

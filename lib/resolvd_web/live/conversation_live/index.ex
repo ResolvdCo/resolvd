@@ -133,7 +133,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
     socket
     |> assign(:conversation, conversation)
     |> assign(:message, %Message{})
-    |> assign(:page_title, conversation.subject)
+    |> assign(:page_title, Mailboxes.parse_mime_encoded_word(conversation.subject))
     |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)
   end
 end

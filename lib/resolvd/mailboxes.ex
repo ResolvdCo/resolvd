@@ -209,4 +209,40 @@ defmodule Resolvd.Mailboxes do
   def mailbox_running?(%Mailbox{id: server_id}) do
     InboundManager.child_started?(server_id)
   end
+
+  # TODO: Maybe insert the decoded subject in the databse
+  def parse_mime_encoded_word(""), do: ""
+
+  def parse_mime_encoded_word(<<"=?", value::binary>>) do
+    case String.split(value, "?", parts: 4) do
+      [charset, encoding, encoded_string, <<"=", rest::binary>>] ->
+        charset = if String.upcase(charset) == "ISO-8859-1", do: :latin1, else: :utf8
+
+        decoded_string =
+          case String.upcase(encoding) do
+            "Q" ->
+              parse_quoted_printable(encoded_string)
+
+            "B" ->
+              :base64.mime_decode(encoded_string)
+          end
+
+        :unicode.characters_to_binary(decoded_string, charset) <> parse_mime_encoded_word(rest)
+
+      _ ->
+        "=?" <> parse_mime_encoded_word(value)
+    end
+  end
+
+  def parse_mime_encoded_word(<<char::utf8, rest::binary>>),
+    do: <<char::utf8, parse_mime_encoded_word(rest)::binary>>
+
+  defp parse_quoted_printable(encoded) do
+    encoded
+    |> String.replace("=", "%")
+    |> String.replace("_", " ")
+    |> URI.decode_query()
+    |> Map.keys()
+    |> hd()
+  end
 end

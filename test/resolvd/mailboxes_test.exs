@@ -34,4 +34,25 @@ defmodule Resolvd.MailboxesTest do
       assert mailbox.id
     end
   end
+
+  describe "Parse mime encoded word" do
+    test "non encoded strings" do
+      assert Mailboxes.parse_mime_encoded_word("") == ""
+      assert Mailboxes.parse_mime_encoded_word("Hello") == "Hello"
+      assert Mailboxes.parse_mime_encoded_word("Hello World!") == "Hello World!"
+    end
+
+    test "ISO-8859-1 encoded strings" do
+      assert Mailboxes.parse_mime_encoded_word("=?iso-8859-1?Q?R=E9sum=E9?=") == "Résumé"
+      assert Mailboxes.parse_mime_encoded_word("=?iso-8859-1?B?UulzdW3p?=") == "Résumé"
+    end
+
+    test "UTF-8 encoded strings" do
+      assert Mailboxes.parse_mime_encoded_word("=?utf-8?Q?Caf=C3=A9?=") == "Café"
+      assert Mailboxes.parse_mime_encoded_word("=?utf-8?B?Q2Fmw6k=?=") == "Café"
+
+      assert Mailboxes.parse_mime_encoded_word("=?utf-8?B?8J+YjPCfmIw=?=") == "😌😌"
+      assert Mailboxes.parse_mime_encoded_word("=?utf-8?Q?=F0=9F=98=8C=F0=9F=98=8C?=") == "😌😌"
+    end
+  end
 end
