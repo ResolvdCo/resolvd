@@ -29,6 +29,7 @@ defmodule Resolvd.ConversationsFixtures do
     Enum.into(attrs, %{
       sender: unique_message_email(),
       subject: unique_conversation_subject(),
+      from: unique_message_email(),
       message_id: valid_message_id(),
       text_body: valid_text_body(),
       html_body: valid_html_body()

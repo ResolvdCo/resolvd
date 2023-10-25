@@ -22,7 +22,7 @@ defmodule Resolvd.Customers.Customer do
   def changeset(customer, attrs) do
     customer
     |> cast(attrs, [:name, :email, :phone])
-    |> validate_required([:name, :email])
+    |> validate_required([:email])
     |> cast_assoc(:tenant)
   end
 end

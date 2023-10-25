@@ -371,7 +371,10 @@ defmodule Resolvd.Conversations do
     else
       # New message, do we have a conversation for any of it's references or reply tos?
       tenant = Tenants.get_tenant!(mailbox.tenant_id)
-      customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, email.sender)
+
+      {:ok, [{name, _email_addr}]} = :smtp_util.parse_rfc822_addresses(email.from)
+      name = if name == :undefined, do: nil, else: to_string(name)
+      customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, email.sender, name)
 
       conversation =
         if existing_message = get_message_by_email_message_id(email.in_reply_to) do

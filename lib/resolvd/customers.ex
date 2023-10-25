@@ -127,13 +127,17 @@ defmodule Resolvd.Customers do
       from c in Customer,
         where: c.email == ^email
 
-    if !Repo.one(query) do
-      create_customer(tenant, %{
-        email: email,
-        name: name || email
-      })
-    end
+    case Repo.one(query) do
+      %Customer{name: nil} = customer when not is_nil(name) ->
+        {:ok, customer} = update_customer(customer, %{name: name})
+        customer
 
-    Repo.one(query)
+      nil ->
+        {:ok, customer} = create_customer(tenant, %{email: email, name: name})
+        customer
+
+      customer ->
+        customer
+    end
   end
 end
