@@ -388,7 +388,7 @@ defmodule ResolvdWeb.Nav do
       <%= render_slot(@inner_block) %>
 
       <span class={[
-        "opacity-0 group-hover:opacity-100 group-hover:hover:opacity-0 transition-opacity absolute whitespace-nowrap bg-gray-600 text-white text-center rounded-md px-2 py-1 z-30 ",
+        "opacity-0 group-hover:opacity-100 group-hover:delay-500 group-hover:hover:delay-0 group-hover:hover:opacity-0 transition-opacity absolute whitespace-nowrap bg-gray-600 text-white text-center rounded-md px-2 py-1 z-30 ",
         "after:absolute after:border-[5px] after:border-transparent",
         case @position do
           "right" ->
