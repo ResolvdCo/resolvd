@@ -63,5 +63,5 @@
   "uri_query": {:hex, :uri_query, "0.1.2", "ae35b83b472f3568c2c159eee3f3ccf585375d8a94fb5382db1ea3589e75c3b4", [:mix], [], "hexpm", "e3bc81816c98502c36498b9b2f239b89c71ce5eadfff7ceb2d6c0a2e6ae2ea0c"},
   "websock": {:hex, :websock, "0.5.3", "2f69a6ebe810328555b6fe5c831a851f485e303a7c8ce6c5f675abeb20ebdadc", [:mix], [], "hexpm", "6105453d7fac22c712ad66fab1d45abdf049868f253cf719b625151460b8b453"},
   "websock_adapter": {:hex, :websock_adapter, "0.5.4", "7af8408e7ed9d56578539594d1ee7d8461e2dd5c3f57b0f2a5352d610ddde757", [:mix], [{:bandit, ">= 0.6.0", [hex: :bandit, repo: "hexpm", optional: true]}, {:plug, "~> 1.14", [hex: :plug, repo: "hexpm", optional: false]}, {:plug_cowboy, "~> 2.6", [hex: :plug_cowboy, repo: "hexpm", optional: true]}, {:websock, "~> 0.5", [hex: :websock, repo: "hexpm", optional: false]}], "hexpm", "d2c238c79c52cbe223fcdae22ca0bb5007a735b9e933870e241fce66afb4f4ab"},
-  "yugo": {:git, "https://github.com/ryotsu/yugo.git", "0bec3a2851c5fe9cbc19e6c4a8ad02689ac01c4b", []},
+  "yugo": {:hex, :yugo, "1.0.0", "6a7abe61cf019b679e4a159c03948cdc824ca2f944681569ab360ecf3fbc974c", [:mix], [], "hexpm", "7d0e08dcad1bb7b452a17b8c08416098176c469468a116e40c58f2d2bbb9592e"},
 }

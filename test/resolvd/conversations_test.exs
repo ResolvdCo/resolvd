@@ -35,6 +35,16 @@ defmodule Resolvd.ConversationsTest do
 
       assert conversation.mailbox_id == mailbox.id
     end
+
+    test "customer name from email", %{user: user} do
+      email = mail_fixture()
+      mailbox = mailbox_fixture(user)
+
+      {:ok, conversation} = Conversations.create_or_update_conversation_from_email(mailbox, email)
+
+      assert conversation.mailbox_id == mailbox.id
+      assert conversation.customer.name == email.from |> hd |> elem(0)
+    end
   end
 
   describe "User assignment" do

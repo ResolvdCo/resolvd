@@ -1,5 +1,11 @@
 defmodule Resolvd.Mailboxes.Mail do
-  @type address :: String.t()
+  @moduledoc false
+
+  @typedoc """
+  The first field is the name associated with the address, and the second field is the address itself.
+  e.g. `{"Bart", "bart@simpsons.family"}`
+  """
+  @type address :: {nil | String.t(), String.t()}
 
   @typedoc """
   e.g. `"text/html"`, `"image/png"`, `"text/plain"`, etc.
@@ -27,11 +33,11 @@ defmodule Resolvd.Mailboxes.Mail do
           cc: [address],
           date: DateTime.t(),
           flags: [flag],
-          from: [String.t()],
           in_reply_to: nil | String.t(),
           message_id: nil | String.t(),
           reply_to: [address],
-          sender: address,
+          sender: [address],
+          from: [address],
           subject: nil | String.t(),
           to: [address]
         }
@@ -42,11 +48,11 @@ defmodule Resolvd.Mailboxes.Mail do
     :cc,
     :date,
     :flags,
-    :from,
     :in_reply_to,
     :message_id,
     :reply_to,
     :sender,
+    :from,
     :subject,
     :to
   ]
@@ -56,7 +62,7 @@ defmodule Resolvd.Mailboxes.Mail do
     |> Map.delete(:body)
     |> Map.put(:html_body, get_body(mail.body, "text/html"))
     |> Map.put(:text_body, get_body(mail.body, "text/plain"))
-    |> Map.put(:sender, hd(mail.sender))
+    |> Map.put(:sender, mail.sender |> hd |> elem(1))
   end
 
   def get_body({found_mime, _charset, body}, mime) when found_mime == mime do

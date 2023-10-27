@@ -58,8 +58,7 @@ defmodule Resolvd.MixProject do
       # Mail
       {:gen_smtp, "~> 1.1"},
       {:swoosh, "~> 1.3"},
-      # Temporary fork
-      {:yugo, github: "ryotsu/yugo"},
+      {:yugo, "~> 1.0"},
       # Sluggin'
       {:slugify, "~> 1.3"},
       # Permissions

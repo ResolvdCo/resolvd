@@ -6,6 +6,7 @@ defmodule Resolvd.ConversationsFixtures do
 
   def unique_conversation_subject, do: "Conversation ##{System.unique_integer()}"
   def unique_message_email, do: "user##{System.unique_integer()}@localhost"
+  def unique_user_name, do: "user##{System.unique_integer()}"
 
   def valid_text_body, do: "Hello World"
   def valid_html_body, do: "<h1>Hello World</h1>"
@@ -29,7 +30,7 @@ defmodule Resolvd.ConversationsFixtures do
     Enum.into(attrs, %{
       sender: unique_message_email(),
       subject: unique_conversation_subject(),
-      from: unique_message_email(),
+      from: [{unique_user_name(), unique_message_email()}],
       message_id: valid_message_id(),
       text_body: valid_text_body(),
       html_body: valid_html_body()
