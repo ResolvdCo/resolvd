@@ -322,14 +322,14 @@ defmodule ResolvdWeb.ConversationLive.Components do
   defp display_info(nil), do: "Unknown"
   defp display_info(info), do: info
 
-  defp message_body(%Message{text_body: body}) when not is_nil(body) do
-    raw(String.replace(body, "\r", "<br>"))
-    raw(String.replace(body, "\n", "<br>"))
+  defp message_body(%Message{html_body: body}) when not is_nil(body) do
+    raw(body)
   end
 
-  defp message_body(%Message{html_body: body}) when not is_nil(body) do
-    raw(String.replace(body, "\r", "<br>"))
-    raw(String.replace(body, "\n", "<br>"))
+  defp message_body(%Message{text_body: body}) when not is_nil(body) do
+    body
+    |> String.replace("\r\n", "<br>")
+    |> raw()
   end
 
   defp message_body(_) do
