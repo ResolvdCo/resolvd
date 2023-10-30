@@ -24,8 +24,31 @@ import topbar from "../vendor/topbar"
 
 import Trix from "./hooks/trix";
 
+let Hooks = {}
+
+Hooks.DisplayMessage = {
+  mounted() {
+    this.el.addEventListener("load", event => {
+      event.target.style.height = `${event.target.contentWindow.document.body.scrollHeight}px`
+      event.target.style.width = `${event.target.contentWindow.document.body.scrollWidth}px`
+      let scrollingHeight = event.target.contentWindow.document.scrollingElement.scrollHeight
+      let scrollingWidth = event.target.contentWindow.document.scrollingElement.scrollWidth
+
+      if (event.target.style.height != scrollingHeight) {
+        event.target.style.height = `${scrollingHeight}px`
+      }
+
+      if (event.target.style.width != scrollingWidth) {
+        event.target.style.width = `${scrollingWidth}px`
+      }
+    })
+  }
+}
+
+Hooks.Trix = Trix
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, { hooks: { Trix: Trix }, params: { _csrf_token: csrfToken } })
+let liveSocket = new LiveSocket("/live", Socket, { hooks: Hooks, params: { _csrf_token: csrfToken } })
 
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
