@@ -44,11 +44,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
               )
             ]}
           >
-            <img
-              class="object-cover w-10 h-10 rounded-full"
-              src={gravatar_avatar(conversation.customer.email)}
-              alt=""
-            />
+            <.profile_picture email={conversation.customer.email} />
             <div class="flex flex-col justify-between h-10 w-72 ml-2">
               <div class="flex justify-between items-center space-x-5">
                 <h1 class={[
@@ -96,11 +92,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
     ~H"""
     <div class="z-30 flex items-center py-4 px-6 rounded-2xl shadow-md justify-between space-x-5">
       <div class="flex overflow-hidden">
-        <img
-          class="object-cover w-10 h-10 rounded-full"
-          src={gravatar_avatar(@conversation.customer.email)}
-          alt=""
-        />
+        <.profile_picture email={@conversation.customer.email} />
         <div class="flex flex-col ml-3 overflow-hidden">
           <p class="font-semibold text-sm truncate">
             <%= display_name(@conversation.customer) %>
@@ -128,13 +120,9 @@ defmodule ResolvdWeb.ConversationLive.Components do
             <%= if is_nil(message.user) do %>
               <div class="col-start-1 col-end-8 p-3 rounded-lg" id={dom_id}>
                 <div class="flex flex-row items-center">
-                  <img
-                    class="object-cover w-10 h-10 rounded-full"
-                    src={gravatar_avatar(message.customer.email)}
-                    alt=""
-                  />
+                  <.profile_picture email={message.customer.email} />
                   <div class="relative ml-3 text-sm bg-blue-50 py-2 px-4 shadow rounded-xl">
-                    <div><%= message_body(message) %></div>
+                    <.message message={message} />
                     <div class="absolute text-xs bottom-0 left-0 -mb-5 ml-2 text-gray-500 whitespace-nowrap">
                       <%= message.inserted_at
                       |> Timex.format("{relative}", :relative)
@@ -146,13 +134,9 @@ defmodule ResolvdWeb.ConversationLive.Components do
             <% else %>
               <div class="col-start-6 col-end-13 p-3 rounded-lg" id={dom_id}>
                 <div class="flex items-center justify-start flex-row-reverse">
-                  <img
-                    class="object-cover w-10 h-10 rounded-full"
-                    src={gravatar_avatar(message.user.email)}
-                    alt=""
-                  />
+                  <.profile_picture email={message.user.email} />
                   <div class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl">
-                    <div><%= message_body(message) %></div>
+                    <.message message={message} />
                     <div class="absolute text-xs bottom-0 right-0 -mb-5 mr-2 text-gray-500 whitespace-nowrap">
                       <%= message.inserted_at
                       |> Timex.format("{relative}", :relative)
@@ -166,6 +150,21 @@ defmodule ResolvdWeb.ConversationLive.Components do
         </div>
       </div>
     </div>
+    """
+  end
+
+  attr :message, :string, required: true
+
+  def message(assigns) do
+    ~H"""
+    <%= case @message do %>
+      <% %Message{text_body: body} when not is_nil(body) -> %>
+        <div class="whitespace-pre-line"><%= body %></div>
+      <% %Message{html_body: body} when not is_nil(body) -> %>
+        <iframe srcdoc={body} id={@message.id} phx-hook="DisplayMessage" />
+      <% _ -> %>
+        <div>~~~</div>
+    <% end %>
     """
   end
 
@@ -321,18 +320,4 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   defp display_info(nil), do: "Unknown"
   defp display_info(info), do: info
-
-  defp message_body(%Message{text_body: body}) when not is_nil(body) do
-    raw(String.replace(body, "\r", "<br>"))
-    raw(String.replace(body, "\n", "<br>"))
-  end
-
-  defp message_body(%Message{html_body: body}) when not is_nil(body) do
-    raw(String.replace(body, "\r", "<br>"))
-    raw(String.replace(body, "\n", "<br>"))
-  end
-
-  defp message_body(_) do
-    "~~~"
-  end
 end
