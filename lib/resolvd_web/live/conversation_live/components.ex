@@ -43,10 +43,10 @@ defmodule ResolvdWeb.ConversationLive.Components do
             id={dom_id}
             patch={Helpers.conversation_index_path(@socket, @live_action, id: conversation.id)}
             class={[
-              "flex flex-row items-center p-4 border-l-2",
+              "flex flex-row items-center p-4 border-l-2 from-red-100 to-transparent",
               if(active_conversation?(conversation, @conversation),
-                do: "bg-gradient-to-r from-red-100 to-transparent border-x-red-500",
-                else: "hover:bg-gradient-to-r from-red-100 to-transparent hover:border-x-red-100"
+                do: "bg-gradient-to-r border-x-red-500",
+                else: "hover:bg-gradient-to-r hover:border-x-red-100"
               )
             ]}
           >
