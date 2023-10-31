@@ -4,6 +4,8 @@ defmodule ResolvdWeb.ConversationLive.Components do
   alias Resolvd.Conversations.Message
   alias Resolvd.Customers.Customer
 
+  attr :live_action, :atom, required: true
+
   def conversation_categories(assigns) do
     ~H"""
     <div class="mt-5 px-4">
@@ -17,7 +19,8 @@ defmodule ResolvdWeb.ConversationLive.Components do
               <%= item.label %>
             </span>
 
-            <span :if={item.label == "All"} class="h-1 w-full bg-gray-800 rounded-full"></span>
+            <span :if={item.action == @live_action} class="h-1 w-full bg-gray-800 rounded-full">
+            </span>
           </.link>
         </li>
       </ul>
@@ -27,6 +30,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   attr :conversations, :any, required: true
   attr :conversation, :map, required: true
+  attr :path, :string, required: true
 
   def conversation_list(assigns) do
     ~H"""
@@ -35,7 +39,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
         <%= for {dom_id, conversation} <- @conversations do %>
           <.link
             id={dom_id}
-            patch={~p"/conversations?id=#{conversation}"}
+            patch={"#{@path}?id=#{conversation.id}"}
             class={[
               "flex flex-row items-center p-4 border-l-2",
               if(active_conversation?(conversation, @conversation),
@@ -273,29 +277,29 @@ defmodule ResolvdWeb.ConversationLive.Components do
   defp conversation_items do
     [
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/all",
         label: gettext("All"),
-        module: ResolvdWeb.ConversationLive
+        action: :all
       },
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/me",
         label: gettext("Me"),
-        module: ResolvdWeb.ConversationLive
+        action: :me
       },
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/unassigned",
         label: gettext("Unassigned"),
-        module: ResolvdWeb.ConversationLive
+        action: :unassigned
       },
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/prioritized",
         label: gettext("Prioritized"),
-        module: ResolvdWeb.ConversationLive
+        action: :prioritized
       },
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/resolved",
         label: gettext("Resolved"),
-        module: ResolvdWeb.Admin.MailboxLive
+        action: :resolved
       }
     ]
   end

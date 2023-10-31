@@ -7,29 +7,37 @@ defmodule ResolvdWeb.ConversationLive.Index do
   alias Resolvd.Accounts
   alias Resolvd.Mailboxes
 
-  alias Resolvd.Repo
-
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> stream(
-       :conversations,
-       Conversations.list_conversations(socket.assigns.current_user)
-       |> Repo.preload([:customer])
-     )
+     |> stream(:conversations, [])
      |> assign(:users, Accounts.list_users(socket.assigns.current_user))
      |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))}
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _url, socket) do
+  def handle_params(%{"id" => id} = params, url, socket) do
     conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
+
+    socket =
+      case socket.assigns do
+        %{path: path} when not is_nil(path) ->
+          socket
+
+        _ ->
+          path = url |> URI.parse() |> Map.get(:path)
+
+          socket
+          |> assign(:path, path)
+          |> apply_action(socket.assigns.live_action, params)
+      end
 
     {:noreply, switch_to_conversation(socket, conversation)}
   end
 
-  def handle_params(params, _url, socket) do
+  def handle_params(params, url, socket) do
+    socket = assign(socket, :path, url |> URI.parse() |> Map.get(:path))
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
@@ -46,8 +54,61 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
+    push_patch(socket, to: "/conversations/all")
+  end
+
+  defp apply_action(socket, :all, _params) do
     socket
-    |> assign(:page_title, "Conversations")
+    |> stream(
+      :conversations,
+      Conversations.list_unresolved_conversations(socket.assigns.current_user)
+    )
+    |> assign(:page_title, "All Conversations")
+    |> assign(:filter, "All Conversations")
+    |> assign(:conversation, nil)
+  end
+
+  defp apply_action(socket, :me, _params) do
+    socket
+    |> stream(
+      :conversations,
+      Conversations.list_conversations_assigned_to_me(socket.assigns.current_user)
+    )
+    |> assign(:page_title, "My Conversations")
+    |> assign(:filter, "My Conversations")
+    |> assign(:conversation, nil)
+  end
+
+  defp apply_action(socket, :unassigned, _params) do
+    socket
+    |> stream(
+      :conversations,
+      Conversations.list_unassigned_conversations(socket.assigns.current_user)
+    )
+    |> assign(:page_title, "Unassigned Conversations")
+    |> assign(:filter, "Unassigned Conversations")
+    |> assign(:conversation, nil)
+  end
+
+  defp apply_action(socket, :prioritized, _params) do
+    socket
+    |> stream(
+      :conversations,
+      Conversations.list_prioritized_conversations(socket.assigns.current_user)
+    )
+    |> assign(:page_title, "Prioritized Conversations")
+    |> assign(:filter, "Prioritized Conversations")
+    |> assign(:conversation, nil)
+  end
+
+  defp apply_action(socket, :resolved, _params) do
+    socket
+    |> stream(
+      :conversations,
+      Conversations.list_resolved_conversations(socket.assigns.current_user)
+    )
+    |> assign(:page_title, "Resolved Conversations")
+    |> assign(:filter, "Resolved Conversations")
     |> assign(:conversation, nil)
   end
 
