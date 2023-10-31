@@ -1,6 +1,8 @@
 defmodule ResolvdWeb.ConversationLive.Index do
   use ResolvdWeb, :live_view
 
+  alias ResolvdWeb.Router.Helpers
+
   alias Resolvd.Conversations
   alias Resolvd.Conversations.Conversation
   alias Resolvd.Conversations.Message
@@ -17,27 +19,23 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   @impl true
-  def handle_params(%{"id" => id} = params, url, socket) do
+  def handle_params(%{"id" => id} = params, _url, socket) do
     conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
 
     socket =
       case socket.assigns do
-        %{path: path} when not is_nil(path) ->
+        %{filter: filter} when not is_nil(filter) ->
           socket
 
         _ ->
-          path = url |> URI.parse() |> Map.get(:path)
-
-          socket
-          |> assign(:path, path)
-          |> apply_action(socket.assigns.live_action, params)
+          apply_action(socket, socket.assigns.live_action, params)
       end
 
     {:noreply, switch_to_conversation(socket, conversation)}
   end
 
-  def handle_params(params, url, socket) do
-    socket = assign(socket, :path, url |> URI.parse() |> Map.get(:path))
+  @impl true
+  def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
@@ -201,7 +199,9 @@ defmodule ResolvdWeb.ConversationLive.Index do
   defp redirect_to_first_conversation(socket, _conversations, %{"id" => _}), do: socket
 
   defp redirect_to_first_conversation(socket, [conversation | _], _params) do
-    push_patch(socket, to: "#{socket.assigns.path}?id=#{conversation.id}")
+    push_patch(socket,
+      to: Helpers.conversation_index_path(socket, socket.assigns.live_action, id: conversation.id)
+    )
   end
 
   defp redirect_to_first_conversation(socket, _conversations, _params), do: socket

@@ -1,6 +1,7 @@
 defmodule ResolvdWeb.ConversationLive.Components do
   use ResolvdWeb, :html
 
+  alias ResolvdWeb.Router.Helpers
   alias Resolvd.Conversations.Message
   alias Resolvd.Customers.Customer
 
@@ -30,7 +31,8 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   attr :conversations, :any, required: true
   attr :conversation, :map, required: true
-  attr :path, :string, required: true
+  attr :socket, :any, required: true
+  attr :live_action, :atom, required: true
 
   def conversation_list(assigns) do
     ~H"""
@@ -39,7 +41,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
         <%= for {dom_id, conversation} <- @conversations do %>
           <.link
             id={dom_id}
-            patch={"#{@path}?id=#{conversation.id}"}
+            patch={Helpers.conversation_index_path(@socket, @live_action, id: conversation.id)}
             class={[
               "flex flex-row items-center p-4 border-l-2",
               if(active_conversation?(conversation, @conversation),
