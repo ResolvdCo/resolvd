@@ -52,7 +52,13 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     ]
 
     test "list all conversations", %{conn: conn, conversations: [con1, con2]} do
-      {:ok, _index_live, html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: "/conversations/all"}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, ~p"/conversations/all")
+
+      {:ok, _index_live, html} = live(conn, conversation_path)
 
       assert html =~ "Conversations"
       assert html =~ con1.subject
@@ -63,25 +69,34 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "display selected conversation", %{conn: conn, conversations: [con | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, ~p"/conversations/all")
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{con.id}") |> render_click() =~ con.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{con.id}")
+      assert_patched(view, "/conversations/all?id=#{con.id}")
       assert page_title(view) =~ con.subject
     end
 
     test "switch to other conversation", %{conn: conn, conversations: [con1, con2]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{con1.id}") |> render_click() =~ con1.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{con1.id}")
+      assert_patched(view, "/conversations/all?id=#{con1.id}")
       assert page_title(view) =~ con1.subject
 
       assert view |> element("#conversations-#{con2.id}") |> render_click() =~ con2.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{con2.id}")
+      assert_patched(view, "/conversations/all?id=#{con2.id}")
       assert page_title(view) =~ con2.subject
     end
   end
@@ -98,12 +113,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     ]
 
     test "no user assigned by default", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
@@ -114,12 +135,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       admin: user
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
@@ -135,12 +162,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       users: [user1, user2]
     } do
       conn = log_in_user(conn, user1)
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
@@ -150,12 +184,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert view |> element("#conversation-details") |> render() =~ user1.id
 
       conn = log_in_user(conn, user2)
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ user1.id
@@ -166,12 +207,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "assign to user", %{conn: conn, conversations: [conversation | _], users: [user | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
@@ -181,12 +228,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "reassign user", %{conn: conn, conversations: [conversation | _], users: [user1, user2]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
@@ -199,12 +252,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "unassign user", %{conn: conn, conversations: [conversation | _], users: [user1, user2]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
@@ -224,12 +283,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       mailboxes: [mailbox | _]
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ mailbox.id
@@ -240,12 +305,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       mailboxes: [mailbox1, mailbox2]
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.id
@@ -259,12 +330,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       mailboxes: [mailbox1, mailbox2]
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.id
@@ -281,12 +358,18 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       mailboxes: [mailbox1 | _]
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.id
@@ -310,13 +393,13 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     ]
 
     test "initial status", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation.id}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
     end
 
     test "prioritize conversation", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation.id}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -325,7 +408,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "toggle priority", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation.id}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -340,7 +423,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "mark resolved from open", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation.id}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -349,7 +432,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "toggle resolved from open", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation.id}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -364,7 +447,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "mark resolved from prioritized", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation.id}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -376,7 +459,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "mark prioritized from resolved", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation.id}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -388,7 +471,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "toggle resolved and prioritized", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation.id}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
