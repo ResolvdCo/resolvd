@@ -158,10 +158,10 @@ defmodule ResolvdWeb.ConversationLive.Components do
   def message(assigns) do
     ~H"""
     <%= case @message do %>
-      <% %Message{html_body: body} when not is_nil(body) -> %>
-        <iframe srcdoc={body} id={@message.id} phx-hook="DisplayMessage" />
       <% %Message{text_body: body} when not is_nil(body) -> %>
         <div class="whitespace-pre-line"><%= body %></div>
+      <% %Message{html_body: body} when not is_nil(body) -> %>
+        <iframe srcdoc={body} id={@message.id} phx-hook="DisplayMessage" />
       <% _ -> %>
         <div>~~~</div>
     <% end %>
