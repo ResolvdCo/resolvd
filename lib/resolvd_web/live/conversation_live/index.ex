@@ -19,22 +19,6 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   @impl true
-  def handle_params(%{"id" => id} = params, _url, socket) do
-    conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
-
-    socket =
-      case socket.assigns do
-        %{filter: filter} when not is_nil(filter) ->
-          socket
-
-        _ ->
-          apply_action(socket, socket.assigns.live_action, params)
-      end
-
-    {:noreply, switch_to_conversation(socket, conversation)}
-  end
-
-  @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -55,59 +39,33 @@ defmodule ResolvdWeb.ConversationLive.Index do
     push_patch(socket, to: ~p"/conversations/all")
   end
 
-  defp apply_action(socket, :all, params) do
-    conversations = Conversations.list_unresolved_conversations(socket.assigns.current_user)
+  defp apply_action(socket, action, %{"id" => id}) do
+    case socket.assigns do
+      %{conversation: %Conversation{id: ^id}} ->
+        socket
 
-    socket
-    |> redirect_to_first_conversation(conversations, params)
-    |> stream(:conversations, conversations)
-    |> assign(:page_title, "All Conversations")
-    |> assign(:filter, "All Conversations")
-    |> assign(:conversation, nil)
+      %{conversation: %Conversation{}} ->
+        conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
+        switch_to_conversation(socket, conversation)
+
+      _ ->
+        conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
+        conversations = get_conversations_function(action).(socket.assigns.current_user)
+
+        socket
+        |> stream(:conversations, conversations)
+        |> assign(:heading, get_heading(action))
+        |> switch_to_conversation(conversation)
+    end
   end
 
-  defp apply_action(socket, :me, params) do
-    conversations = Conversations.list_conversations_assigned_to_me(socket.assigns.current_user)
+  defp apply_action(socket, action, _params) do
+    conversations = get_conversations_function(action).(socket.assigns.current_user)
 
     socket
-    |> redirect_to_first_conversation(conversations, params)
     |> stream(:conversations, conversations)
-    |> assign(:page_title, "My Conversations")
-    |> assign(:filter, "My Conversations")
-    |> assign(:conversation, nil)
-  end
-
-  defp apply_action(socket, :unassigned, params) do
-    conversations = Conversations.list_unassigned_conversations(socket.assigns.current_user)
-
-    socket
-    |> redirect_to_first_conversation(conversations, params)
-    |> stream(:conversations, conversations)
-    |> assign(:page_title, "Unassigned Conversations")
-    |> assign(:filter, "Unassigned Conversations")
-    |> assign(:conversation, nil)
-  end
-
-  defp apply_action(socket, :prioritized, params) do
-    conversations = Conversations.list_prioritized_conversations(socket.assigns.current_user)
-
-    socket
-    |> redirect_to_first_conversation(conversations, params)
-    |> stream(:conversations, conversations)
-    |> assign(:page_title, "Prioritized Conversations")
-    |> assign(:filter, "Prioritized Conversations")
-    |> assign(:conversation, nil)
-  end
-
-  defp apply_action(socket, :resolved, params) do
-    conversations = Conversations.list_resolved_conversations(socket.assigns.current_user)
-
-    socket
-    |> redirect_to_first_conversation(conversations, params)
-    |> stream(:conversations, conversations)
-    |> assign(:page_title, "Resolved Conversations")
-    |> assign(:filter, "Resolved Conversations")
-    |> assign(:conversation, nil)
+    |> assign(:heading, get_heading(action))
+    |> redirect_to_first_conversation(conversations, action)
   end
 
   @impl true
@@ -196,13 +154,35 @@ defmodule ResolvdWeb.ConversationLive.Index do
     |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)
   end
 
-  defp redirect_to_first_conversation(socket, _conversations, %{"id" => _}), do: socket
-
-  defp redirect_to_first_conversation(socket, [conversation | _], _params) do
-    push_patch(socket,
-      to: Helpers.conversation_index_path(socket, socket.assigns.live_action, id: conversation.id)
-    )
+  defp get_heading(action) do
+    case action do
+      :all -> "All Conversations"
+      :me -> "My Conversations"
+      :unassigned -> "Unassigned Conversations"
+      :prioritized -> "Prioritized Conversations"
+      :resolved -> "Resolved Conversations"
+    end
   end
 
-  defp redirect_to_first_conversation(socket, _conversations, _params), do: socket
+  defp get_conversations_function(action) do
+    case action do
+      :all -> &Conversations.list_unresolved_conversations/1
+      :me -> &Conversations.list_conversations_assigned_to_me/1
+      :unassigned -> &Conversations.list_unassigned_conversations/1
+      :prioritized -> &Conversations.list_prioritized_conversations/1
+      :resolved -> &Conversations.list_resolved_conversations/1
+    end
+  end
+
+  defp redirect_to_first_conversation(socket, [conversation | _], action) do
+    socket
+    |> push_patch(to: Helpers.conversation_index_path(socket, action, id: conversation.id))
+    |> apply_assigns(conversation)
+  end
+
+  defp redirect_to_first_conversation(socket, _conversations, action) do
+    socket
+    |> assign(:conversation, nil)
+    |> assign(:page_title, get_heading(action))
+  end
 end
