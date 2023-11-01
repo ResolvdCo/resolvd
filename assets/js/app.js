@@ -68,3 +68,36 @@ window.addEventListener("phx:input", event => {
   event.target.style.height = '10px';
   event.target.style.height = `${event.target.scrollHeight + 2}px`;
 })
+
+window.addEventListener("phx:highlight", event => {
+  let conversation = document.getElementById(`conversations-${event.detail.id}`)
+  if (conversation) {
+    conversation.classList.remove("hover:bg-gradient-to-r", "hover:border-x-red-100")
+    conversation.classList.add("bg-gradient-to-r", "border-x-red-500")
+
+    let name = conversation.querySelector("h1")
+    name.classList.remove("text-gray-700")
+    name.classList.add("text-gray-800")
+
+    let subject = conversation.querySelector("p")
+    subject.classList.remove("text-gray-600")
+    subject.classList.add("text-gray-700")
+  }
+})
+
+
+window.addEventListener("phx:remove-highlight", event => {
+  let conversation = document.getElementById(`conversations-${event.detail.id}`)
+  if (conversation) {
+    conversation.classList.remove("bg-gradient-to-r", "border-x-red-500")
+    conversation.classList.add("hover:bg-gradient-to-r", "hover:border-x-red-100")
+
+    let name = conversation.querySelector("h1")
+    name.classList.remove("text-gray-800")
+    name.classList.add("text-gray-700")
+
+    let subject = conversation.querySelector("p")
+    subject.classList.remove("text-gray-700")
+    subject.classList.add("text-gray-600")
+  }
+})

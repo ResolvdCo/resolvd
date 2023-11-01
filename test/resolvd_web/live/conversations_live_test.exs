@@ -9,6 +9,8 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
   import ExUnit.CaptureLog, only: [capture_log: 1]
 
+  alias Resolvd.Mailboxes
+
   setup :set_swoosh_global
 
   defp create_conversation(%{mailboxes: [mailbox | _], conversations: conversations} = other) do
@@ -52,37 +54,52 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     ]
 
     test "list all conversations", %{conn: conn, conversations: [con1, con2]} do
-      {:ok, _index_live, html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: "/conversations/all"}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, ~p"/conversations/all")
+
+      {:ok, _index_live, html} = live(conn, conversation_path)
 
       assert html =~ "Conversations"
-      assert html =~ con1.subject
+      assert html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
       assert html =~ "conversations-#{con1.id}"
 
-      assert html =~ con2.subject
+      assert html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
       assert html =~ "conversations-#{con2.id}"
     end
 
     test "display selected conversation", %{conn: conn, conversations: [con | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, ~p"/conversations/all")
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{con.id}") |> render_click() =~ con.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{con.id}")
-      assert page_title(view) =~ con.subject
+      assert_patched(view, "/conversations/all?id=#{con.id}")
+      assert page_title(view) =~ con.subject |> Mailboxes.parse_mime_encoded_word()
     end
 
     test "switch to other conversation", %{conn: conn, conversations: [con1, con2]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{con1.id}") |> render_click() =~ con1.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{con1.id}")
-      assert page_title(view) =~ con1.subject
+      assert_patched(view, "/conversations/all?id=#{con1.id}")
+      assert page_title(view) =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversations-#{con2.id}") |> render_click() =~ con2.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{con2.id}")
-      assert page_title(view) =~ con2.subject
+      assert_patched(view, "/conversations/all?id=#{con2.id}")
+      assert page_title(view) =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
     end
   end
 
@@ -98,13 +115,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     ]
 
     test "no user assigned by default", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
     end
@@ -114,13 +137,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       admin: user
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -135,13 +164,20 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       users: [user1, user2]
     } do
       conn = log_in_user(conn, user1)
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -150,13 +186,20 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert view |> element("#conversation-details") |> render() =~ user1.id
 
       conn = log_in_user(conn, user2)
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ user1.id
 
@@ -166,13 +209,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "assign to user", %{conn: conn, conversations: [conversation | _], users: [user | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -181,13 +230,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "reassign user", %{conn: conn, conversations: [conversation | _], users: [user1, user2]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -199,13 +254,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "unassign user", %{conn: conn, conversations: [conversation | _], users: [user1, user2]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -224,13 +285,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       mailboxes: [mailbox | _]
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ mailbox.id
     end
@@ -240,13 +307,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       mailboxes: [mailbox1, mailbox2]
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.id
 
@@ -259,13 +332,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       mailboxes: [mailbox1, mailbox2]
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.id
 
@@ -281,13 +360,19 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       conversations: [conversation | _],
       mailboxes: [mailbox1 | _]
     } do
-      {:ok, view, _html} = live(conn, ~p"/conversations")
+      assert {:error, {:live_redirect, %{to: all_conversations}}} =
+               live(conn, ~p"/conversations")
+
+      assert {:error, {:live_redirect, %{to: conversation_path}}} =
+               live(conn, all_conversations)
+
+      {:ok, view, _html} = live(conn, conversation_path)
 
       assert view |> element("#conversations-#{conversation.id}") |> render_click() =~
                conversation.mailbox_id
 
-      assert_patched(view, "/conversations?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject
+      assert_patched(view, "/conversations/all?id=#{conversation.id}")
+      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.id
 
@@ -310,13 +395,13 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     ]
 
     test "initial status", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
     end
 
     test "prioritize conversation", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -325,7 +410,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "toggle priority", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -340,7 +425,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "mark resolved from open", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -349,7 +434,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "toggle resolved from open", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -364,7 +449,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "mark resolved from prioritized", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -376,7 +461,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "mark prioritized from resolved", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -388,7 +473,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     end
 
     test "toggle resolved and prioritized", %{conn: conn, conversations: [conversation | _]} do
-      {:ok, view, _html} = live(conn, ~p"/conversations?id=#{conversation.id}")
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
       assert view |> element("#conversation-details") |> render() =~ "Open"
 
@@ -409,6 +494,189 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       view |> element("#priority-change") |> render_change(%{priority: false})
       assert view |> element("#conversation-details") |> render() =~ "Open"
+    end
+  end
+
+  describe "Initial Conversation Categories" do
+    setup [
+      :create_tenant_and_admin,
+      :log_in_admin,
+      :create_conversation,
+      :create_conversation
+    ]
+
+    test "all conversations", %{conn: conn, conversations: [con1, con2]} do
+      {:ok, _view, html} = live(conn, ~p"/conversations/all?id=#{con1}")
+      assert html =~ "All Conversations"
+      assert html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ "conversations-#{con1.id}"
+
+      assert html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ "conversations-#{con2.id}"
+    end
+
+    test "my conversations", %{conn: conn, conversations: [con1, con2]} do
+      {:ok, _view, html} = live(conn, ~p"/conversations/me")
+      assert html =~ "My Conversations"
+      refute html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ "conversations-#{con1.id}"
+
+      refute html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ "conversations-#{con2.id}"
+    end
+
+    test "unassigned conversations", %{conn: conn, conversations: [con1, con2]} do
+      {:ok, _view, html} = live(conn, ~p"/conversations/unassigned?id=#{con1}")
+      assert html =~ "Unassigned Conversations"
+      assert html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ "conversations-#{con1.id}"
+
+      assert html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ "conversations-#{con2.id}"
+    end
+
+    test "prioritized conversations", %{conn: conn, conversations: [con1, con2]} do
+      {:ok, _view, html} = live(conn, ~p"/conversations/prioritized")
+      assert html =~ "Prioritized Conversations"
+      refute html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ "conversations-#{con1.id}"
+
+      refute html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ "conversations-#{con2.id}"
+    end
+
+    test "resolved conversations", %{conn: conn, conversations: [con1, con2]} do
+      {:ok, _view, html} = live(conn, ~p"/conversations/resolved")
+      assert html =~ "Resolved Conversations"
+      refute html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ "conversations-#{con1.id}"
+
+      refute html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ "conversations-#{con2.id}"
+    end
+  end
+
+  describe "Filter conversations" do
+    setup [
+      :create_tenant_and_admin,
+      :log_in_admin,
+      :create_conversation,
+      :create_conversation
+    ]
+
+    test "to me", %{conn: conn, conversations: [con | _], admin: user} do
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{con}")
+
+      view |> element("#assignee-select") |> render_change(%{assignee: user.id})
+      assert view |> element("#conversation-details") |> render() =~ user.id
+
+      view |> element("#category-me") |> render_click()
+      {"/conversations/me", _flash} = assert_redirect(view)
+      {:error, {:live_redirect, %{to: path}}} = live(conn, "/conversations/me")
+
+      {:ok, view, _html} = live(conn, path)
+
+      assert view |> element("#heading") |> render() =~ "My Conversations"
+
+      conversations = view |> element("#conversations") |> render()
+
+      assert conversations =~ con.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ "conversations-#{con.id}"
+    end
+
+    test "to unassigned", %{conn: conn, conversations: [con1, con2], admin: user} do
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{con1}")
+
+      view |> element("#assignee-select") |> render_change(%{assignee: user.id})
+      assert view |> element("#conversation-details") |> render() =~ user.id
+
+      view |> element("#category-unassigned") |> render_click()
+      {"/conversations/unassigned", _flash} = assert_redirect(view)
+      {:error, {:live_redirect, %{to: path}}} = live(conn, "/conversations/unassigned")
+
+      {:ok, view, _html} = live(conn, path)
+
+      assert view |> element("#heading") |> render() =~ "Unassigned Conversations"
+
+      conversations = view |> element("#conversations") |> render()
+
+      assert conversations =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ "conversations-#{con2.id}"
+    end
+
+    test "to prioritized", %{conn: conn, conversations: [con | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{con}")
+
+      view |> element("#priority-change") |> render_change(%{priority: true})
+      assert view |> element("#conversation-details") |> render() =~ "Prioritized"
+
+      view |> element("#category-prioritized") |> render_click()
+      {"/conversations/prioritized", _flash} = assert_redirect(view)
+      {:error, {:live_redirect, %{to: path}}} = live(conn, "/conversations/prioritized")
+
+      {:ok, view, _html} = live(conn, path)
+
+      assert view |> element("#heading") |> render() =~ "Prioritized Conversations"
+
+      conversations = view |> element("#conversations") |> render()
+
+      assert conversations =~ con.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ "conversations-#{con.id}"
+    end
+
+    test "to resolved", %{conn: conn, conversations: [con | _]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{con}")
+
+      view |> element("#resolve-change") |> render_change(%{resolve: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+
+      view |> element("#category-resolved") |> render_click()
+      {"/conversations/resolved", _flash} = assert_redirect(view)
+      {:error, {:live_redirect, %{to: path}}} = live(conn, "/conversations/resolved")
+
+      {:ok, view, _html} = live(conn, path)
+
+      assert view |> element("#heading") |> render() =~ "Resolved Conversations"
+
+      conversations = view |> element("#conversations") |> render()
+
+      assert conversations =~ con.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ "conversations-#{con.id}"
+    end
+
+    test "to all", %{conn: conn, conversations: [con1, con2]} do
+      {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{con1}")
+
+      view |> element("#resolve-change") |> render_change(%{resolve: true})
+      assert view |> element("#conversation-details") |> render() =~ "Resolved"
+
+      view |> element("#category-resolved") |> render_click()
+      {"/conversations/resolved", _flash} = assert_redirect(view)
+      {:error, {:live_redirect, %{to: path}}} = live(conn, "/conversations/resolved")
+
+      {:ok, view, _html} = live(conn, path)
+
+      assert view |> element("#heading") |> render() =~ "Resolved Conversations"
+
+      conversations = view |> element("#conversations") |> render()
+
+      assert conversations =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ "conversations-#{con1.id}"
+
+      view |> element("#category-all") |> render_click()
+      {"/conversations/all", _flash} = assert_redirect(view)
+      {:error, {:live_redirect, %{to: path}}} = live(conn, "/conversations/all")
+
+      {:ok, view, _html} = live(conn, path)
+
+      assert view |> element("#heading") |> render() =~ "All Conversations"
+
+      conversations = view |> element("#conversations") |> render()
+
+      refute conversations =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      refute conversations =~ "conversations-#{con1.id}"
+      assert conversations =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ "conversations-#{con2.id}"
     end
   end
 end

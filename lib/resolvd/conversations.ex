@@ -28,6 +28,102 @@ defmodule Resolvd.Conversations do
   end
 
   @doc """
+  Returns the list of unresolved conversations.
+
+  ## Examples
+
+      iex> list_unresolved_conversations(user)
+      [%Conversation{}, ...]
+
+  """
+  def list_unresolved_conversations(%User{} = user) do
+    from(c in Conversation,
+      where: [is_resolved: false],
+      order_by: [desc: c.inserted_at],
+      preload: [:customer]
+    )
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of unresolved conversations assigned to the user.
+
+  ## Examples
+
+      iex> list_conversations_assigned_to_me(user)
+      [%Conversation{}, ...]
+
+  """
+  def list_conversations_assigned_to_me(%User{} = user) do
+    from(c in Conversation,
+      where: [is_resolved: false, user_id: ^user.id],
+      order_by: [desc: c.inserted_at],
+      preload: [:customer]
+    )
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of unassigned conversations.
+
+  ## Examples
+
+      iex> list_unassigned_conversations(user)
+      [%Conversation{}, ...]
+
+  """
+  def list_unassigned_conversations(%User{} = user) do
+    from(c in Conversation,
+      where: [is_resolved: false],
+      where: is_nil(c.user_id),
+      order_by: [desc: c.inserted_at],
+      preload: [:customer]
+    )
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of prioritized conversations.
+
+  ## Examples
+
+      iex> list_prioritized_conversations(user)
+      [%Conversation{}, ...]
+
+  """
+  def list_prioritized_conversations(%User{} = user) do
+    from(c in Conversation,
+      where: [is_resolved: false, is_prioritized: true],
+      order_by: [desc: c.inserted_at],
+      preload: [:customer]
+    )
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of resolved conversations.
+
+  ## Examples
+
+      iex> list_resolved_conversations(user)
+      [%Conversation{}, ...]
+
+  """
+  def list_resolved_conversations(%User{} = user) do
+    from(c in Conversation,
+      where: [is_resolved: true],
+      order_by: [desc: c.inserted_at],
+      preload: [:customer]
+    )
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single conversation.
 
   Raises `Ecto.NoResultsError` if the Conversation does not exist.

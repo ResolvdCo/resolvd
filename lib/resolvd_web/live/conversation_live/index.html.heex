@@ -2,7 +2,7 @@
   <div class="flex flex-col h-full pt-4 w-full">
     <div class="flex items-center px-4">
       <div class="flex items-center">
-        <div class="text-xl font-semibold">Conversations</div>
+        <div class="text-xl font-semibold" id="heading"><%= @heading %></div>
         <div class="hidden flex items-center justify-center ml-2 text-xs h-5 w-5 text-white bg-red-500 rounded-full font-medium">
           9+
         </div>
@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <ResolvdWeb.ConversationLive.Components.conversation_categories />
+    <ResolvdWeb.ConversationLive.Components.conversation_categories live_action={@live_action} />
 
     <div class="mt-5 pb-2 px-4">
       <div class="text-xs text-gray-400 font-semibold">Mailbox One</div>
@@ -22,6 +22,8 @@
     <ResolvdWeb.ConversationLive.Components.conversation_list
       conversations={@streams.conversations}
       conversation={@conversation}
+      socket={@socket}
+      live_action={@live_action}
     />
   </div>
 </div>

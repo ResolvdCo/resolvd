@@ -93,6 +93,12 @@ defmodule ResolvdWeb.Router do
       live "/reports", DashboardLive.Index, :index
 
       live "/conversations", ConversationLive.Index, :index
+      live "/conversations/all", ConversationLive.Index, :all
+      live "/conversations/me", ConversationLive.Index, :me
+      live "/conversations/unassigned", ConversationLive.Index, :unassigned
+      live "/conversations/prioritized", ConversationLive.Index, :prioritized
+      live "/conversations/resolved", ConversationLive.Index, :resolved
+
       live "/conversations/new", ConversationLive.Index, :new
       live "/conversations/:id/edit", ConversationLive.Index, :edit
 

@@ -1,8 +1,11 @@
 defmodule ResolvdWeb.ConversationLive.Components do
   use ResolvdWeb, :html
 
+  alias ResolvdWeb.Router.Helpers
   alias Resolvd.Conversations.Message
   alias Resolvd.Customers.Customer
+
+  attr :live_action, :atom, required: true
 
   def conversation_categories(assigns) do
     ~H"""
@@ -12,12 +15,14 @@ defmodule ResolvdWeb.ConversationLive.Components do
           <.link
             navigate={item.to}
             class="flex flex-col items-center pb-3 text-xs font-semibold text-gray-700"
+            id={"category-#{item.action}"}
           >
             <span class="whitespace-nowrap">
               <%= item.label %>
             </span>
 
-            <span :if={item.label == "All"} class="h-1 w-full bg-gray-800 rounded-full"></span>
+            <span :if={item.action == @live_action} class="h-1 w-full bg-gray-800 rounded-full">
+            </span>
           </.link>
         </li>
       </ul>
@@ -27,6 +32,8 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   attr :conversations, :any, required: true
   attr :conversation, :map, required: true
+  attr :socket, :any, required: true
+  attr :live_action, :atom, required: true
 
   def conversation_list(assigns) do
     ~H"""
@@ -35,12 +42,12 @@ defmodule ResolvdWeb.ConversationLive.Components do
         <%= for {dom_id, conversation} <- @conversations do %>
           <.link
             id={dom_id}
-            patch={~p"/conversations?id=#{conversation}"}
+            patch={Helpers.conversation_index_path(@socket, @live_action, id: conversation.id)}
             class={[
-              "flex flex-row items-center p-4 border-l-2",
+              "flex flex-row items-center p-4 border-l-2 from-red-100 to-transparent",
               if(active_conversation?(conversation, @conversation),
-                do: "bg-gradient-to-r from-red-100 to-transparent border-x-red-500",
-                else: "hover:bg-gradient-to-r from-red-100 to-transparent hover:border-x-red-100"
+                do: "bg-gradient-to-r border-x-red-500",
+                else: "hover:bg-gradient-to-r hover:border-x-red-100"
               )
             ]}
           >
@@ -159,7 +166,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
     ~H"""
     <%= case @message do %>
       <% %Message{text_body: body} when not is_nil(body) -> %>
-        <div class="whitespace-pre-line"><%= body %></div>
+        <div class="whitespace-pre-line"><%= String.trim(body) %></div>
       <% %Message{html_body: body} when not is_nil(body) -> %>
         <iframe srcdoc={body} id={@message.id} phx-hook="DisplayMessage" />
       <% _ -> %>
@@ -273,29 +280,29 @@ defmodule ResolvdWeb.ConversationLive.Components do
   defp conversation_items do
     [
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/all",
         label: gettext("All"),
-        module: ResolvdWeb.ConversationLive
+        action: :all
       },
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/me",
         label: gettext("Me"),
-        module: ResolvdWeb.ConversationLive
+        action: :me
       },
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/unassigned",
         label: gettext("Unassigned"),
-        module: ResolvdWeb.ConversationLive
+        action: :unassigned
       },
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/prioritized",
         label: gettext("Prioritized"),
-        module: ResolvdWeb.ConversationLive
+        action: :prioritized
       },
       %{
-        to: ~p"/conversations",
+        to: ~p"/conversations/resolved",
         label: gettext("Resolved"),
-        module: ResolvdWeb.Admin.MailboxLive
+        action: :resolved
       }
     ]
   end
