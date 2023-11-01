@@ -70,7 +70,6 @@ window.addEventListener("phx:input", event => {
 })
 
 window.addEventListener("phx:highlight", event => {
-  console.log("add")
   let conversation = document.getElementById(`conversations-${event.detail.id}`)
   if (conversation) {
     conversation.classList.remove("hover:bg-gradient-to-r", "hover:border-x-red-100")
@@ -88,7 +87,6 @@ window.addEventListener("phx:highlight", event => {
 
 
 window.addEventListener("phx:remove-highlight", event => {
-  console.log("remove")
   let conversation = document.getElementById(`conversations-${event.detail.id}`)
   if (conversation) {
     conversation.classList.remove("bg-gradient-to-r", "border-x-red-500")

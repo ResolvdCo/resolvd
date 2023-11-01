@@ -15,6 +15,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
           <.link
             navigate={item.to}
             class="flex flex-col items-center pb-3 text-xs font-semibold text-gray-700"
+            id={"category-#{item.action}"}
           >
             <span class="whitespace-nowrap">
               <%= item.label %>
@@ -165,7 +166,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
     ~H"""
     <%= case @message do %>
       <% %Message{text_body: body} when not is_nil(body) -> %>
-        <div class="whitespace-pre-line"><%= body %></div>
+        <div class="whitespace-pre-line"><%= String.trim(body) %></div>
       <% %Message{html_body: body} when not is_nil(body) -> %>
         <iframe srcdoc={body} id={@message.id} phx-hook="DisplayMessage" />
       <% _ -> %>
