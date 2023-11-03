@@ -27,7 +27,7 @@ defmodule Resolvd.Accounts do
       {:ok, user} ->
         deliver_user_invite(user, tenant, &url(~p"/users/invite/#{&1}"))
 
-        user
+        {:ok, user}
 
       error ->
         error

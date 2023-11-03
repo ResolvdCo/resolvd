@@ -14,7 +14,7 @@ defmodule ResolvdWeb.UserInviteLiveTest do
       tenant: tenant,
       admin: admin
     } do
-      user =
+      {:ok, user} =
         Resolvd.Accounts.invite_user(admin, %{
           name: "Fooey Bar",
           email: "foo@example.com"

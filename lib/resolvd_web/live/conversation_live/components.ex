@@ -35,6 +35,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
   attr :conversation, :map, required: true
   attr :socket, :any, required: true
   attr :live_action, :atom, required: true
+  attr :current_user, :any, required: true
 
   def conversation_list(assigns) do
     ~H"""
@@ -81,7 +82,28 @@ defmodule ResolvdWeb.ConversationLive.Components do
                 ]}>
                   <%= Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject) %>
                 </p>
-                <div class="hidden h-1 w-1 p-1 bg-red-500 rounded-full"></div>
+                <%= if @live_action in [:all, :prioritized] do %>
+                  <%= case conversation.user_id do %>
+                    <% nil -> %>
+                      <% nil %>
+                    <% user_id when user_id == @current_user.id  -> %>
+                      <ResolvdWeb.Nav.tooltip
+                        label={"Assigned to #{@current_user.name}"}
+                        position="left"
+                        class="right-[150%]"
+                      >
+                        <.icon name="hero-user-solid h-4 w-4 bg-blue-500" />
+                      </ResolvdWeb.Nav.tooltip>
+                    <% _ -> %>
+                      <ResolvdWeb.Nav.tooltip
+                        label={"Assigned to #{conversation.user.name}"}
+                        position="left"
+                        class="right-[150%]"
+                      >
+                        <.icon name="hero-user-solid h-4 w-4" />
+                      </ResolvdWeb.Nav.tooltip>
+                  <% end %>
+                <% end %>
               </div>
             </div>
           </.link>

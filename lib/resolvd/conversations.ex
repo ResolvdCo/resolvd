@@ -40,7 +40,7 @@ defmodule Resolvd.Conversations do
     from(c in Conversation,
       where: [is_resolved: false],
       order_by: [desc: c.inserted_at],
-      preload: [:customer]
+      preload: [:customer, :user]
     )
     |> Bodyguard.scope(user)
     |> Repo.all()
@@ -59,7 +59,7 @@ defmodule Resolvd.Conversations do
     from(c in Conversation,
       where: [is_resolved: false, user_id: ^user.id],
       order_by: [desc: c.inserted_at],
-      preload: [:customer]
+      preload: [:customer, :user]
     )
     |> Bodyguard.scope(user)
     |> Repo.all()
@@ -79,7 +79,7 @@ defmodule Resolvd.Conversations do
       where: [is_resolved: false],
       where: is_nil(c.user_id),
       order_by: [desc: c.inserted_at],
-      preload: [:customer]
+      preload: [:customer, :user]
     )
     |> Bodyguard.scope(user)
     |> Repo.all()
@@ -98,7 +98,7 @@ defmodule Resolvd.Conversations do
     from(c in Conversation,
       where: [is_resolved: false, is_prioritized: true],
       order_by: [desc: c.inserted_at],
-      preload: [:customer]
+      preload: [:customer, :user]
     )
     |> Bodyguard.scope(user)
     |> Repo.all()
@@ -117,7 +117,7 @@ defmodule Resolvd.Conversations do
     from(c in Conversation,
       where: [is_resolved: true],
       order_by: [desc: c.inserted_at],
-      preload: [:customer]
+      preload: [:customer, :user]
     )
     |> Bodyguard.scope(user)
     |> Repo.all()
