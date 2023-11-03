@@ -98,6 +98,7 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
   def handle_event("mailbox_changed", %{"mailbox" => mailbox_id}, socket) do
     mailbox = Mailboxes.get_mailbox!(socket.assigns.current_user, mailbox_id)
     conversation = Conversations.update_conversation_mailbox(socket.assigns.conversation, mailbox)
+    conversation = Conversations.get_conversation!(socket.assigns.current_user, conversation.id)
     notify_parent({:updated_mailbox, conversation})
 
     {:noreply, socket}
@@ -106,6 +107,7 @@ defmodule ResolvdWeb.ConversationLive.HeaderForm do
   def handle_event("assignee_changed", %{"assignee" => user_id}, socket) do
     user = if user_id == "", do: nil, else: Accounts.get_user!(user_id)
     conversation = Conversations.update_conversation_user(socket.assigns.conversation, user)
+    conversation = Conversations.get_conversation!(socket.assigns.current_user, conversation.id)
     notify_parent({:updated_user, conversation})
 
     {:noreply, socket}

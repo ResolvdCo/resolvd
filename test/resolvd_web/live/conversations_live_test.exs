@@ -155,7 +155,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       view |> element("#message-form") |> render_submit()
       assert_email_sent()
-      assert view |> element("#conversation-details") |> render() =~ user.id
+      assert view |> element("#conversation-details") |> render() =~ user.name
     end
 
     test "replying to assigned conversation doesn't reassign", %{
@@ -183,7 +183,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       view |> element("#message-form") |> render_submit()
       assert_email_sent()
-      assert view |> element("#conversation-details") |> render() =~ user1.id
+      assert view |> element("#conversation-details") |> render() =~ user1.name
 
       conn = log_in_user(conn, user2)
 
@@ -201,11 +201,11 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
-      assert view |> element("#conversation-details") |> render() =~ user1.id
+      assert view |> element("#conversation-details") |> render() =~ user1.name
 
       view |> element("#message-form") |> render_submit()
       assert_email_sent()
-      assert view |> element("#conversation-details") |> render() =~ user1.id
+      assert view |> element("#conversation-details") |> render() =~ user1.name
     end
 
     test "assign to user", %{conn: conn, conversations: [conversation | _], users: [user | _]} do
@@ -226,7 +226,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
       view |> element("#assignee-select") |> render_change(%{assignee: user.id})
-      assert view |> element("#conversation-details") |> render() =~ user.id
+      assert view |> element("#conversation-details") |> render() =~ user.name
     end
 
     test "reassign user", %{conn: conn, conversations: [conversation | _], users: [user1, user2]} do
@@ -247,10 +247,10 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
       view |> element("#assignee-select") |> render_change(%{assignee: user1.id})
-      assert view |> element("#conversation-details") |> render() =~ user1.id
+      assert view |> element("#conversation-details") |> render() =~ user1.name
 
       view |> element("#assignee-select") |> render_change(%{assignee: user2.id})
-      assert view |> element("#conversation-details") |> render() =~ user2.id
+      assert view |> element("#conversation-details") |> render() =~ user2.name
     end
 
     test "unassign user", %{conn: conn, conversations: [conversation | _], users: [user1, user2]} do
@@ -271,10 +271,10 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
       view |> element("#assignee-select") |> render_change(%{assignee: user1.id})
-      assert view |> element("#conversation-details") |> render() =~ user1.id
+      assert view |> element("#conversation-details") |> render() =~ user1.name
 
       view |> element("#assignee-select") |> render_change(%{assignee: user2.id})
-      assert view |> element("#conversation-details") |> render() =~ user2.id
+      assert view |> element("#conversation-details") |> render() =~ user2.name
 
       view |> element("#assignee-select") |> render_change(%{assignee: ""})
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
@@ -568,7 +568,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{con}")
 
       view |> element("#assignee-select") |> render_change(%{assignee: user.id})
-      assert view |> element("#conversation-details") |> render() =~ user.id
+      assert view |> element("#conversation-details") |> render() =~ user.name
 
       view |> element("#category-me") |> render_click()
       {"/conversations/me", _flash} = assert_redirect(view)
@@ -588,7 +588,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{con1}")
 
       view |> element("#assignee-select") |> render_change(%{assignee: user.id})
-      assert view |> element("#conversation-details") |> render() =~ user.id
+      assert view |> element("#conversation-details") |> render() =~ user.name
 
       view |> element("#category-unassigned") |> render_click()
       {"/conversations/unassigned", _flash} = assert_redirect(view)

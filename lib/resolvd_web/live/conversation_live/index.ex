@@ -8,6 +8,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
   alias Resolvd.Conversations.Message
   alias Resolvd.Accounts
   alias Resolvd.Mailboxes
+  alias Resolvd.Repo
 
   @impl true
   def mount(_params, _session, socket) do
@@ -130,7 +131,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
   defp apply_assigns(socket, conversation) do
     socket
-    |> assign(:conversation, conversation)
+    |> assign(:conversation, conversation |> Repo.preload([:user]))
     |> assign(:message, %Message{})
     |> assign(:page_title, Mailboxes.parse_mime_encoded_word(conversation.subject))
     |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)

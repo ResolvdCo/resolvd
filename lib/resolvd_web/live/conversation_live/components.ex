@@ -214,7 +214,9 @@ defmodule ResolvdWeb.ConversationLive.Components do
         </div>
         <div class="flex items-center space-x-2 pl-2">
           <span class="font-medium text-sm">Assignee: </span>
-          <p class="truncate text-sm"><%= @conversation.user_id || "Not assigned" %></p>
+          <p class="truncate text-sm">
+            <%= if @conversation.user_id, do: @conversation.user.name, else: "Not assigned" %>
+          </p>
         </div>
         <div class="flex items-center space-x-2 pl-2">
           <span class="font-medium text-sm">Inbox: </span>
