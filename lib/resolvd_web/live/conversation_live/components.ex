@@ -4,6 +4,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
   alias ResolvdWeb.Router.Helpers
   alias Resolvd.Conversations.Message
   alias Resolvd.Customers.Customer
+  alias Resolvd.Mailboxes
 
   attr :live_action, :atom, required: true
 
@@ -318,7 +319,8 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   def display_name(%Customer{} = customer) do
     cond do
-      not is_nil(customer.name) -> customer.name
+      # Name can contain non-ASCII characters
+      not is_nil(customer.name) -> customer.name |> Mailboxes.parse_mime_encoded_word()
       not is_nil(customer.email) -> customer.email
       not is_nil(customer.phone) -> customer.phone
       true -> "Customer"

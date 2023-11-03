@@ -152,11 +152,7 @@ defmodule Resolvd.Conversations do
     |> Bodyguard.scope(user)
     |> where(id: ^id)
     |> Repo.one!()
-    |> Repo.preload([
-      :customer,
-      :user
-      # messages: from(Message, order_by: [asc: :inserted_at], preload: [:customer, :user])
-    ])
+    |> Repo.preload([:customer, :user])
   end
 
   @doc """
