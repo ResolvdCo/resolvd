@@ -299,7 +299,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
-      assert view |> element("#conversation-details") |> render() =~ mailbox.id
+      assert view |> element("#conversation-details") |> render() =~ mailbox.name
     end
 
     test "assign mailbox", %{
@@ -321,10 +321,10 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
-      assert view |> element("#conversation-details") |> render() =~ mailbox1.id
+      assert view |> element("#conversation-details") |> render() =~ mailbox1.name
 
       view |> element("#mailbox-select") |> render_change(%{mailbox: mailbox2.id})
-      assert view |> element("#conversation-details") |> render() =~ mailbox2.id
+      assert view |> element("#conversation-details") |> render() =~ mailbox2.name
     end
 
     test "reassign mailbox", %{
@@ -346,13 +346,13 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
-      assert view |> element("#conversation-details") |> render() =~ mailbox1.id
+      assert view |> element("#conversation-details") |> render() =~ mailbox1.name
 
       view |> element("#mailbox-select") |> render_change(%{mailbox: mailbox2.id})
-      assert view |> element("#conversation-details") |> render() =~ mailbox2.id
+      assert view |> element("#conversation-details") |> render() =~ mailbox2.name
 
       view |> element("#mailbox-select") |> render_change(%{mailbox: mailbox1.id})
-      assert view |> element("#conversation-details") |> render() =~ mailbox1.id
+      assert view |> element("#conversation-details") |> render() =~ mailbox1.name
     end
 
     test "unassign mailbox", %{
@@ -374,7 +374,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
       assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
 
-      assert view |> element("#conversation-details") |> render() =~ mailbox1.id
+      assert view |> element("#conversation-details") |> render() =~ mailbox1.name
 
       assert capture_log(fn ->
                Process.flag(:trap_exit, true)
@@ -397,13 +397,13 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     test "initial status", %{conn: conn, conversations: [conversation | _]} do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
     end
 
     test "prioritize conversation", %{conn: conn, conversations: [conversation | _]} do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#priority-change") |> render_change(%{priority: true})
       assert view |> element("#conversation-details") |> render() =~ "Prioritized"
@@ -412,13 +412,13 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     test "toggle priority", %{conn: conn, conversations: [conversation | _]} do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#priority-change") |> render_change(%{priority: true})
       assert view |> element("#conversation-details") |> render() =~ "Prioritized"
 
       view |> element("#priority-change") |> render_change(%{priority: false})
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#priority-change") |> render_change(%{priority: true})
       assert view |> element("#conversation-details") |> render() =~ "Prioritized"
@@ -427,7 +427,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     test "mark resolved from open", %{conn: conn, conversations: [conversation | _]} do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#resolve-change") |> render_change(%{resolve: true})
       assert view |> element("#conversation-details") |> render() =~ "Resolved"
@@ -436,13 +436,13 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     test "toggle resolved from open", %{conn: conn, conversations: [conversation | _]} do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#resolve-change") |> render_change(%{resolve: true})
       assert view |> element("#conversation-details") |> render() =~ "Resolved"
 
       view |> element("#resolve-change") |> render_change(%{resolve: false})
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#resolve-change") |> render_change(%{resolve: true})
       assert view |> element("#conversation-details") |> render() =~ "Resolved"
@@ -451,7 +451,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     test "mark resolved from prioritized", %{conn: conn, conversations: [conversation | _]} do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#priority-change") |> render_change(%{priority: true})
       assert view |> element("#conversation-details") |> render() =~ "Prioritized"
@@ -463,7 +463,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     test "mark prioritized from resolved", %{conn: conn, conversations: [conversation | _]} do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#resolve-change") |> render_change(%{resolve: true})
       assert view |> element("#conversation-details") |> render() =~ "Resolved"
@@ -475,7 +475,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     test "toggle resolved and prioritized", %{conn: conn, conversations: [conversation | _]} do
       {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
 
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
 
       view |> element("#priority-change") |> render_change(%{priority: true})
       assert view |> element("#conversation-details") |> render() =~ "Prioritized"
@@ -493,7 +493,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert view |> element("#conversation-details") |> render() =~ "Prioritized"
 
       view |> element("#priority-change") |> render_change(%{priority: false})
-      assert view |> element("#conversation-details") |> render() =~ "Open"
+      assert view |> element("#conversation-details") |> render() =~ "Unresolved"
     end
   end
 

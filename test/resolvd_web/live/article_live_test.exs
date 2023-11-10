@@ -4,12 +4,12 @@ defmodule ResolvdWeb.ArticleLiveTest do
   import Phoenix.LiveViewTest
   import Resolvd.ArticlesFixtures
 
-  @create_attrs %{body: "some body", subject: "some subject"}
-  @update_attrs %{
-    body: "some updated body",
-    subject: "some updated subject"
-  }
-  @invalid_attrs %{body: nil, subject: nil}
+  # @create_attrs %{body: "some body", subject: "some subject"}
+  # @update_attrs %{
+  #   body: "some updated body",
+  #   subject: "some updated subject"
+  # }
+  # @invalid_attrs %{body: nil, subject: nil}
 
   defp create_article(%{admin: admin} = other) do
     Map.put(other, :article, article_fixture(admin))
