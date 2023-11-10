@@ -20,7 +20,7 @@ defmodule Resolvd.AccountsFixtures do
       email: unique_user_email(),
       password: valid_user_password(),
       company_name: "ExampleCompany#{System.unique_integer()}",
-      full_name: "Dave ##{System.unique_integer()} Example"
+      full_name: "Dave ##{System.unique_integer()}"
     })
   end
 

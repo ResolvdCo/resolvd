@@ -34,7 +34,10 @@ defmodule ResolvdWeb.ConversationLive.ShowMessage do
           />
         </div>
 
-        <ResolvdWeb.ConversationLive.Components.details conversation={@conversation} />
+        <ResolvdWeb.ConversationLive.Components.details
+          conversation={@conversation}
+          current_user={@current_user}
+        />
       </div>
     </div>
     """

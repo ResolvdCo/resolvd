@@ -123,21 +123,21 @@ defmodule ResolvdWeb.ConversationLive.Index do
   defp switch_to_conversation(socket, conversation, nil) do
     socket
     |> apply_assigns(conversation)
-    |> push_event("highlight", %{id: conversation.id})
+    |> push_event("highlight", %{id: "conversations-#{conversation.id}"})
   end
 
   defp switch_to_conversation(socket, conversation, old_conversation) do
     socket
     |> apply_assigns(conversation)
-    |> push_event("highlight", %{id: conversation.id})
-    |> push_event("remove-highlight", %{id: old_conversation.id})
+    |> push_event("highlight", %{id: "conversations-#{conversation.id}"})
+    |> push_event("remove-highlight", %{id: "conversations-#{old_conversation.id}"})
   end
 
   defp apply_assigns(socket, conversation) do
     socket
     |> assign(:conversation, conversation)
     |> assign(:message, %Message{})
-    |> assign(:page_title, Mailboxes.parse_mime_encoded_word(conversation.subject))
+    |> assign(:page_title, Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject))
     |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)
   end
 

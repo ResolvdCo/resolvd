@@ -11,9 +11,9 @@ defmodule Resolvd.CustomersFixtures do
     attrs =
       attrs
       |> Enum.into(%{
-        email: "some email",
-        name: "some name",
-        phone: "some phone"
+        email: "customer##{System.unique_integer()}@example.com",
+        name: "Customer##{System.unique_integer()}",
+        phone: "#{System.unique_integer()}"
       })
 
     {:ok, customer} = Resolvd.Customers.create_customer(tenant, attrs)

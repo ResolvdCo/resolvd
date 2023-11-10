@@ -9,6 +9,7 @@ defmodule Resolvd.Customers do
   alias Resolvd.Customers.Customer
   alias Resolvd.Tenants.Tenant
   alias Resolvd.Accounts.User
+  alias Resolvd.Conversations.Conversation
 
   @doc """
   List all customers
@@ -53,6 +54,18 @@ defmodule Resolvd.Customers do
     |> Bodyguard.scope(user)
     |> where(id: ^id)
     |> Repo.one!()
+  end
+
+  @doc """
+  Gets all conversations for a customer.
+  """
+  def get_conversations_for_customer(%Customer{id: id}) do
+    from(c in Conversation,
+      where: [customer_id: ^id],
+      order_by: [desc: c.updated_at],
+      preload: [:customer]
+    )
+    |> Repo.all()
   end
 
   @doc """
