@@ -13,9 +13,11 @@ defmodule ResolvdWeb.ConversationLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> stream_configure(:conversations, dom_id: &"mailbox-conversations-#{&1 |> elem(0)}")
      |> stream(:conversations, [])
      |> assign(:users, Accounts.list_users(socket.assigns.current_user))
-     |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))}
+     |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))
+     |> set_mailbox_conversation_streams()}
   end
 
   @impl true
@@ -50,27 +52,37 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
       _ ->
         conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
-        conversations = get_conversations_function(action).(socket.assigns.current_user)
+
+        conversations =
+          get_conversations_function(action).(socket.assigns.current_user)
+          |> Enum.group_by(& &1.mailbox_id)
 
         socket
-        |> stream(:conversations, conversations)
+        |> stream(:conversations, get_mailbox_id_and_name(conversations))
+        |> stream_mailbox_conversations(conversations)
         |> assign(:heading, get_heading(action))
         |> switch_to_conversation(conversation, nil)
     end
   end
 
   defp apply_action(socket, action, _params) do
-    conversations = get_conversations_function(action).(socket.assigns.current_user)
+    conversations =
+      get_conversations_function(action).(socket.assigns.current_user)
+      |> Enum.group_by(& &1.mailbox_id)
 
     socket
-    |> stream(:conversations, conversations)
+    |> stream(:conversations, get_mailbox_id_and_name(conversations))
+    |> stream_mailbox_conversations(conversations)
     |> assign(:heading, get_heading(action))
     |> redirect_to_first_conversation(conversations, action)
   end
 
   @impl true
   def handle_info({ResolvdWeb.ConversationLive.FormComponent, {:saved, conversation}}, socket) do
-    {:noreply, stream_insert(socket, :conversations, conversation)}
+    {:noreply,
+     socket
+     |> stream_insert(:conversations, conversation.mailbox_id)
+     |> stream_insert(conversation.mailbox_id, conversation)}
   end
 
   @impl true
@@ -81,7 +93,8 @@ defmodule ResolvdWeb.ConversationLive.Index do
     {:noreply,
      socket
      |> stream_insert(:messages, message)
-     |> stream_insert(:conversations, conversation)
+     |> stream_insert(:conversations, {conversation.mailbox_id, conversation.mailbox.name})
+     |> stream_insert(conversation.mailbox_id, conversation)
      |> assign(:conversation, conversation)}
   end
 
@@ -90,13 +103,20 @@ defmodule ResolvdWeb.ConversationLive.Index do
         {ResolvdWeb.ConversationLive.HeaderForm, {:updated_mailbox, conversation}},
         socket
       ) do
-    {:noreply, assign(socket, :conversation, conversation)}
+    {:noreply,
+     socket
+     |> assign(:conversation, conversation)
+     |> stream_insert(:conversations, {conversation.mailbox_id, conversation.mailbox.name})
+     |> stream_insert(conversation.mailbox_id, conversation)}
   end
 
   @impl true
   def handle_info({ResolvdWeb.ConversationLive.HeaderForm, {:updated_user, conversation}}, socket) do
     {:noreply,
-     socket |> assign(:conversation, conversation) |> stream_insert(:conversations, conversation)}
+     socket
+     |> assign(:conversation, conversation)
+     |> stream_insert(:conversations, {conversation.mailbox_id, conversation.mailbox.name})
+     |> stream_insert(conversation.mailbox_id, conversation)}
   end
 
   @impl true
@@ -141,16 +161,40 @@ defmodule ResolvdWeb.ConversationLive.Index do
     |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)
   end
 
-  defp redirect_to_first_conversation(socket, [conversation | _], action) do
-    socket
-    |> push_patch(to: Helpers.conversation_index_path(socket, action, id: conversation.id))
-    |> apply_assigns(conversation)
+  defp redirect_to_first_conversation(socket, conversations, action) do
+    case Map.keys(conversations) do
+      [mailbox_id | _] ->
+        [conversation | _] = Map.get(conversations, mailbox_id)
+
+        socket
+        |> push_patch(to: Helpers.conversation_index_path(socket, action, id: conversation.id))
+        |> apply_assigns(conversation)
+
+      _ ->
+        socket
+        |> assign(:conversation, nil)
+        |> assign(:page_title, get_heading(action))
+    end
   end
 
-  defp redirect_to_first_conversation(socket, _conversations, action) do
-    socket
-    |> assign(:conversation, nil)
-    |> assign(:page_title, get_heading(action))
+  defp set_mailbox_conversation_streams(socket) do
+    Enum.reduce(socket.assigns.mailboxes, socket, fn mailbox, socket ->
+      socket
+      |> stream_configure(mailbox.id, dom_id: &"conversations-#{&1.id}")
+      |> stream(mailbox.id, [])
+    end)
+  end
+
+  defp stream_mailbox_conversations(socket, conversations) do
+    Enum.reduce(conversations, socket, fn {mailbox_id, convos}, socket ->
+      stream(socket, mailbox_id, convos, reset: true)
+    end)
+  end
+
+  defp get_mailbox_id_and_name(conversations) do
+    Enum.map(conversations, fn {mailbox_id, [conversation | _]} ->
+      {mailbox_id, conversation.mailbox.name}
+    end)
   end
 
   defp get_heading(action) do

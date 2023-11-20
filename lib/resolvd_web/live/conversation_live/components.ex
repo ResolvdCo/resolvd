@@ -32,6 +32,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
   end
 
   attr :conversations, :any, required: true
+  attr :mailbox_id, :string, required: true
   attr :conversation, :map, required: true
   attr :socket, :any, required: true
   attr :live_action, :atom, required: true
@@ -39,8 +40,12 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   def conversation_list(assigns) do
     ~H"""
-    <div class="h-full overflow-hidden relative shadow-inner">
-      <div class="flex flex-col h-full w-full overflow-y-auto " id="conversations" phx-update="stream">
+    <div class="h-full overflow-hidden relative shadow-inner conversations">
+      <div
+        class="flex flex-col h-full w-full overflow-y-auto"
+        id={"mailbox-list-#{@mailbox_id}"}
+        phx-update="stream"
+      >
         <%= for {dom_id, conversation} <- @conversations do %>
           <.link
             id={dom_id}

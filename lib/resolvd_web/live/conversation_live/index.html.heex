@@ -18,16 +18,25 @@
 
     <ResolvdWeb.ConversationLive.Components.conversation_categories live_action={@live_action} />
 
-    <div class="mt-5 pb-2 px-4">
-      <div class="text-xs text-gray-400 font-semibold">Mailbox One</div>
+    <div id="mailbox-filtered" phx-update="stream" class="overflow-y-auto">
+      <%= for {dom_id, {mailbox_id, mailbox_name}} <- @streams.conversations  do %>
+        <div id={dom_id}>
+          <div class="py-2 px-4 sticky top-0 bg-gray-100 z-30">
+            <div class="text-xs text-gray-500 font-semibold">
+              <%= mailbox_name %>
+            </div>
+          </div>
+          <ResolvdWeb.ConversationLive.Components.conversation_list
+            conversations={@streams[mailbox_id]}
+            mailbox_id={mailbox_id}
+            conversation={@conversation}
+            socket={@socket}
+            live_action={@live_action}
+            current_user={@current_user}
+          />
+        </div>
+      <% end %>
     </div>
-    <ResolvdWeb.ConversationLive.Components.conversation_list
-      conversations={@streams.conversations}
-      conversation={@conversation}
-      socket={@socket}
-      live_action={@live_action}
-      current_user={@current_user}
-    />
   </div>
 </div>
 

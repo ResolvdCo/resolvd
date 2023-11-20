@@ -6,7 +6,8 @@
 
 /* This file is for your main application CSS */
 
-@import url('https://fonts.googleapis.com/css2?family=Sriracha&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Sriracha&display=swap");
+
 .sriracha {
-    font-family: 'Sriracha', cursive;
+  font-family: "Sriracha", cursive;
 }
