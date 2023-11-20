@@ -69,6 +69,22 @@ defmodule Resolvd.Customers do
   end
 
   @doc """
+  Searches for customer by their name, email or phone.
+  """
+  def search_customers(search_query) do
+    search_query = "%#{search_query}%"
+
+    query =
+      from c in Customer,
+        where: ilike(c.name, ^search_query),
+        or_where: ilike(c.email, ^search_query),
+        or_where: ilike(c.phone, ^search_query),
+        select: c
+
+    Repo.all(query)
+  end
+
+  @doc """
   Creates a customer.
 
   ## Examples

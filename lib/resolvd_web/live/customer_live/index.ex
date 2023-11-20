@@ -15,6 +15,7 @@ defmodule ResolvdWeb.CustomerLive.Index do
      socket
      |> stream(:customers, [])
      |> assign(:conversation, nil)
+     |> assign(:query, "")
      |> assign(:users, Accounts.list_users(socket.assigns.current_user))
      |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))}
   end
@@ -129,6 +130,19 @@ defmodule ResolvdWeb.CustomerLive.Index do
     conversation = Conversations.update_conversation_user(conversation, user)
 
     {:noreply, stream_insert(socket, :conversations, conversation)}
+  end
+
+  @impl true
+  def handle_event("search", %{"search" => query}, socket) do
+    customers = Customers.search_customers(query)
+
+    socket =
+      socket
+      |> stream(:customers, customers, reset: true)
+      |> redirect_to_first_customer(customers)
+      |> assign(:query, query)
+
+    {:noreply, socket}
   end
 
   @impl true
