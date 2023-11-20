@@ -156,6 +156,25 @@ defmodule Resolvd.Conversations do
   end
 
   @doc """
+  Searches the given string in the conversation.
+  """
+  def search_conversation(search_query) do
+    search_query = "%#{search_query}%"
+
+    query =
+      from c in Conversation,
+        join: m in Message,
+        on: c.id == m.conversation_id,
+        where: ilike(m.text_body, ^search_query),
+        or_where: ilike(m.html_body, ^search_query),
+        or_where: ilike(c.subject, ^search_query),
+        select: c,
+        preload: [:customer, :user, :mailbox]
+
+    Repo.all(query)
+  end
+
+  @doc """
   Creates a conversation.
 
   ## Examples

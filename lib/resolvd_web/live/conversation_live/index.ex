@@ -17,6 +17,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
      |> stream(:conversations, [])
      |> assign(:users, Accounts.list_users(socket.assigns.current_user))
      |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))
+     |> assign(:query, "")
      |> set_mailbox_conversation_streams()}
   end
 
@@ -133,6 +134,23 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   @impl true
+  def handle_event("search", %{"search" => query}, socket) do
+    conversations =
+      query
+      |> Conversations.search_conversation()
+      |> Enum.group_by(& &1.mailbox_id)
+
+    socket =
+      socket
+      |> stream(:conversations, get_mailbox_id_and_name(conversations))
+      |> stream_mailbox_conversations(conversations)
+      |> redirect_to_first_conversation(conversations, socket.assigns.live_action)
+      |> assign(:query, query)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
     {:ok, _} = Conversations.delete_conversation(conversation)
@@ -186,6 +204,16 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   defp stream_mailbox_conversations(socket, conversations) do
+    all_mailboxes = socket.assigns.mailboxes |> Enum.into(%MapSet{})
+    streaming_mailboxes = conversations |> Map.keys() |> Enum.into(%MapSet{})
+
+    socket =
+      all_mailboxes
+      |> MapSet.difference(streaming_mailboxes)
+      |> Enum.reduce(socket, fn mailbox, socket ->
+        stream_delete(socket, :conversations, {mailbox.id, mailbox.name})
+      end)
+
     Enum.reduce(conversations, socket, fn {mailbox_id, convos}, socket ->
       stream(socket, mailbox_id, convos, reset: true)
     end)
