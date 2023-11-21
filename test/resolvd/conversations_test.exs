@@ -237,7 +237,7 @@ defmodule Resolvd.ConversationsTest do
     end
 
     test "list all unresolved conversations", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_unresolved_conversations(user)
+      assert Conversations.filter_conversations(user, :all)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox))
@@ -250,10 +250,10 @@ defmodule Resolvd.ConversationsTest do
     end
 
     test "list all conversations assigned to user", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_conversations_assigned_to_me(user) == []
+      assert Conversations.filter_conversations(user, :me) == []
       convo1 = Conversations.update_conversation_user(convo1, user)
 
-      assert Conversations.list_conversations_assigned_to_me(user)
+      assert Conversations.filter_conversations(user, :me)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox)) ==
@@ -264,7 +264,7 @@ defmodule Resolvd.ConversationsTest do
 
       convo2 = Conversations.update_conversation_user(convo2, user)
 
-      assert Conversations.list_conversations_assigned_to_me(user)
+      assert Conversations.filter_conversations(user, :me)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox))
@@ -275,7 +275,7 @@ defmodule Resolvd.ConversationsTest do
                |> Enum.map(&Map.delete(&1, :mailbox))
                |> Enum.sort()
 
-      assert Conversations.list_unresolved_conversations(user)
+      assert Conversations.filter_conversations(user, :all)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox))
@@ -288,7 +288,7 @@ defmodule Resolvd.ConversationsTest do
     end
 
     test "list all unassigned conversations", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_unassigned_conversations(user)
+      assert Conversations.filter_conversations(user, :unassigned)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox))
@@ -301,7 +301,7 @@ defmodule Resolvd.ConversationsTest do
 
       convo1 = Conversations.update_conversation_user(convo1, user)
 
-      assert Conversations.list_unassigned_conversations(user)
+      assert Conversations.filter_conversations(user, :unassigned)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox)) ==
@@ -312,9 +312,9 @@ defmodule Resolvd.ConversationsTest do
 
       convo2 = Conversations.update_conversation_user(convo2, user)
 
-      assert Conversations.list_unassigned_conversations(user) == []
+      assert Conversations.filter_conversations(user, :unassigned) == []
 
-      assert Conversations.list_unresolved_conversations(user)
+      assert Conversations.filter_conversations(user, :all)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox))
@@ -327,11 +327,11 @@ defmodule Resolvd.ConversationsTest do
     end
 
     test "list all prioritized conversations", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_prioritized_conversations(user) == []
+      assert Conversations.filter_conversations(user, :prioritized) == []
 
       convo1 = Conversations.set_priority(convo1, true)
 
-      assert Conversations.list_prioritized_conversations(user)
+      assert Conversations.filter_conversations(user, :prioritized)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox)) ==
@@ -342,7 +342,7 @@ defmodule Resolvd.ConversationsTest do
 
       convo2 = Conversations.set_priority(convo2, true)
 
-      assert Conversations.list_prioritized_conversations(user)
+      assert Conversations.filter_conversations(user, :prioritized)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox))
@@ -353,7 +353,7 @@ defmodule Resolvd.ConversationsTest do
                |> Enum.map(&Map.delete(&1, :mailbox))
                |> Enum.sort()
 
-      assert Conversations.list_unresolved_conversations(user)
+      assert Conversations.filter_conversations(user, :all)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox))
@@ -366,11 +366,11 @@ defmodule Resolvd.ConversationsTest do
     end
 
     test "list all resolved conversations", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_resolved_conversations(user) == []
+      assert Conversations.filter_conversations(user, :resolved) == []
 
       convo1 = Conversations.set_resolved(convo1, true)
 
-      assert Conversations.list_resolved_conversations(user)
+      assert Conversations.filter_conversations(user, :resolved)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox)) ==
@@ -379,7 +379,7 @@ defmodule Resolvd.ConversationsTest do
                |> Enum.map(&Map.delete(&1, :user))
                |> Enum.map(&Map.delete(&1, :mailbox))
 
-      assert Conversations.list_unresolved_conversations(user)
+      assert Conversations.filter_conversations(user, :all)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox)) ==
@@ -390,7 +390,7 @@ defmodule Resolvd.ConversationsTest do
 
       convo2 = Conversations.set_resolved(convo2, true)
 
-      assert Conversations.list_resolved_conversations(user)
+      assert Conversations.filter_conversations(user, :resolved)
              |> Enum.map(&Map.delete(&1, :messages))
              |> Enum.map(&Map.delete(&1, :user))
              |> Enum.map(&Map.delete(&1, :mailbox))
@@ -401,7 +401,7 @@ defmodule Resolvd.ConversationsTest do
                |> Enum.map(&Map.delete(&1, :mailbox))
                |> Enum.sort()
 
-      assert Conversations.list_unresolved_conversations(user) == []
+      assert Conversations.filter_conversations(user, :all) == []
     end
   end
 end

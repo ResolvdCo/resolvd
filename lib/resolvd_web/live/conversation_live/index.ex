@@ -55,7 +55,8 @@ defmodule ResolvdWeb.ConversationLive.Index do
         conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
 
         conversations =
-          get_conversations_function(action).(socket.assigns.current_user)
+          socket.assigns.current_user
+          |> Conversations.filter_conversations(action)
           |> Enum.group_by(& &1.mailbox_id)
 
         socket
@@ -68,7 +69,8 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
   defp apply_action(socket, action, _params) do
     conversations =
-      get_conversations_function(action).(socket.assigns.current_user)
+      socket.assigns.current_user
+      |> Conversations.filter_conversations(action)
       |> Enum.group_by(& &1.mailbox_id)
 
     socket
@@ -136,8 +138,8 @@ defmodule ResolvdWeb.ConversationLive.Index do
   @impl true
   def handle_event("search", %{"search" => query}, socket) do
     conversations =
-      query
-      |> Conversations.search_conversation()
+      socket.assigns.current_user
+      |> Conversations.search_conversation(query, socket.assigns.live_action)
       |> Enum.group_by(& &1.mailbox_id)
 
     socket =
@@ -232,16 +234,6 @@ defmodule ResolvdWeb.ConversationLive.Index do
       :unassigned -> "Unassigned Conversations"
       :prioritized -> "Prioritized Conversations"
       :resolved -> "Resolved Conversations"
-    end
-  end
-
-  defp get_conversations_function(action) do
-    case action do
-      :all -> &Conversations.list_unresolved_conversations/1
-      :me -> &Conversations.list_conversations_assigned_to_me/1
-      :unassigned -> &Conversations.list_unassigned_conversations/1
-      :prioritized -> &Conversations.list_prioritized_conversations/1
-      :resolved -> &Conversations.list_resolved_conversations/1
     end
   end
 end
