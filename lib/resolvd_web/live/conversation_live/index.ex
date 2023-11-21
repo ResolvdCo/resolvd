@@ -137,19 +137,19 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
   @impl true
   def handle_event("search", %{"search" => query}, socket) do
-    conversations =
-      socket.assigns.current_user
-      |> Conversations.search_conversation(query, socket.assigns.live_action)
-      |> Enum.group_by(& &1.mailbox_id)
-
     socket =
-      socket
-      |> stream(:conversations, get_mailbox_id_and_name(conversations))
-      |> stream_mailbox_conversations(conversations)
-      |> redirect_to_first_conversation(conversations, socket.assigns.live_action)
-      |> assign(:query, query)
+      case String.trim(query) do
+        query when byte_size(query) >= 3 ->
+          search_conversations(query, socket)
 
-    {:noreply, socket}
+        _ when byte_size(socket.assigns.query) >= 3 ->
+          apply_action(socket, socket.assigns.live_action, %{})
+
+        _ ->
+          socket
+      end
+
+    {:noreply, assign(socket, :query, String.trim(query))}
   end
 
   @impl true
@@ -195,6 +195,18 @@ defmodule ResolvdWeb.ConversationLive.Index do
         |> assign(:conversation, nil)
         |> assign(:page_title, get_heading(action))
     end
+  end
+
+  defp search_conversations(query, socket) do
+    conversations =
+      socket.assigns.current_user
+      |> Conversations.search_conversation(query, socket.assigns.live_action)
+      |> Enum.group_by(& &1.mailbox_id)
+
+    socket
+    |> stream(:conversations, get_mailbox_id_and_name(conversations))
+    |> stream_mailbox_conversations(conversations)
+    |> redirect_to_first_conversation(conversations, socket.assigns.live_action)
   end
 
   defp set_mailbox_conversation_streams(socket) do
