@@ -11,6 +11,7 @@ defmodule Resolvd.Conversations do
   alias Resolvd.Conversations.Conversation
   alias Resolvd.Conversations.Message
   alias Resolvd.Mailboxes.Mailbox
+  alias Resolvd.Mailboxes
 
   @doc """
   Returns the list of conversations.
@@ -483,7 +484,7 @@ defmodule Resolvd.Conversations do
       # New message, do we have a conversation for any of it's references or reply tos?
       tenant = Tenants.get_tenant!(mailbox.tenant_id)
 
-      name = email.from |> hd |> elem(0)
+      name = email.from |> hd |> elem(0) |> Mailboxes.parse_mime_encoded_word()
       customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, email.sender, name)
 
       conversation =
@@ -495,7 +496,7 @@ defmodule Resolvd.Conversations do
           {:ok, conversation} =
             %Conversation{tenant: tenant, mailbox: mailbox, customer: customer}
             |> Conversation.changeset(%{
-              subject: email.subject
+              subject: email.subject |> Mailboxes.parse_mime_encoded_word()
             })
             |> Repo.insert()
 

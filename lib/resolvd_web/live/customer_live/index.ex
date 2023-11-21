@@ -43,7 +43,7 @@ defmodule ResolvdWeb.CustomerLive.Index do
     socket
     |> apply_action(:index, params |> Map.delete("conversation_id"))
     |> assign(:conversation, conversation)
-    |> assign(:page_title, Mailboxes.parse_mime_encoded_word(conversation.subject))
+    |> assign(:page_title, conversation.subject)
     |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)
   end
 

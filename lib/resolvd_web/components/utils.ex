@@ -269,7 +269,7 @@ defmodule ResolvdWeb.Utils do
   def display_name(%Customer{} = customer) do
     cond do
       # Name can contain non-ASCII characters
-      not is_nil(customer.name) -> customer.name |> Resolvd.Mailboxes.parse_mime_encoded_word()
+      not is_nil(customer.name) -> customer.name
       not is_nil(customer.email) -> customer.email
       not is_nil(customer.phone) -> customer.phone
       true -> "Customer"

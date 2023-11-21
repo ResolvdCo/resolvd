@@ -176,8 +176,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
     end
@@ -196,8 +195,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer1.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
 
@@ -212,8 +210,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer2.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
     end
@@ -232,8 +229,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
 
@@ -246,7 +242,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       |> render_click
 
       assert_patched(view, ~p"/customers?id=#{customer.id}&conversation_id=#{conversation.id}")
-      assert page_title(view) =~ Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject)
+      assert page_title(view) =~ conversation.subject
     end
 
     test "switch to another conversation", %{
@@ -263,8 +259,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
 
@@ -276,12 +271,12 @@ defmodule ResolvdWeb.CustomerLiveTest do
       |> render_click
 
       assert_patched(view, ~p"/customers?id=#{customer.id}&conversation_id=#{conversation1.id}")
-      assert page_title(view) =~ Resolvd.Mailboxes.parse_mime_encoded_word(conversation1.subject)
+      assert page_title(view) =~ conversation1.subject
 
       assert {:ok, view, _html} =
                live(conn, ~p"/customers?id=#{customer.id}&conversation_id=#{conversation2.id}")
 
-      assert page_title(view) =~ Resolvd.Mailboxes.parse_mime_encoded_word(conversation2.subject)
+      assert page_title(view) =~ conversation2.subject
     end
   end
 

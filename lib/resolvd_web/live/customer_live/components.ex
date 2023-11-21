@@ -131,7 +131,7 @@ defmodule ResolvdWeb.CustomerLive.Components do
                 <.link patch={
                   ~p"/customers?id=#{conversation.customer}&conversation_id=#{conversation}"
                 }>
-                  <%= Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject) %>
+                  <%= conversation.subject %>
                 </.link>
               </td>
               <td

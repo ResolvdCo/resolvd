@@ -85,7 +85,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
                     else: "text-gray-600"
                   )
                 ]}>
-                  <%= Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject) %>
+                  <%= conversation.subject %>
                 </p>
                 <%= if @live_action in [:all, :prioritized] do %>
                   <%= case conversation.user_id do %>
@@ -133,7 +133,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
             <%= Utils.display_name(@conversation.customer) %>
           </p>
           <p class="text-sm text-gray-700 whitespace-nowrap truncate">
-            <%= Resolvd.Mailboxes.parse_mime_encoded_word(@conversation.subject) %>
+            <%= @conversation.subject %>
           </p>
         </div>
       </div>

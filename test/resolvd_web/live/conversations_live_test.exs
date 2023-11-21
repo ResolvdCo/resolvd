@@ -9,8 +9,6 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
   import ExUnit.CaptureLog, only: [capture_log: 1]
 
-  alias Resolvd.Mailboxes
-
   setup :set_swoosh_global
 
   defp create_conversation(%{mailboxes: [mailbox | _], conversations: conversations} = other) do
@@ -63,10 +61,10 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       {:ok, _index_live, html} = live(conn, conversation_path)
 
       assert html =~ "Conversations"
-      assert html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ con1.subject
       assert html =~ "conversations-#{con1.id}"
 
-      assert html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ con2.subject
       assert html =~ "conversations-#{con2.id}"
     end
 
@@ -79,7 +77,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert view |> element("#conversations-#{con.id}") |> render_click() =~ con.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{con.id}")
-      assert page_title(view) =~ con.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ con.subject
     end
 
     test "switch to other conversation", %{conn: conn, conversations: [con1, con2]} do
@@ -94,12 +92,12 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       assert view |> element("#conversations-#{con1.id}") |> render_click() =~ con1.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{con1.id}")
-      assert page_title(view) =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ con1.subject
 
       assert view |> element("#conversations-#{con2.id}") |> render_click() =~ con2.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{con2.id}")
-      assert page_title(view) =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ con2.subject
     end
   end
 
@@ -127,7 +125,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
     end
@@ -149,7 +147,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -177,7 +175,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -199,7 +197,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ user1.name
 
@@ -221,7 +219,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -242,7 +240,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -266,7 +264,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ "Not assigned"
 
@@ -297,7 +295,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ mailbox.name
     end
@@ -319,7 +317,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.name
 
@@ -344,7 +342,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.name
 
@@ -372,7 +370,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
                conversation.mailbox_id
 
       assert_patched(view, "/conversations/all?id=#{conversation.id}")
-      assert page_title(view) =~ conversation.subject |> Mailboxes.parse_mime_encoded_word()
+      assert page_title(view) =~ conversation.subject
 
       assert view |> element("#conversation-details") |> render() =~ mailbox1.name
 
@@ -508,50 +506,50 @@ defmodule ResolvdWeb.ConversationsLiveTest do
     test "all conversations", %{conn: conn, conversations: [con1, con2]} do
       {:ok, _view, html} = live(conn, ~p"/conversations/all?id=#{con1}")
       assert html =~ "All Conversations"
-      assert html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ con1.subject
       assert html =~ "conversations-#{con1.id}"
 
-      assert html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ con2.subject
       assert html =~ "conversations-#{con2.id}"
     end
 
     test "my conversations", %{conn: conn, conversations: [con1, con2]} do
       {:ok, _view, html} = live(conn, ~p"/conversations/me")
       assert html =~ "My Conversations"
-      refute html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ con1.subject
       refute html =~ "conversations-#{con1.id}"
 
-      refute html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ con2.subject
       refute html =~ "conversations-#{con2.id}"
     end
 
     test "unassigned conversations", %{conn: conn, conversations: [con1, con2]} do
       {:ok, _view, html} = live(conn, ~p"/conversations/unassigned?id=#{con1}")
       assert html =~ "Unassigned Conversations"
-      assert html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ con1.subject
       assert html =~ "conversations-#{con1.id}"
 
-      assert html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert html =~ con2.subject
       assert html =~ "conversations-#{con2.id}"
     end
 
     test "prioritized conversations", %{conn: conn, conversations: [con1, con2]} do
       {:ok, _view, html} = live(conn, ~p"/conversations/prioritized")
       assert html =~ "Prioritized Conversations"
-      refute html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ con1.subject
       refute html =~ "conversations-#{con1.id}"
 
-      refute html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ con2.subject
       refute html =~ "conversations-#{con2.id}"
     end
 
     test "resolved conversations", %{conn: conn, conversations: [con1, con2]} do
       {:ok, _view, html} = live(conn, ~p"/conversations/resolved")
       assert html =~ "Resolved Conversations"
-      refute html =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ con1.subject
       refute html =~ "conversations-#{con1.id}"
 
-      refute html =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      refute html =~ con2.subject
       refute html =~ "conversations-#{con2.id}"
     end
   end
@@ -580,7 +578,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       conversations = view |> element(".conversations") |> render()
 
-      assert conversations =~ con.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ con.subject
       assert conversations =~ "conversations-#{con.id}"
     end
 
@@ -600,7 +598,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       conversations = view |> element(".conversations") |> render()
 
-      assert conversations =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ con2.subject
       assert conversations =~ "conversations-#{con2.id}"
     end
 
@@ -620,7 +618,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       conversations = view |> element(".conversations") |> render()
 
-      assert conversations =~ con.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ con.subject
       assert conversations =~ "conversations-#{con.id}"
     end
 
@@ -640,7 +638,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       conversations = view |> element(".conversations") |> render()
 
-      assert conversations =~ con.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ con.subject
       assert conversations =~ "conversations-#{con.id}"
     end
 
@@ -660,7 +658,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       conversations = view |> element(".conversations") |> render()
 
-      assert conversations =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ con1.subject
       assert conversations =~ "conversations-#{con1.id}"
 
       view |> element("#category-all") |> render_click()
@@ -673,9 +671,9 @@ defmodule ResolvdWeb.ConversationsLiveTest do
 
       conversations = view |> element(".conversations") |> render()
 
-      refute conversations =~ con1.subject |> Mailboxes.parse_mime_encoded_word()
+      refute conversations =~ con1.subject
       refute conversations =~ "conversations-#{con1.id}"
-      assert conversations =~ con2.subject |> Mailboxes.parse_mime_encoded_word()
+      assert conversations =~ con2.subject
       assert conversations =~ "conversations-#{con2.id}"
     end
   end
