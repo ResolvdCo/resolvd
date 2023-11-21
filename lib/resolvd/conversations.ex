@@ -42,7 +42,7 @@ defmodule Resolvd.Conversations do
   def filter_conversations(%User{} = user, action) when action in @filters do
     Conversation
     |> filter_by_action(action, user)
-    |> order_by([c], desc: c.inserted_at)
+    |> order_by([c], desc: c.updated_at)
     |> preload([:customer, :user, :mailbox])
     |> Bodyguard.scope(user)
     |> Repo.all()
@@ -52,7 +52,7 @@ defmodule Resolvd.Conversations do
   Searches the given string in the conversation.
   """
   def search_conversation(%User{} = user, search_query, action) when action in @filters do
-    search_query = "%#{search_query}%"
+    search_query = "%#{Resolvd.Helpers.sanitize_sql_like(search_query)}"
 
     query =
       from c in Conversation,
@@ -61,6 +61,7 @@ defmodule Resolvd.Conversations do
         where: ilike(m.text_body, ^search_query),
         or_where: ilike(m.html_body, ^search_query),
         or_where: ilike(c.subject, ^search_query),
+        order_by: [desc: c.updated_at],
         select: c,
         preload: [:customer, :user, :mailbox]
 

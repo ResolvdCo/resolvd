@@ -72,13 +72,14 @@ defmodule Resolvd.Customers do
   Searches for customer by their name, email or phone.
   """
   def search_customers(search_query) do
-    search_query = "%#{search_query}%"
+    search_query = "%#{Resolvd.Helpers.sanitize_sql_like(search_query)}%"
 
     query =
       from c in Customer,
         where: ilike(c.name, ^search_query),
         or_where: ilike(c.email, ^search_query),
         or_where: ilike(c.phone, ^search_query),
+        order_by: [desc: c.updated_at],
         select: c
 
     Repo.all(query)
