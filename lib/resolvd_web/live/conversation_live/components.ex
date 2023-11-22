@@ -40,7 +40,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   def conversation_list(assigns) do
     ~H"""
-    <div class="h-full overflow-hidden relative shadow-inner conversations">
+    <div class="h-full overflow-hidden relative shadow-inner">
       <div
         class="flex flex-col h-full w-full overflow-y-auto"
         id={"mailbox-list-#{@mailbox_id}"}
