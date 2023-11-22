@@ -324,4 +324,42 @@ defmodule Resolvd.ConversationsTest do
       assert Conversations.filter_conversations(user, :all) == []
     end
   end
+
+  describe "Search conversations" do
+    setup do
+      admin = user_fixture()
+
+      %{
+        convo1: conversation_fixture_user(admin),
+        convo2: conversation_fixture_user(admin),
+        admin: admin
+      }
+    end
+
+    test "by subject", %{convo1: convo1, admin: user} do
+      assert Conversations.search_conversation(user, convo1.subject, :all) |> clear_fields() ==
+               [convo1] |> clear_fields()
+    end
+
+    test "by body", %{convo1: convo1, convo2: convo2, admin: user} do
+      msg = convo1.messages |> List.first()
+
+      assert Conversations.search_conversation(user, msg.text_body, :all) |> clear_fields() ==
+               [convo1] |> clear_fields()
+
+      msg = convo2.messages |> List.first()
+
+      assert Conversations.search_conversation(user, msg.html_body, :all) |> clear_fields() ==
+               [convo2] |> clear_fields()
+    end
+
+    test "empty query", %{convo1: convo1, convo2: convo2, admin: user} do
+      assert Conversations.search_conversation(user, "", :all) |> clear_fields() |> Enum.sort() ==
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
+    end
+
+    test "no match", %{admin: user} do
+      assert Conversations.search_conversation(user, "abracadabra", :all) == []
+    end
+  end
 end

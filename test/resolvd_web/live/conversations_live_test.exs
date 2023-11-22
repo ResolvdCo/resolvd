@@ -576,4 +576,137 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       end)
     end
   end
+
+  describe "Search conversations" do
+    setup [
+      :create_tenant_and_admin,
+      :log_in_admin,
+      :create_mailboxes,
+      :create_conversations
+    ]
+
+    test "by subject", %{
+      conn: conn,
+      user: _user,
+      conversations: conversations
+    } do
+      [conversation | others] = Enum.shuffle(conversations)
+
+      assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
+
+      conversations_view = view |> element("#mailbox-filtered") |> render()
+
+      Enum.each(conversations, fn convo ->
+        assert conversations_view =~ convo.subject
+        assert conversations_view =~ "conversations-#{convo.id}"
+      end)
+
+      view |> element("#conversation-search") |> render_change(%{query: conversation.subject})
+      conversations_view = view |> element("#mailbox-filtered") |> render()
+
+      assert conversations_view =~ conversation.subject
+      assert conversations_view =~ "conversations-#{conversation.id}"
+
+      Enum.each(others, fn convo ->
+        if convo.mailbox_id != conversation.mailbox_id do
+          refute conversations_view =~ convo.subject
+          refute conversations_view =~ "conversations-#{convo.id}"
+        end
+      end)
+    end
+
+    test "by html_body", %{
+      conn: conn,
+      user: _user,
+      conversations: conversations
+    } do
+      [conversation | others] = Enum.shuffle(conversations)
+
+      assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
+
+      message = conversation.messages |> List.first()
+
+      view |> element("#conversation-search") |> render_change(%{query: message.html_body})
+      conversations_view = view |> element("#mailbox-filtered") |> render()
+
+      assert conversations_view =~ conversation.subject
+      assert conversations_view =~ "conversations-#{conversation.id}"
+
+      Enum.each(others, fn convo ->
+        if convo.mailbox_id != conversation.mailbox_id do
+          refute conversations_view =~ convo.subject
+          refute conversations_view =~ "conversations-#{convo.id}"
+        end
+      end)
+    end
+
+    test "by text_body", %{
+      conn: conn,
+      user: _user,
+      conversations: conversations
+    } do
+      [conversation | others] = Enum.shuffle(conversations)
+
+      assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
+
+      message = conversation.messages |> List.first()
+
+      view |> element("#conversation-search") |> render_change(%{query: message.text_body})
+      conversations_view = view |> element("#mailbox-filtered") |> render()
+
+      assert conversations_view =~ conversation.subject
+      assert conversations_view =~ "conversations-#{conversation.id}"
+
+      Enum.each(others, fn convo ->
+        if convo.mailbox_id != conversation.mailbox_id do
+          refute conversations_view =~ convo.subject
+          refute conversations_view =~ "conversations-#{convo.id}"
+        end
+      end)
+    end
+
+    test "when no match", %{
+      conn: conn,
+      user: _user,
+      conversations: conversations
+    } do
+      [conversation | _] = Enum.shuffle(conversations)
+
+      assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
+
+      view |> element("#conversation-search") |> render_change(%{query: "Abrakadabra"})
+      conversations_view = view |> element("#mailbox-filtered") |> render()
+
+      Enum.each(conversations, fn convo ->
+        refute conversations_view =~ convo.subject
+        refute conversations_view =~ "conversations-#{convo.id}"
+      end)
+    end
+
+    test "clear query", %{
+      conn: conn,
+      user: _user,
+      conversations: conversations
+    } do
+      [conversation | _] = Enum.shuffle(conversations)
+
+      assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
+
+      view |> element("#conversation-search") |> render_change(%{query: "Abrakadabra"})
+      conversations_view = view |> element("#mailbox-filtered") |> render()
+
+      Enum.each(conversations, fn convo ->
+        refute conversations_view =~ convo.subject
+        refute conversations_view =~ "conversations-#{convo.id}"
+      end)
+
+      view |> element("#conversation-search") |> render_change(%{query: ""})
+      conversations_view = view |> element("#mailbox-filtered") |> render()
+
+      Enum.each(conversations, fn convo ->
+        assert conversations_view =~ convo.subject
+        assert conversations_view =~ "conversations-#{convo.id}"
+      end)
+    end
+  end
 end
