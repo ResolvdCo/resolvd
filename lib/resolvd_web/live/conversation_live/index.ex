@@ -225,6 +225,9 @@ defmodule ResolvdWeb.ConversationLive.Index do
       end)
 
     Enum.reduce(conversations, socket, fn {mailbox_id, convos}, socket ->
+      # BUG: Not resetting the list properly. Upstream issue.
+      # https://github.com/phoenixframework/phoenix_live_view/issues/2895
+      # https://github.com/phoenixframework/phoenix_live_view/issues/2816
       stream(socket, mailbox_id, convos, reset: true)
     end)
   end
