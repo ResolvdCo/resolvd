@@ -585,11 +585,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       :create_conversations
     ]
 
-    test "by subject", %{
-      conn: conn,
-      user: _user,
-      conversations: conversations
-    } do
+    test "by subject", %{conn: conn, conversations: conversations} do
       [conversation | others] = Enum.shuffle(conversations)
 
       assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
@@ -615,11 +611,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       end)
     end
 
-    test "by html_body", %{
-      conn: conn,
-      user: _user,
-      conversations: conversations
-    } do
+    test "by html_body", %{conn: conn, conversations: conversations} do
       [conversation | others] = Enum.shuffle(conversations)
 
       assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
@@ -640,11 +632,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       end)
     end
 
-    test "by text_body", %{
-      conn: conn,
-      user: _user,
-      conversations: conversations
-    } do
+    test "by text_body", %{conn: conn, conversations: conversations} do
       [conversation | others] = Enum.shuffle(conversations)
 
       assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
@@ -665,11 +653,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       end)
     end
 
-    test "when no match", %{
-      conn: conn,
-      user: _user,
-      conversations: conversations
-    } do
+    test "when no match", %{conn: conn, conversations: conversations} do
       [conversation | _] = Enum.shuffle(conversations)
 
       assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")
@@ -683,11 +667,7 @@ defmodule ResolvdWeb.ConversationsLiveTest do
       end)
     end
 
-    test "clear query", %{
-      conn: conn,
-      user: _user,
-      conversations: conversations
-    } do
+    test "clear query", %{conn: conn, conversations: conversations} do
       [conversation | _] = Enum.shuffle(conversations)
 
       assert {:ok, view, _html} = live(conn, ~p"/conversations/all?id=#{conversation}")

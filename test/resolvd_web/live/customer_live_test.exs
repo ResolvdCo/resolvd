@@ -497,6 +497,125 @@ defmodule ResolvdWeb.CustomerLiveTest do
     end
   end
 
+  describe "Search customers" do
+    setup [
+      :create_tenant_and_admin,
+      :log_in_admin,
+      :create_customers,
+      :create_mailboxes,
+      :create_conversations
+    ]
+
+    test "by name", %{conn: conn, customers: customers} do
+      [customer | others] = Enum.shuffle(customers)
+
+      assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
+      assert html =~ "Customers"
+
+      customers_view = view |> element("#customers") |> render()
+
+      Enum.each(customers, fn customer ->
+        assert customers_view =~ customer.name
+        assert customers_view =~ customer.email
+        assert customers_view =~ "customers-#{customer.id}"
+      end)
+
+      view |> element("#customer-search") |> render_change(%{query: customer.name})
+      customers_view = view |> element("#customers") |> render()
+
+      assert customers_view =~ customer.name
+      assert customers_view =~ customer.email
+      assert customers_view =~ "customers-#{customer.id}"
+
+      Enum.each(others, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+
+    test "by email", %{conn: conn, customers: customers} do
+      [customer | others] = Enum.shuffle(customers)
+
+      assert {:ok, view, _html} = live(conn, ~p"/customers?id=#{customer.id}")
+
+      view |> element("#customer-search") |> render_change(%{query: customer.email})
+      customers_view = view |> element("#customers") |> render()
+
+      assert customers_view =~ customer.name
+      assert customers_view =~ customer.email
+      assert customers_view =~ "customers-#{customer.id}"
+
+      Enum.each(others, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+
+    test "by phone", %{conn: conn, customers: customers} do
+      [customer | others] = Enum.shuffle(customers)
+
+      assert {:ok, view, _html} = live(conn, ~p"/customers?id=#{customer.id}")
+
+      view |> element("#customer-search") |> render_change(%{query: customer.phone})
+      customers_view = view |> element("#customers") |> render()
+
+      assert customers_view =~ customer.name
+      assert customers_view =~ customer.email
+      assert customers_view =~ "customers-#{customer.id}"
+
+      Enum.each(others, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+
+    test "when no match", %{conn: conn, customers: customers} do
+      [customer | _] = Enum.shuffle(customers)
+
+      assert {:ok, view, _html} = live(conn, ~p"/customers?id=#{customer.id}")
+
+      view |> element("#customer-search") |> render_change(%{query: "abracadabra"})
+      customers_view = view |> element("#customers") |> render()
+
+      Enum.each(customers, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+
+    test "clear query", %{conn: conn, customers: customers} do
+      [customer | others] = Enum.shuffle(customers)
+
+      assert {:ok, view, _html} = live(conn, ~p"/customers?id=#{customer.id}")
+
+      view |> element("#customer-search") |> render_change(%{query: customer.name})
+      customers_view = view |> element("#customers") |> render()
+
+      assert customers_view =~ customer.name
+      assert customers_view =~ customer.email
+      assert customers_view =~ "customers-#{customer.id}"
+
+      Enum.each(others, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+
+      view |> element("#customer-search") |> render_change(%{query: ""})
+      customers_view = view |> element("#customers") |> render()
+
+      Enum.each(customers, fn customer ->
+        assert customers_view =~ customer.name
+        assert customers_view =~ customer.email
+        assert customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+  end
+
   # describe "Show" do
   #   setup [:create_customer]
 
