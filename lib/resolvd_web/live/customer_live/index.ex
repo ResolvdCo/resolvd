@@ -133,7 +133,7 @@ defmodule ResolvdWeb.CustomerLive.Index do
   end
 
   @impl true
-  def handle_event("search", %{"search" => query}, socket) do
+  def handle_event("search", %{"query" => query}, socket) do
     socket =
       case String.trim(query) do
         query when byte_size(query) >= 3 ->
