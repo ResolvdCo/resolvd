@@ -40,12 +40,8 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   def conversation_list(assigns) do
     ~H"""
-    <div class="h-full overflow-hidden relative shadow-inner">
-      <div
-        class="flex flex-col h-full w-full overflow-y-auto"
-        id={"mailbox-list-#{@mailbox_id}"}
-        phx-update="stream"
-      >
+    <div class="relative shadow-inner">
+      <div class="flex flex-col w-full" id={"mailbox-list-#{@mailbox_id}"} phx-update="stream">
         <%= for {dom_id, conversation} <- @conversations do %>
           <.link
             id={dom_id}

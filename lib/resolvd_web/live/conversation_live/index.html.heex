@@ -18,13 +18,13 @@
 
     <ResolvdWeb.ConversationLive.Components.conversation_categories live_action={@live_action} />
 
-    <form class="relative flex items-center" phx-change="search">
+    <form class="relative flex items-center mb-0" phx-change="search" id="conversation-search">
       <.icon class="left-2 absolute" name="hero-magnifying-glass" />
       <input
         class="placeholder:italic placeholder:text-slate-400 pl-9 bg-white w-full border border-slate-300 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 focus:ring-inset leading-tight sm:text-sm"
         placeholder="Search conversations..."
         type="text"
-        name="search"
+        name="query"
         value={@query}
         phx-debounce="500"
       />

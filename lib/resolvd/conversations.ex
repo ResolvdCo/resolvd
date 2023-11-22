@@ -52,7 +52,7 @@ defmodule Resolvd.Conversations do
   Searches the given string in the conversation.
   """
   def search_conversation(%User{} = user, search_query, action) when action in @filters do
-    search_query = "%#{Resolvd.Helpers.sanitize_sql_like(search_query)}"
+    search_query = "%#{Resolvd.Helpers.sanitize_sql_like(search_query)}%"
 
     query =
       from c in Conversation,
@@ -63,6 +63,7 @@ defmodule Resolvd.Conversations do
         or_where: ilike(c.subject, ^search_query),
         order_by: [desc: c.updated_at],
         select: c,
+        distinct: c,
         preload: [:customer, :user, :mailbox]
 
     query

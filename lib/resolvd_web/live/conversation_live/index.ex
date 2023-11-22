@@ -60,7 +60,6 @@ defmodule ResolvdWeb.ConversationLive.Index do
           |> Enum.group_by(& &1.mailbox_id)
 
         socket
-        |> stream(:conversations, get_mailbox_id_and_name(conversations))
         |> stream_mailbox_conversations(conversations)
         |> assign(:heading, get_heading(action))
         |> switch_to_conversation(conversation, nil)
@@ -74,7 +73,6 @@ defmodule ResolvdWeb.ConversationLive.Index do
       |> Enum.group_by(& &1.mailbox_id)
 
     socket
-    |> stream(:conversations, get_mailbox_id_and_name(conversations))
     |> stream_mailbox_conversations(conversations)
     |> assign(:heading, get_heading(action))
     |> redirect_to_first_conversation(conversations, action)
@@ -136,7 +134,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   @impl true
-  def handle_event("search", %{"search" => query}, socket) do
+  def handle_event("search", %{"query" => query}, socket) do
     socket =
       case String.trim(query) do
         query when byte_size(query) >= 3 ->
@@ -204,7 +202,6 @@ defmodule ResolvdWeb.ConversationLive.Index do
       |> Enum.group_by(& &1.mailbox_id)
 
     socket
-    |> stream(:conversations, get_mailbox_id_and_name(conversations))
     |> stream_mailbox_conversations(conversations)
     |> redirect_to_first_conversation(conversations, socket.assigns.live_action)
   end
@@ -218,24 +215,17 @@ defmodule ResolvdWeb.ConversationLive.Index do
   end
 
   defp stream_mailbox_conversations(socket, conversations) do
-    all_mailboxes = socket.assigns.mailboxes |> Enum.into(%MapSet{})
     streaming_mailboxes = conversations |> Map.keys() |> Enum.into(%MapSet{})
 
     socket =
-      all_mailboxes
-      |> MapSet.difference(streaming_mailboxes)
-      |> Enum.reduce(socket, fn mailbox, socket ->
-        stream_delete(socket, :conversations, {mailbox.id, mailbox.name})
+      Enum.reduce(socket.assigns.mailboxes, socket, fn mailbox, socket ->
+        if MapSet.member?(streaming_mailboxes, mailbox.id),
+          do: stream_insert(socket, :conversations, {mailbox.id, mailbox.name}),
+          else: stream_delete(socket, :conversations, {mailbox.id, mailbox.name})
       end)
 
     Enum.reduce(conversations, socket, fn {mailbox_id, convos}, socket ->
       stream(socket, mailbox_id, convos, reset: true)
-    end)
-  end
-
-  defp get_mailbox_id_and_name(conversations) do
-    Enum.map(conversations, fn {mailbox_id, [conversation | _]} ->
-      {mailbox_id, conversation.mailbox.name}
     end)
   end
 
