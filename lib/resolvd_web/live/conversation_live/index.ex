@@ -60,6 +60,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
           |> Enum.group_by(& &1.mailbox_id)
 
         socket
+        |> stream(:conversations, get_mailbox_id_and_name(conversations))
         |> stream_mailbox_conversations(conversations)
         |> assign(:heading, get_heading(action))
         |> switch_to_conversation(conversation, nil)
@@ -73,6 +74,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
       |> Enum.group_by(& &1.mailbox_id)
 
     socket
+    |> stream(:conversations, get_mailbox_id_and_name(conversations))
     |> stream_mailbox_conversations(conversations)
     |> assign(:heading, get_heading(action))
     |> redirect_to_first_conversation(conversations, action)
@@ -202,6 +204,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
       |> Enum.group_by(& &1.mailbox_id)
 
     socket
+    |> stream(:conversations, get_mailbox_id_and_name(conversations))
     |> stream_mailbox_conversations(conversations)
     |> redirect_to_first_conversation(conversations, socket.assigns.live_action)
   end
@@ -220,7 +223,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
     socket =
       Enum.reduce(socket.assigns.mailboxes, socket, fn mailbox, socket ->
         if MapSet.member?(streaming_mailboxes, mailbox.id),
-          do: stream_insert(socket, :conversations, {mailbox.id, mailbox.name}),
+          do: socket,
           else: stream_delete(socket, :conversations, {mailbox.id, mailbox.name})
       end)
 
@@ -229,6 +232,12 @@ defmodule ResolvdWeb.ConversationLive.Index do
       # https://github.com/phoenixframework/phoenix_live_view/issues/2895
       # https://github.com/phoenixframework/phoenix_live_view/issues/2816
       stream(socket, mailbox_id, convos, reset: true)
+    end)
+  end
+
+  defp get_mailbox_id_and_name(conversations) do
+    Enum.map(conversations, fn {mailbox_id, [conversation | _]} ->
+      {mailbox_id, conversation.mailbox.name}
     end)
   end
 
