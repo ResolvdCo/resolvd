@@ -7,6 +7,14 @@ defmodule Resolvd.ConversationsTest do
 
   alias Resolvd.Conversations
 
+  defp clear_fields(conversations, fields \\ [:messages, :user, :mailbox]) do
+    Enum.map(conversations, fn conversation ->
+      Enum.reduce(fields, conversation, fn field, conversation ->
+        Map.delete(conversation, field)
+      end)
+    end)
+  end
+
   describe "Conversation creation" do
     setup do
       %{user: user_fixture()}
@@ -237,171 +245,121 @@ defmodule Resolvd.ConversationsTest do
     end
 
     test "list all unresolved conversations", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_unresolved_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox))
-             |> Enum.sort() ==
-               [convo1, convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
-               |> Enum.sort()
+      assert Conversations.filter_conversations(user, :all) |> clear_fields() |> Enum.sort() ==
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
     end
 
     test "list all conversations assigned to user", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_conversations_assigned_to_me(user) == []
+      assert Conversations.filter_conversations(user, :me) == []
       convo1 = Conversations.update_conversation_user(convo1, user)
 
-      assert Conversations.list_conversations_assigned_to_me(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox)) ==
-               [convo1]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
+      assert Conversations.filter_conversations(user, :me) |> clear_fields() ==
+               [convo1] |> clear_fields()
 
       convo2 = Conversations.update_conversation_user(convo2, user)
 
-      assert Conversations.list_conversations_assigned_to_me(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox))
-             |> Enum.sort() ==
-               [convo1, convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
-               |> Enum.sort()
+      assert Conversations.filter_conversations(user, :me) |> clear_fields() |> Enum.sort() ==
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
 
-      assert Conversations.list_unresolved_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox))
-             |> Enum.sort() ==
-               [convo1, convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
-               |> Enum.sort()
+      assert Conversations.filter_conversations(user, :all) |> clear_fields() |> Enum.sort() ==
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
     end
 
     test "list all unassigned conversations", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_unassigned_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox))
+      assert Conversations.filter_conversations(user, :unassigned)
+             |> clear_fields()
              |> Enum.sort() ==
-               [convo1, convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
-               |> Enum.sort()
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
 
       convo1 = Conversations.update_conversation_user(convo1, user)
 
-      assert Conversations.list_unassigned_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox)) ==
-               [convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
+      assert Conversations.filter_conversations(user, :unassigned) |> clear_fields() ==
+               [convo2] |> clear_fields()
 
       convo2 = Conversations.update_conversation_user(convo2, user)
 
-      assert Conversations.list_unassigned_conversations(user) == []
+      assert Conversations.filter_conversations(user, :unassigned) == []
 
-      assert Conversations.list_unresolved_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox))
-             |> Enum.sort() ==
-               [convo1, convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
-               |> Enum.sort()
+      assert Conversations.filter_conversations(user, :all) |> clear_fields() |> Enum.sort() ==
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
     end
 
     test "list all prioritized conversations", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_prioritized_conversations(user) == []
+      assert Conversations.filter_conversations(user, :prioritized) == []
 
       convo1 = Conversations.set_priority(convo1, true)
 
-      assert Conversations.list_prioritized_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox)) ==
-               [convo1]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
+      assert Conversations.filter_conversations(user, :prioritized) |> clear_fields() ==
+               [convo1] |> clear_fields()
 
       convo2 = Conversations.set_priority(convo2, true)
 
-      assert Conversations.list_prioritized_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox))
+      assert Conversations.filter_conversations(user, :prioritized)
+             |> clear_fields()
              |> Enum.sort() ==
                [convo1, convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
+               |> clear_fields()
                |> Enum.sort()
 
-      assert Conversations.list_unresolved_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox))
-             |> Enum.sort() ==
-               [convo1, convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
-               |> Enum.sort()
+      assert Conversations.filter_conversations(user, :all) |> clear_fields() |> Enum.sort() ==
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
     end
 
     test "list all resolved conversations", %{convo1: convo1, convo2: convo2, admin: user} do
-      assert Conversations.list_resolved_conversations(user) == []
+      assert Conversations.filter_conversations(user, :resolved) == []
 
       convo1 = Conversations.set_resolved(convo1, true)
 
-      assert Conversations.list_resolved_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox)) ==
-               [convo1]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
+      assert Conversations.filter_conversations(user, :resolved) |> clear_fields() ==
+               [convo1] |> clear_fields()
 
-      assert Conversations.list_unresolved_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox)) ==
-               [convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
+      assert Conversations.filter_conversations(user, :all) |> clear_fields() ==
+               [convo2] |> clear_fields()
 
       convo2 = Conversations.set_resolved(convo2, true)
 
-      assert Conversations.list_resolved_conversations(user)
-             |> Enum.map(&Map.delete(&1, :messages))
-             |> Enum.map(&Map.delete(&1, :user))
-             |> Enum.map(&Map.delete(&1, :mailbox))
-             |> Enum.sort() ==
-               [convo1, convo2]
-               |> Enum.map(&Map.delete(&1, :messages))
-               |> Enum.map(&Map.delete(&1, :user))
-               |> Enum.map(&Map.delete(&1, :mailbox))
-               |> Enum.sort()
+      assert Conversations.filter_conversations(user, :resolved) |> clear_fields() |> Enum.sort() ==
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
 
-      assert Conversations.list_unresolved_conversations(user) == []
+      assert Conversations.filter_conversations(user, :all) == []
+    end
+  end
+
+  describe "Search conversations" do
+    setup do
+      admin = user_fixture()
+
+      %{
+        convo1: conversation_fixture_user(admin),
+        convo2: conversation_fixture_user(admin),
+        admin: admin
+      }
+    end
+
+    test "by subject", %{convo1: convo1, admin: user} do
+      assert Conversations.search_conversation(user, convo1.subject, :all) |> clear_fields() ==
+               [convo1] |> clear_fields()
+    end
+
+    test "by body", %{convo1: convo1, convo2: convo2, admin: user} do
+      msg = convo1.messages |> List.first()
+
+      assert Conversations.search_conversation(user, msg.text_body, :all) |> clear_fields() ==
+               [convo1] |> clear_fields()
+
+      msg = convo2.messages |> List.first()
+
+      assert Conversations.search_conversation(user, msg.html_body, :all) |> clear_fields() ==
+               [convo2] |> clear_fields()
+    end
+
+    test "empty query", %{convo1: convo1, convo2: convo2, admin: user} do
+      assert Conversations.search_conversation(user, "", :all) |> clear_fields() |> Enum.sort() ==
+               [convo1, convo2] |> clear_fields() |> Enum.sort()
+    end
+
+    test "no match", %{admin: user} do
+      assert Conversations.search_conversation(user, "abracadabra", :all) == []
     end
   end
 end

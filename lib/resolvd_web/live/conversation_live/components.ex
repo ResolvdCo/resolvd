@@ -32,6 +32,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
   end
 
   attr :conversations, :any, required: true
+  attr :mailbox_id, :string, required: true
   attr :conversation, :map, required: true
   attr :socket, :any, required: true
   attr :live_action, :atom, required: true
@@ -39,8 +40,8 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   def conversation_list(assigns) do
     ~H"""
-    <div class="h-full overflow-hidden relative shadow-inner">
-      <div class="flex flex-col h-full w-full overflow-y-auto " id="conversations" phx-update="stream">
+    <div class="relative shadow-inner">
+      <div class="flex flex-col w-full" id={"mailbox-list-#{@mailbox_id}"} phx-update="stream">
         <%= for {dom_id, conversation} <- @conversations do %>
           <.link
             id={dom_id}
@@ -80,7 +81,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
                     else: "text-gray-600"
                   )
                 ]}>
-                  <%= Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject) %>
+                  <%= conversation.subject %>
                 </p>
                 <%= if @live_action in [:all, :prioritized] do %>
                   <%= case conversation.user_id do %>
@@ -128,7 +129,7 @@ defmodule ResolvdWeb.ConversationLive.Components do
             <%= Utils.display_name(@conversation.customer) %>
           </p>
           <p class="text-sm text-gray-700 whitespace-nowrap truncate">
-            <%= Resolvd.Mailboxes.parse_mime_encoded_word(@conversation.subject) %>
+            <%= @conversation.subject %>
           </p>
         </div>
       </div>

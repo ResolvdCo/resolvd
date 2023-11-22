@@ -13,9 +13,12 @@ defmodule ResolvdWeb.ConversationLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> stream_configure(:conversations, dom_id: &"mailbox-conversations-#{&1 |> elem(0)}")
      |> stream(:conversations, [])
      |> assign(:users, Accounts.list_users(socket.assigns.current_user))
-     |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))}
+     |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))
+     |> assign(:query, "")
+     |> set_mailbox_conversation_streams()}
   end
 
   @impl true
@@ -50,27 +53,37 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
       _ ->
         conversation = Conversations.get_conversation!(socket.assigns.current_user, id)
-        conversations = get_conversations_function(action).(socket.assigns.current_user)
+
+        conversations =
+          socket.assigns.current_user
+          |> Conversations.filter_conversations(action)
+          |> Enum.group_by(& &1.mailbox_id)
 
         socket
-        |> stream(:conversations, conversations)
+        |> stream_mailbox_conversations(conversations)
         |> assign(:heading, get_heading(action))
         |> switch_to_conversation(conversation, nil)
     end
   end
 
   defp apply_action(socket, action, _params) do
-    conversations = get_conversations_function(action).(socket.assigns.current_user)
+    conversations =
+      socket.assigns.current_user
+      |> Conversations.filter_conversations(action)
+      |> Enum.group_by(& &1.mailbox_id)
 
     socket
-    |> stream(:conversations, conversations)
+    |> stream_mailbox_conversations(conversations)
     |> assign(:heading, get_heading(action))
     |> redirect_to_first_conversation(conversations, action)
   end
 
   @impl true
   def handle_info({ResolvdWeb.ConversationLive.FormComponent, {:saved, conversation}}, socket) do
-    {:noreply, stream_insert(socket, :conversations, conversation)}
+    {:noreply,
+     socket
+     |> stream_insert(:conversations, conversation.mailbox_id)
+     |> stream_insert(conversation.mailbox_id, conversation)}
   end
 
   @impl true
@@ -81,7 +94,8 @@ defmodule ResolvdWeb.ConversationLive.Index do
     {:noreply,
      socket
      |> stream_insert(:messages, message)
-     |> stream_insert(:conversations, conversation)
+     |> stream_insert(:conversations, {conversation.mailbox_id, conversation.mailbox.name})
+     |> stream_insert(conversation.mailbox_id, conversation)
      |> assign(:conversation, conversation)}
   end
 
@@ -90,13 +104,20 @@ defmodule ResolvdWeb.ConversationLive.Index do
         {ResolvdWeb.ConversationLive.HeaderForm, {:updated_mailbox, conversation}},
         socket
       ) do
-    {:noreply, assign(socket, :conversation, conversation)}
+    {:noreply,
+     socket
+     |> assign(:conversation, conversation)
+     |> stream_insert(:conversations, {conversation.mailbox_id, conversation.mailbox.name})
+     |> stream_insert(conversation.mailbox_id, conversation)}
   end
 
   @impl true
   def handle_info({ResolvdWeb.ConversationLive.HeaderForm, {:updated_user, conversation}}, socket) do
     {:noreply,
-     socket |> assign(:conversation, conversation) |> stream_insert(:conversations, conversation)}
+     socket
+     |> assign(:conversation, conversation)
+     |> stream_insert(:conversations, {conversation.mailbox_id, conversation.mailbox.name})
+     |> stream_insert(conversation.mailbox_id, conversation)}
   end
 
   @impl true
@@ -110,6 +131,23 @@ defmodule ResolvdWeb.ConversationLive.Index do
   @impl true
   def handle_info({ResolvdWeb.ConversationLive.HeaderForm, {:unimplemented, event}}, socket) do
     {:noreply, put_flash(socket, :error, "Event: #{event} in not implemented yet")}
+  end
+
+  @impl true
+  def handle_event("search", %{"query" => query}, socket) do
+    socket =
+      case String.trim(query) do
+        query when byte_size(query) >= 3 ->
+          search_conversations(query, socket)
+
+        _ when byte_size(socket.assigns.query) >= 3 ->
+          apply_action(socket, socket.assigns.live_action, %{})
+
+        _ ->
+          socket
+      end
+
+    {:noreply, assign(socket, :query, String.trim(query))}
   end
 
   @impl true
@@ -137,20 +175,61 @@ defmodule ResolvdWeb.ConversationLive.Index do
     socket
     |> assign(:conversation, conversation)
     |> assign(:message, %Message{})
-    |> assign(:page_title, Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject))
+    |> assign(:page_title, conversation.subject)
     |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)
   end
 
-  defp redirect_to_first_conversation(socket, [conversation | _], action) do
-    socket
-    |> push_patch(to: Helpers.conversation_index_path(socket, action, id: conversation.id))
-    |> apply_assigns(conversation)
+  defp redirect_to_first_conversation(socket, conversations, action) do
+    case Map.keys(conversations) do
+      [mailbox_id | _] ->
+        [conversation | _] = Map.get(conversations, mailbox_id)
+
+        socket
+        |> push_patch(to: Helpers.conversation_index_path(socket, action, id: conversation.id))
+        |> apply_assigns(conversation)
+
+      _ ->
+        socket
+        |> assign(:conversation, nil)
+        |> assign(:page_title, get_heading(action))
+    end
   end
 
-  defp redirect_to_first_conversation(socket, _conversations, action) do
+  defp search_conversations(query, socket) do
+    conversations =
+      socket.assigns.current_user
+      |> Conversations.search_conversation(query, socket.assigns.live_action)
+      |> Enum.group_by(& &1.mailbox_id)
+
     socket
-    |> assign(:conversation, nil)
-    |> assign(:page_title, get_heading(action))
+    |> stream_mailbox_conversations(conversations)
+    |> redirect_to_first_conversation(conversations, socket.assigns.live_action)
+  end
+
+  defp set_mailbox_conversation_streams(socket) do
+    Enum.reduce(socket.assigns.mailboxes, socket, fn mailbox, socket ->
+      socket
+      |> stream_configure(mailbox.id, dom_id: &"conversations-#{&1.id}")
+      |> stream(mailbox.id, [])
+    end)
+  end
+
+  defp stream_mailbox_conversations(socket, conversations) do
+    streaming_mailboxes = conversations |> Map.keys() |> Enum.into(%MapSet{})
+
+    socket =
+      Enum.reduce(socket.assigns.mailboxes, socket, fn mailbox, socket ->
+        if MapSet.member?(streaming_mailboxes, mailbox.id),
+          do: stream_insert(socket, :conversations, {mailbox.id, mailbox.name}),
+          else: stream_delete(socket, :conversations, {mailbox.id, mailbox.name})
+      end)
+
+    Enum.reduce(conversations, socket, fn {mailbox_id, convos}, socket ->
+      # BUG: Not resetting the list properly. Upstream issue.
+      # https://github.com/phoenixframework/phoenix_live_view/issues/2895
+      # https://github.com/phoenixframework/phoenix_live_view/issues/2816
+      stream(socket, mailbox_id, convos, reset: true)
+    end)
   end
 
   defp get_heading(action) do
@@ -160,16 +239,6 @@ defmodule ResolvdWeb.ConversationLive.Index do
       :unassigned -> "Unassigned Conversations"
       :prioritized -> "Prioritized Conversations"
       :resolved -> "Resolved Conversations"
-    end
-  end
-
-  defp get_conversations_function(action) do
-    case action do
-      :all -> &Conversations.list_unresolved_conversations/1
-      :me -> &Conversations.list_conversations_assigned_to_me/1
-      :unassigned -> &Conversations.list_unassigned_conversations/1
-      :prioritized -> &Conversations.list_prioritized_conversations/1
-      :resolved -> &Conversations.list_resolved_conversations/1
     end
   end
 end

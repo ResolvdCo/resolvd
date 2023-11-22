@@ -11,6 +11,9 @@ defmodule Resolvd.Conversations do
   alias Resolvd.Conversations.Conversation
   alias Resolvd.Conversations.Message
   alias Resolvd.Mailboxes.Mailbox
+  alias Resolvd.Mailboxes
+
+  @filters [:all, :me, :unassigned, :prioritized, :resolved]
 
   @doc """
   Returns the list of conversations.
@@ -28,98 +31,43 @@ defmodule Resolvd.Conversations do
   end
 
   @doc """
-  Returns the list of unresolved conversations.
+  Returns the list of conversation filtered by `action`.
 
   ## Examples
 
-      iex> list_unresolved_conversations(user)
+      iex> filter_conversations(user, :all)
       [%Conversation{}, ...]
-
   """
-  def list_unresolved_conversations(%User{} = user) do
-    from(c in Conversation,
-      where: [is_resolved: false],
-      order_by: [desc: c.inserted_at],
-      preload: [:customer, :user, :mailbox]
-    )
+
+  def filter_conversations(%User{} = user, action) when action in @filters do
+    Conversation
+    |> filter_by_action(action, user)
+    |> order_by([c], desc: c.updated_at)
+    |> preload([:customer, :user, :mailbox])
     |> Bodyguard.scope(user)
     |> Repo.all()
   end
 
   @doc """
-  Returns the list of unresolved conversations assigned to the user.
-
-  ## Examples
-
-      iex> list_conversations_assigned_to_me(user)
-      [%Conversation{}, ...]
-
+  Searches the given string in the conversation.
   """
-  def list_conversations_assigned_to_me(%User{} = user) do
-    from(c in Conversation,
-      where: [is_resolved: false, user_id: ^user.id],
-      order_by: [desc: c.inserted_at],
-      preload: [:customer, :user, :mailbox]
-    )
-    |> Bodyguard.scope(user)
-    |> Repo.all()
-  end
+  def search_conversation(%User{} = user, search_query, action) when action in @filters do
+    search_query = "%#{Resolvd.Helpers.sanitize_sql_like(search_query)}%"
 
-  @doc """
-  Returns the list of unassigned conversations.
+    query =
+      from c in Conversation,
+        join: m in Message,
+        on: c.id == m.conversation_id,
+        where: ilike(m.text_body, ^search_query),
+        or_where: ilike(m.html_body, ^search_query),
+        or_where: ilike(c.subject, ^search_query),
+        order_by: [desc: c.updated_at],
+        select: c,
+        distinct: c,
+        preload: [:customer, :user, :mailbox]
 
-  ## Examples
-
-      iex> list_unassigned_conversations(user)
-      [%Conversation{}, ...]
-
-  """
-  def list_unassigned_conversations(%User{} = user) do
-    from(c in Conversation,
-      where: [is_resolved: false],
-      where: is_nil(c.user_id),
-      order_by: [desc: c.inserted_at],
-      preload: [:customer, :user, :mailbox]
-    )
-    |> Bodyguard.scope(user)
-    |> Repo.all()
-  end
-
-  @doc """
-  Returns the list of prioritized conversations.
-
-  ## Examples
-
-      iex> list_prioritized_conversations(user)
-      [%Conversation{}, ...]
-
-  """
-  def list_prioritized_conversations(%User{} = user) do
-    from(c in Conversation,
-      where: [is_resolved: false, is_prioritized: true],
-      order_by: [desc: c.inserted_at],
-      preload: [:customer, :user, :mailbox]
-    )
-    |> Bodyguard.scope(user)
-    |> Repo.all()
-  end
-
-  @doc """
-  Returns the list of resolved conversations.
-
-  ## Examples
-
-      iex> list_resolved_conversations(user)
-      [%Conversation{}, ...]
-
-  """
-  def list_resolved_conversations(%User{} = user) do
-    from(c in Conversation,
-      where: [is_resolved: true],
-      order_by: [desc: c.inserted_at],
-      preload: [:customer, :user, :mailbox]
-    )
-    |> Bodyguard.scope(user)
+    query
+    |> filter_by_action(action, user)
     |> Repo.all()
   end
 
@@ -464,7 +412,7 @@ defmodule Resolvd.Conversations do
       # New message, do we have a conversation for any of it's references or reply tos?
       tenant = Tenants.get_tenant!(mailbox.tenant_id)
 
-      name = email.from |> hd |> elem(0)
+      name = email.from |> hd |> elem(0) |> Mailboxes.parse_mime_encoded_word()
       customer = Resolvd.Customers.get_or_create_customer_from_email(tenant, email.sender, name)
 
       conversation =
@@ -476,7 +424,7 @@ defmodule Resolvd.Conversations do
           {:ok, conversation} =
             %Conversation{tenant: tenant, mailbox: mailbox, customer: customer}
             |> Conversation.changeset(%{
-              subject: email.subject
+              subject: email.subject |> Mailboxes.parse_mime_encoded_word()
             })
             |> Repo.insert()
 
@@ -495,6 +443,16 @@ defmodule Resolvd.Conversations do
       |> Repo.insert()
 
       {:ok, get_conversation!(conversation.id)}
+    end
+  end
+
+  defp filter_by_action(query, action, user) do
+    case action do
+      :all -> query |> where(is_resolved: false)
+      :me -> query |> where(is_resolved: false, user_id: ^user.id)
+      :unassigned -> query |> where(is_resolved: false) |> where([c], is_nil(c.user_id))
+      :prioritized -> query |> where(is_resolved: false, is_prioritized: true)
+      :resolved -> query |> where(is_resolved: true)
     end
   end
 end

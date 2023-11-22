@@ -210,7 +210,7 @@ defmodule Resolvd.Mailboxes do
     InboundManager.child_started?(server_id)
   end
 
-  # TODO: Maybe insert the decoded subject in the databse
+  def parse_mime_encoded_word(nil), do: nil
   def parse_mime_encoded_word(""), do: ""
 
   def parse_mime_encoded_word(<<"=?", value::binary>>) do

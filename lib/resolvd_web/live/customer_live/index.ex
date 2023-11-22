@@ -15,6 +15,7 @@ defmodule ResolvdWeb.CustomerLive.Index do
      socket
      |> stream(:customers, [])
      |> assign(:conversation, nil)
+     |> assign(:query, "")
      |> assign(:users, Accounts.list_users(socket.assigns.current_user))
      |> assign(:mailboxes, Mailboxes.list_mailboxes(socket.assigns.current_user))}
   end
@@ -42,7 +43,7 @@ defmodule ResolvdWeb.CustomerLive.Index do
     socket
     |> apply_action(:index, params |> Map.delete("conversation_id"))
     |> assign(:conversation, conversation)
-    |> assign(:page_title, Mailboxes.parse_mime_encoded_word(conversation.subject))
+    |> assign(:page_title, conversation.subject)
     |> stream(:messages, Conversations.list_messages_for_conversation(conversation), reset: true)
   end
 
@@ -132,6 +133,23 @@ defmodule ResolvdWeb.CustomerLive.Index do
   end
 
   @impl true
+  def handle_event("search", %{"query" => query}, socket) do
+    socket =
+      case String.trim(query) do
+        query when byte_size(query) >= 3 ->
+          search_customers(query, socket)
+
+        _ when byte_size(socket.assigns.query) >= 3 ->
+          apply_action(socket, socket.assigns.live_action, %{})
+
+        _ ->
+          socket
+      end
+
+    {:noreply, assign(socket, :query, String.trim(query))}
+  end
+
+  @impl true
   def handle_event(event, data, socket) do
     dbg(event)
     dbg(data)
@@ -169,5 +187,13 @@ defmodule ResolvdWeb.CustomerLive.Index do
     |> assign(:page_title, Utils.display_name(customer))
     |> assign(:conversation, nil)
     |> stream(:conversations, Customers.get_conversations_for_customer(customer), reset: true)
+  end
+
+  defp search_customers(query, socket) do
+    customers = Customers.search_customers(query)
+
+    socket
+    |> stream(:customers, customers, reset: true)
+    |> redirect_to_first_customer(customers)
   end
 end

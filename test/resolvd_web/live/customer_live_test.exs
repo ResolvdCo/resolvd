@@ -15,33 +15,22 @@ defmodule ResolvdWeb.CustomerLiveTest do
   # }
   # @invalid_attrs %{email: nil, name: nil, phone: nil}
 
-  defp create_customer(%{tenant: tenant, customers: customers} = other) do
-    customer = customer_fixture(tenant)
-    Map.put(other, :customers, [customer | customers])
+  defp create_customers(%{tenant: tenant} = other) do
+    customers = for _ <- 1..5, do: customer_fixture(tenant)
+    Map.put(other, :customers, customers)
   end
 
-  defp create_customer(%{tenant: tenant} = other) do
-    customer = customer_fixture(tenant)
-    Map.put(other, :customers, [customer])
+  defp create_mailboxes(%{admin: admin} = other) do
+    mailboxes = for _ <- 1..5, do: mailbox_fixture(admin)
+    Map.put(other, :mailboxes, mailboxes)
   end
 
-  defp create_mailbox(%{admin: admin, mailboxes: mailboxes} = other) do
-    Map.put(other, :mailboxes, [mailbox_fixture(admin) | mailboxes])
+  defp create_users(%{admin: admin} = other) do
+    users = for _ <- 1..5, do: user_fixture(admin)
+    Map.put(other, :users, users)
   end
 
-  defp create_mailbox(%{admin: admin} = other) do
-    Map.put(other, :mailboxes, [mailbox_fixture(admin)])
-  end
-
-  defp create_user(%{admin: admin, users: users} = other) do
-    Map.put(other, :users, [user_fixture(admin) | users])
-  end
-
-  defp create_user(%{admin: admin} = other) do
-    Map.put(other, :users, [user_fixture(admin), admin])
-  end
-
-  defp create_conversations(%{user: user, customers: customers, mailboxes: [mailbox, _]} = other) do
+  defp create_conversations(%{user: user, customers: customers, mailboxes: [mailbox | _]} = other) do
     conversations =
       Enum.flat_map(customers, fn customer ->
         for _ <- 1..5, do: conversation_fixture(user, customer, mailbox)
@@ -51,38 +40,29 @@ defmodule ResolvdWeb.CustomerLiveTest do
   end
 
   describe "Index" do
-    setup [:create_tenant_and_admin, :log_in_admin, :create_customer, :create_customer]
+    setup [:create_tenant_and_admin, :log_in_admin, :create_customers]
 
-    test "redirect to first customer", %{conn: conn, customers: [_, customer]} do
+    test "redirect to first customer", %{conn: conn, customers: customers} do
       assert {:error, {:live_redirect, %{to: "/customers?id=" <> id = customer_path}}} =
                live(conn, ~p"/customers")
 
-      assert id == customer.id
+      customer = Enum.find(customers, fn customer -> customer.id == id end)
 
-      assert {:ok, view, _html} = live(conn, customer_path)
+      assert {:ok, view, html} = live(conn, customer_path)
       assert view |> element("#customer-name-title") |> render() =~ customer.name
       assert page_title(view) =~ customer.name
-    end
-
-    test "lists all customers", %{conn: conn, customers: [customer1, customer2]} do
-      assert {:ok, _view, html} = live(conn, ~p"/customers?id=#{customer1.id}")
 
       assert html =~ "Customers"
 
-      assert html =~ customer1.name
-      assert html =~ customer1.email
-      assert html =~ customer2.name
-      assert html =~ customer2.email
+      Enum.each(customers, fn customer ->
+        assert html =~ customer.name
+        assert html =~ customer.email
+      end)
     end
 
-    test "switch customer", %{conn: conn, customers: [customer1, customer2]} do
+    test "switch customer", %{conn: conn, customers: [customer1, customer2 | _]} do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer1.id}")
       assert html =~ "Customers"
-
-      assert html =~ customer1.name
-      assert html =~ customer1.email
-      assert html =~ customer2.name
-      assert html =~ customer2.email
 
       assert view |> element("#customer-name-title") |> render() =~ customer1.name
       assert page_title(view) =~ customer1.name
@@ -153,18 +133,16 @@ defmodule ResolvdWeb.CustomerLiveTest do
   describe "Customer conversations" do
     setup [
       :create_tenant_and_admin,
-      :create_user,
+      :create_users,
       :log_in_admin,
-      :create_customer,
-      :create_customer,
-      :create_mailbox,
-      :create_mailbox,
+      :create_customers,
+      :create_mailboxes,
       :create_conversations
     ]
 
     test "list all conversations for customer", %{
       conn: conn,
-      customers: [customer, _],
+      customers: [customer | _],
       conversations: conversations
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
@@ -176,15 +154,14 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
     end
 
     test "switching displays conversations for selected customer", %{
       conn: conn,
-      customers: [customer1, customer2],
+      customers: [customer1, customer2 | _],
       conversations: conversations
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer1.id}")
@@ -196,8 +173,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer1.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
 
@@ -212,15 +188,14 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer2.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
     end
 
     test "clicking on conversation opens modal", %{
       conn: conn,
-      customers: [customer, _],
+      customers: [customer | _],
       conversations: conversations
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
@@ -232,8 +207,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
 
@@ -246,12 +220,12 @@ defmodule ResolvdWeb.CustomerLiveTest do
       |> render_click
 
       assert_patched(view, ~p"/customers?id=#{customer.id}&conversation_id=#{conversation.id}")
-      assert page_title(view) =~ Resolvd.Mailboxes.parse_mime_encoded_word(conversation.subject)
+      assert page_title(view) =~ conversation.subject
     end
 
     test "switch to another conversation", %{
       conn: conn,
-      customers: [customer, _],
+      customers: [customer | _],
       conversations: conversations
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
@@ -263,8 +237,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert conversations
              |> Enum.filter(fn convo -> convo.customer_id == customer.id end)
              |> Enum.map(fn convo ->
-               assert view |> element("#conversations-#{convo.id}") |> render =~
-                        Resolvd.Mailboxes.parse_mime_encoded_word(convo.subject)
+               assert view |> element("#conversations-#{convo.id}") |> render =~ convo.subject
              end)
              |> Enum.count() == 5
 
@@ -276,32 +249,30 @@ defmodule ResolvdWeb.CustomerLiveTest do
       |> render_click
 
       assert_patched(view, ~p"/customers?id=#{customer.id}&conversation_id=#{conversation1.id}")
-      assert page_title(view) =~ Resolvd.Mailboxes.parse_mime_encoded_word(conversation1.subject)
+      assert page_title(view) =~ conversation1.subject
 
       assert {:ok, view, _html} =
                live(conn, ~p"/customers?id=#{customer.id}&conversation_id=#{conversation2.id}")
 
-      assert page_title(view) =~ Resolvd.Mailboxes.parse_mime_encoded_word(conversation2.subject)
+      assert page_title(view) =~ conversation2.subject
     end
   end
 
   describe "Customer conversations user/mailbox assignment" do
     setup [
       :create_tenant_and_admin,
-      :create_user,
+      :create_users,
       :log_in_admin,
-      :create_customer,
-      :create_customer,
-      :create_mailbox,
-      :create_mailbox,
+      :create_customers,
+      :create_mailboxes,
       :create_conversations
     ]
 
     test "assign to user", %{
       conn: conn,
-      customers: [customer, _],
+      customers: [customer | _],
       conversations: conversations,
-      users: [user, _]
+      users: [user | _]
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
       assert html =~ "Customers"
@@ -325,9 +296,9 @@ defmodule ResolvdWeb.CustomerLiveTest do
 
     test "unassign user", %{
       conn: conn,
-      customers: [customer, _],
+      customers: [customer | _],
       conversations: conversations,
-      users: [user, _]
+      users: [user | _]
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
       assert html =~ "Customers"
@@ -360,9 +331,9 @@ defmodule ResolvdWeb.CustomerLiveTest do
 
     test "reassign user", %{
       conn: conn,
-      customers: [customer, _],
+      customers: [customer | _],
       conversations: conversations,
-      users: [user1, user2]
+      users: [user1, user2 | _]
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
       assert html =~ "Customers"
@@ -395,9 +366,9 @@ defmodule ResolvdWeb.CustomerLiveTest do
 
     test "assign mailbox", %{
       conn: conn,
-      customers: [customer, _],
+      customers: [customer | _],
       conversations: conversations,
-      mailboxes: [mailbox, _]
+      mailboxes: [mailbox | _]
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
       assert html =~ "Customers"
@@ -421,9 +392,9 @@ defmodule ResolvdWeb.CustomerLiveTest do
 
     test "reassign mailbox", %{
       conn: conn,
-      customers: [customer, _],
+      customers: [customer | _],
       conversations: conversations,
-      mailboxes: [mb1, mb2]
+      mailboxes: [mb1, mb2 | _]
     } do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
       assert html =~ "Customers"
@@ -458,16 +429,14 @@ defmodule ResolvdWeb.CustomerLiveTest do
   describe "Customer conversations status" do
     setup [
       :create_tenant_and_admin,
-      :create_user,
+      :create_users,
       :log_in_admin,
-      :create_customer,
-      :create_customer,
-      :create_mailbox,
-      :create_mailbox,
+      :create_customers,
+      :create_mailboxes,
       :create_conversations
     ]
 
-    test "toggle priority", %{conn: conn, customers: [customer, _], conversations: conversations} do
+    test "toggle priority", %{conn: conn, customers: [customer | _], conversations: conversations} do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
       assert html =~ "Customers"
 
@@ -497,7 +466,7 @@ defmodule ResolvdWeb.CustomerLiveTest do
       assert view |> element("#status-#{conversation.id}") |> render() =~ "Unresolved"
     end
 
-    test "toggle resolved", %{conn: conn, customers: [customer, _], conversations: conversations} do
+    test "toggle resolved", %{conn: conn, customers: [customer | _], conversations: conversations} do
       assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
       assert html =~ "Customers"
 
@@ -525,6 +494,125 @@ defmodule ResolvdWeb.CustomerLiveTest do
       })
 
       assert view |> element("#status-#{conversation.id}") |> render() =~ "Unresolved"
+    end
+  end
+
+  describe "Search customers" do
+    setup [
+      :create_tenant_and_admin,
+      :log_in_admin,
+      :create_customers,
+      :create_mailboxes,
+      :create_conversations
+    ]
+
+    test "by name", %{conn: conn, customers: customers} do
+      [customer | others] = Enum.shuffle(customers)
+
+      assert {:ok, view, html} = live(conn, ~p"/customers?id=#{customer.id}")
+      assert html =~ "Customers"
+
+      customers_view = view |> element("#customers") |> render()
+
+      Enum.each(customers, fn customer ->
+        assert customers_view =~ customer.name
+        assert customers_view =~ customer.email
+        assert customers_view =~ "customers-#{customer.id}"
+      end)
+
+      view |> element("#customer-search") |> render_change(%{query: customer.name})
+      customers_view = view |> element("#customers") |> render()
+
+      assert customers_view =~ customer.name
+      assert customers_view =~ customer.email
+      assert customers_view =~ "customers-#{customer.id}"
+
+      Enum.each(others, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+
+    test "by email", %{conn: conn, customers: customers} do
+      [customer | others] = Enum.shuffle(customers)
+
+      assert {:ok, view, _html} = live(conn, ~p"/customers?id=#{customer.id}")
+
+      view |> element("#customer-search") |> render_change(%{query: customer.email})
+      customers_view = view |> element("#customers") |> render()
+
+      assert customers_view =~ customer.name
+      assert customers_view =~ customer.email
+      assert customers_view =~ "customers-#{customer.id}"
+
+      Enum.each(others, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+
+    test "by phone", %{conn: conn, customers: customers} do
+      [customer | others] = Enum.shuffle(customers)
+
+      assert {:ok, view, _html} = live(conn, ~p"/customers?id=#{customer.id}")
+
+      view |> element("#customer-search") |> render_change(%{query: customer.phone})
+      customers_view = view |> element("#customers") |> render()
+
+      assert customers_view =~ customer.name
+      assert customers_view =~ customer.email
+      assert customers_view =~ "customers-#{customer.id}"
+
+      Enum.each(others, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+
+    test "when no match", %{conn: conn, customers: customers} do
+      [customer | _] = Enum.shuffle(customers)
+
+      assert {:ok, view, _html} = live(conn, ~p"/customers?id=#{customer.id}")
+
+      view |> element("#customer-search") |> render_change(%{query: "abracadabra"})
+      customers_view = view |> element("#customers") |> render()
+
+      Enum.each(customers, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+    end
+
+    test "clear query", %{conn: conn, customers: customers} do
+      [customer | others] = Enum.shuffle(customers)
+
+      assert {:ok, view, _html} = live(conn, ~p"/customers?id=#{customer.id}")
+
+      view |> element("#customer-search") |> render_change(%{query: customer.name})
+      customers_view = view |> element("#customers") |> render()
+
+      assert customers_view =~ customer.name
+      assert customers_view =~ customer.email
+      assert customers_view =~ "customers-#{customer.id}"
+
+      Enum.each(others, fn customer ->
+        refute customers_view =~ customer.name
+        refute customers_view =~ customer.email
+        refute customers_view =~ "customers-#{customer.id}"
+      end)
+
+      view |> element("#customer-search") |> render_change(%{query: ""})
+      customers_view = view |> element("#customers") |> render()
+
+      Enum.each(customers, fn customer ->
+        assert customers_view =~ customer.name
+        assert customers_view =~ customer.email
+        assert customers_view =~ "customers-#{customer.id}"
+      end)
     end
   end
 

@@ -18,16 +18,37 @@
 
     <ResolvdWeb.ConversationLive.Components.conversation_categories live_action={@live_action} />
 
-    <div class="mt-5 pb-2 px-4">
-      <div class="text-xs text-gray-400 font-semibold">Mailbox One</div>
+    <form class="relative flex items-center mb-0" phx-change="search" id="conversation-search">
+      <.icon class="left-2 absolute" name="hero-magnifying-glass" />
+      <input
+        class="placeholder:italic placeholder:text-slate-400 pl-9 bg-white w-full border border-slate-300 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 focus:ring-inset leading-tight sm:text-sm"
+        placeholder="Search conversations..."
+        type="text"
+        name="query"
+        value={@query}
+        phx-debounce="500"
+      />
+    </form>
+
+    <div id="mailbox-filtered" phx-update="stream" class="overflow-y-auto">
+      <%= for {dom_id, {mailbox_id, mailbox_name}} <- @streams.conversations  do %>
+        <div id={dom_id}>
+          <div class="py-2 px-4 sticky top-0 bg-gray-200 z-30">
+            <div class="text-xs text-gray-500 font-semibold">
+              <%= mailbox_name %>
+            </div>
+          </div>
+          <ResolvdWeb.ConversationLive.Components.conversation_list
+            conversations={@streams[mailbox_id]}
+            mailbox_id={mailbox_id}
+            conversation={@conversation}
+            socket={@socket}
+            live_action={@live_action}
+            current_user={@current_user}
+          />
+        </div>
+      <% end %>
     </div>
-    <ResolvdWeb.ConversationLive.Components.conversation_list
-      conversations={@streams.conversations}
-      conversation={@conversation}
-      socket={@socket}
-      live_action={@live_action}
-      current_user={@current_user}
-    />
   </div>
 </div>
 

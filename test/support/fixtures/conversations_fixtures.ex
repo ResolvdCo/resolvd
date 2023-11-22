@@ -14,8 +14,8 @@ defmodule Resolvd.ConversationsFixtures do
   def unique_message_email, do: "user##{System.unique_integer()}@localhost"
   def unique_user_name, do: "user##{System.unique_integer()}"
 
-  def valid_text_body, do: "Hello World"
-  def valid_html_body, do: "<h1>Hello World</h1>"
+  def valid_text_body, do: "Hello World #{System.unique_integer()}"
+  def valid_html_body, do: "<h1>Hello World #{System.unique_integer()}</h1>"
   def valid_message_id, do: :smtp_util.generate_message_id() |> to_string()
 
   def valid_message_attrs(attrs \\ %{}) do
