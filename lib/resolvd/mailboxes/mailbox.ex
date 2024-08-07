@@ -24,6 +24,8 @@ defmodule Resolvd.Mailboxes.Mailbox do
     embeds_one :outbound_config, Resolvd.Mailboxes.OutboundProviders.SMTPProvider,
       on_replace: :update
 
+    has_many :conversations, Resolvd.Conversations.Conversation
+
     timestamps()
   end
 

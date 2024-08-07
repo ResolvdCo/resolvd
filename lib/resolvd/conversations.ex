@@ -25,9 +25,29 @@ defmodule Resolvd.Conversations do
 
   """
   def list_conversations(%User{} = user) do
-    from(c in Conversation, order_by: [desc: c.inserted_at])
+    from(c in Conversation,
+      order_by: [desc: c.inserted_at],
+      limit: 100,
+      preload: [:customer, :user]
+    )
     |> Bodyguard.scope(user)
     |> Repo.all()
+    |> Repo.preload(:mailbox)
+  end
+
+  def list_conversations_by_mailbox(%User{} = user, nil) do
+    list_conversations(user)
+  end
+
+  def list_conversations_by_mailbox(%User{} = user, mailbox_id) do
+    from(c in Conversation,
+      where: c.mailbox_id == ^mailbox_id,
+      order_by: [desc: c.inserted_at],
+      preload: [:customer, :user]
+    )
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+    |> Repo.preload(:mailbox)
   end
 
   @doc """
@@ -405,6 +425,8 @@ defmodule Resolvd.Conversations do
         %Resolvd.Mailboxes.Mailbox{} = mailbox,
         %Resolvd.Mailboxes.Mail{} = email
       ) do
+    dbg(email)
+
     if not is_nil(get_message_by_email_message_id(email.message_id)) do
       # If we've already seen this message ID -- ignore it!
       {:ok, :dupe}

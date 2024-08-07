@@ -1,6 +1,7 @@
 defmodule Resolvd.Mailboxes do
   import Ecto.Query, warn: false
 
+  alias Resolvd.Conversations.Conversation
   alias Resolvd.Repo
   alias Resolvd.Mailboxes.Mailbox
   alias Resolvd.Mailboxes.Inbound.Manager, as: InboundManager
@@ -85,6 +86,19 @@ defmodule Resolvd.Mailboxes do
     Mailbox
     |> Bodyguard.scope(user)
     |> Repo.all()
+  end
+
+  def list_mailboxes_for_sidebar(%User{} = user) do
+    from(m in Mailbox,
+      left_join: c in Conversation,
+      on: m.id == c.mailbox_id,
+      where: c.is_resolved == false,
+      select: {m, count(c.id)},
+      group_by: m.id
+    )
+    |> Bodyguard.scope(user)
+    |> Repo.all()
+    |> dbg()
   end
 
   def get_mailbox!(id) do

@@ -93,7 +93,9 @@ defmodule ResolvdWeb do
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components and translation
-      import ResolvdWeb.CoreComponents
+      # import ResolvdWeb.CoreComponents
+
+      import ResolvdWeb.WindmillComponents
       import ResolvdWeb.Gettext
 
       # Shortcut for generating JS commands

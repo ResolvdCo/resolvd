@@ -18,11 +18,7 @@ defmodule ResolvdWeb.ConversationLive.MessageComponent do
         <.live_file_input upload={@uploads.images} />
         <.input type="hidden" field={@form[:html_body]} id="trix-editor" phx-hook="Trix" />
         <div id="richtext" phx-update="ignore">
-          <trix-editor
-            input="trix-editor"
-            class="trix-content prose max-w-none prose-pre:text-black"
-            autofocus
-          >
+          <trix-editor input="trix-editor" class="trix-content prose max-w-none prose-pre:text-black">
           </trix-editor>
         </div>
         <:actions>

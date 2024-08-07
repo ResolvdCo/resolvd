@@ -1,4 +1,5 @@
 defmodule ResolvdWeb.Router do
+  alias ResolvdWeb.StylesLive
   use ResolvdWeb, :router
 
   import ResolvdWeb.UserAuth
@@ -37,6 +38,11 @@ defmodule ResolvdWeb.Router do
 
       live_dashboard "/dashboard", metrics: ResolvdWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
+
+      live_session :dev_pages,
+        on_mount: [{ResolvdWeb.UserAuth, :ensure_authenticated}] do
+        live "/styles", StylesLive
+      end
     end
   end
 

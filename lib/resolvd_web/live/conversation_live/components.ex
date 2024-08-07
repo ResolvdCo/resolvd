@@ -10,24 +10,24 @@ defmodule ResolvdWeb.ConversationLive.Components do
 
   def conversation_categories(assigns) do
     ~H"""
-    <div class="mt-5 px-4">
-      <ul class="flex flex-row items-baseline justify-between">
-        <li :for={item <- conversation_items()}>
-          <.link
-            navigate={item.to}
-            class="flex flex-col items-center pb-3 text-xs font-semibold text-gray-700"
-            id={"category-#{item.action}"}
-          >
-            <span class="whitespace-nowrap">
-              <%= item.label %>
-            </span>
-
-            <span :if={item.action == @live_action} class="h-1 w-full bg-gray-800 rounded-full">
-            </span>
-          </.link>
-        </li>
-      </ul>
-    </div>
+    <ul class="-mx-2 mt-2 space-y-1">
+      <li :for={item <- conversation_items()}>
+        <.link
+          navigate={item.to}
+          class={[
+            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold",
+            if(item.action == @live_action,
+              do: "bg-gray-100 text-indigo-600",
+              else: "text-gray-700 hover:text-indigo-600 hover:bg-gray-100"
+            )
+          ]}
+        >
+          <span class="whitespace-nowrap">
+            <%= item.label %>
+          </span>
+        </.link>
+      </li>
+    </ul>
     """
   end
 
@@ -296,14 +296,14 @@ defmodule ResolvdWeb.ConversationLive.Components do
     [
       %{
         to: ~p"/conversations/all",
-        label: gettext("All"),
+        label: gettext("Inbox"),
         action: :all
       },
-      %{
-        to: ~p"/conversations/me",
-        label: gettext("Me"),
-        action: :me
-      },
+      # %{
+      #   to: ~p"/conversations/me",
+      #   label: gettext("Me"),
+      #   action: :me
+      # },
       %{
         to: ~p"/conversations/unassigned",
         label: gettext("Unassigned"),

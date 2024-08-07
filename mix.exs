@@ -66,7 +66,11 @@ defmodule Resolvd.MixProject do
       # Time
       {:timex, "~> 3.7"},
       # Jobs
-      {:oban, "~> 2.16"}
+      {:oban, "~> 2.16"},
+      # Misc
+      {:csv, "~> 3.0"},
+      # Importing
+      {:myxql, "~> 0.7.0"}
     ]
   end
 

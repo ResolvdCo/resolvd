@@ -11,6 +11,27 @@ defmodule Resolvd.Customers do
   alias Resolvd.Accounts.User
   alias Resolvd.Conversations.Conversation
 
+  def gravatar_avatar(%Customer{email: email}) do
+    hash = :crypto.hash(:md5, email) |> Base.encode16(case: :lower)
+    "https://www.gravatar.com/avatar/#{hash}?d=identicon"
+  end
+
+  def initials(%Customer{name: name}) do
+    case String.split(name, " ", trim: true) do
+      [first, second | _rest] ->
+        String.at(first, 0) <> String.at(second, 0)
+
+      [first, second] ->
+        String.at(first, 0) <> String.at(second, 0)
+
+      [first] ->
+        String.at(first, 0) <> String.at(first, 1)
+
+      true ->
+        "?"
+    end
+  end
+
   @doc """
   List all customers
   """
@@ -153,6 +174,8 @@ defmodule Resolvd.Customers do
   end
 
   def get_or_create_customer_from_email(%Resolvd.Tenants.Tenant{} = tenant, email, name \\ nil) do
+    dbg(email)
+
     query =
       from c in Customer,
         where: c.email == ^email
