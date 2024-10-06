@@ -98,18 +98,20 @@ defmodule ResolvdWeb.Router do
 
       live "/reports", DashboardLive.Index, :index
 
+      # live "/conversations", ConversationLive, :list
+      # live "/conversations/:id", ConversationLive, :conversation
       live "/conversations", ConversationLive.Index, :index
-      live "/conversations/all", ConversationLive.Index, :all
-      live "/conversations/me", ConversationLive.Index, :me
-      live "/conversations/unassigned", ConversationLive.Index, :unassigned
-      live "/conversations/prioritized", ConversationLive.Index, :prioritized
-      live "/conversations/resolved", ConversationLive.Index, :resolved
+      # live "/conversations/all", ConversationLive.Index, :all
+      # live "/conversations/me", ConversationLive.Index, :me
+      # live "/conversations/unassigned", ConversationLive.Index, :unassigned
+      # live "/conversations/prioritized", ConversationLive.Index, :prioritized
+      # live "/conversations/resolved", ConversationLive.Index, :resolved
 
-      live "/conversations/new", ConversationLive.Index, :new
-      live "/conversations/:id/edit", ConversationLive.Index, :edit
+      # live "/conversations/new", ConversationLive.Index, :new
+      # live "/conversations/:id/edit", ConversationLive.Index, :edit
 
       live "/conversations/:id", ConversationLive.Show, :show
-      live "/conversations/:id/show/edit", ConversationLive.Show, :edit
+      # live "/conversations/:id/show/edit", ConversationLive.Show, :edit
 
       # live "/messages", MessageLive.Index, :index
       # live "/messages/new", MessageLive.Index, :new

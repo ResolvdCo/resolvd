@@ -11,3 +11,18 @@
 .sriracha {
   font-family: "Sriracha", cursive;
 }
+
+/* trix-editor {
+  border: none;
+} */
+trix-toolbar {
+  padding: 1rem;
+}
+trix-toolbar .trix-button-group {
+  margin-bottom: 0px;
+}
+@media (min-width: 640px) {
+  trix-toolbar {
+    padding: 1.5rem;
+  }
+}

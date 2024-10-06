@@ -16,7 +16,7 @@ defmodule Resolvd.Customers do
     "https://www.gravatar.com/avatar/#{hash}?d=identicon"
   end
 
-  def initials(%Customer{name: name}) do
+  def initials(%{name: name}) do
     case String.split(name, " ", trim: true) do
       [first, second | _rest] ->
         String.at(first, 0) <> String.at(second, 0)
@@ -173,14 +173,19 @@ defmodule Resolvd.Customers do
     Customer.changeset(customer, attrs)
   end
 
-  def get_or_create_customer_from_email(%Resolvd.Tenants.Tenant{} = tenant, email, name \\ nil) do
-    dbg(email)
+  def get_customer_by_email(%Resolvd.Tenants.Tenant{} = tenant, email) do
+    Repo.one(
+      from c in Customer,
+        where: c.tenant_id == ^tenant.id and c.email == ^email
+    )
+  end
 
+  def get_or_create_customer_from_email(%Resolvd.Tenants.Tenant{} = tenant, email, name \\ nil) do
     query =
       from c in Customer,
         where: c.email == ^email
 
-    case Repo.one(query) do
+    case Repo.one(query) |> dbg() do
       %Customer{name: nil} = customer when not is_nil(name) ->
         {:ok, customer} = update_customer(customer, %{name: name})
         customer

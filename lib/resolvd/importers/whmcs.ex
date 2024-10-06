@@ -73,10 +73,13 @@ defmodule Resolvd.Importers.WHMCS do
       |> Resolvd.Importers.MySQL.preload([:client, [replies: [:client]]])
       |> Enum.map(fn %Resolvd.Importers.WHMCS.Ticket{} = ticket ->
         Ecto.Multi.new()
-        |> Ecto.Multi.insert(:customer, fn _ ->
-          %Customer{
-            tenant: tenant
-          }
+        |> Ecto.Multi.run(:maybe_customer, fn repo, _changes ->
+          {:ok,
+           Resolvd.Customers.get_customer_by_email(tenant, ticket.client.email) ||
+             %Customer{tenant: tenant}}
+        end)
+        |> Ecto.Multi.insert_or_update(:customer, fn %{maybe_customer: maybe_customer} ->
+          maybe_customer
           |> Customer.changeset(%{
             email: ticket.client.email,
             name: ticket.client.firstname <> " " <> ticket.client.lastname

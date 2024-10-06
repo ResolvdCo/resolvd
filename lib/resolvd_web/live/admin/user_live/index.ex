@@ -1,5 +1,5 @@
 defmodule ResolvdWeb.Admin.UserLive.Index do
-  use ResolvdWeb, :admin_live_view
+  use ResolvdWeb, :live_view
 
   alias Resolvd.Accounts
   alias Resolvd.Accounts.User

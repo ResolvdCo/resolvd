@@ -24,5 +24,6 @@ defmodule Resolvd.Customers.Customer do
     |> cast(attrs, [:name, :email, :phone])
     |> validate_required([:email])
     |> cast_assoc(:tenant)
+    |> unique_constraint([:tenant_id, :email])
   end
 end

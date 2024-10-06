@@ -1,6 +1,6 @@
 defmodule ResolvdWeb.Admin.MailboxLive.Show do
   alias Phoenix.PubSub
-  use ResolvdWeb, :admin_live_view
+  use ResolvdWeb, :live_view
 
   alias Resolvd.Mailboxes
 

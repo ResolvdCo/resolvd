@@ -15,14 +15,22 @@ defmodule ResolvdWeb.ConversationLive.MessageComponent do
         phx-submit="save"
       >
         <%!-- <.input field={@form[:text_body]} type="textarea" label="Body" /> --%>
-        <.live_file_input upload={@uploads.images} />
+        <.live_file_input class="hidden" upload={@uploads.images} />
         <.input type="hidden" field={@form[:html_body]} id="trix-editor" phx-hook="Trix" />
         <div id="richtext" phx-update="ignore">
-          <trix-editor input="trix-editor" class="trix-content prose max-w-none prose-pre:text-black">
+          <trix-editor
+            input="trix-editor"
+            class="trix-content prose max-w-none prose-pre:text-black min-h-36 border-none focus:border-none p-4 pt-0 sm:p-6 sm:pt-0 ring-none outline-none"
+            placeholder="Write a reply!"
+          >
           </trix-editor>
         </div>
         <:actions>
-          <.button phx-disable-with="Saving...">Save Message</.button>
+          <div class="p-4 sm:p-6">
+            <.button phx-disable-with="Sending...">
+              <.icon name="hero-paper-airplane" class="h-5 w-5 mr-2" /> Send Message
+            </.button>
+          </div>
         </:actions>
       </.simple_form>
     </div>
@@ -104,7 +112,7 @@ defmodule ResolvdWeb.ConversationLive.MessageComponent do
            message_params
          ) do
       {{:ok, message}, conversation} ->
-        notify_parent({:saved, message, conversation})
+        # notify_parent({:saved, message, conversation})
 
         {:noreply, socket |> put_flash(:info, "Message created successfully")}
 

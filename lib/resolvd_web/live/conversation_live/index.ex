@@ -27,10 +27,30 @@ defmodule ResolvdWeb.ConversationLive.Index do
 
   def render(assigns) do
     ~H"""
-    <.header>Conversations</.header>
+    <.header class="text-xl mb-8">Conversations</.header>
+
+    <div id="conversations" phx-update="stream" class="flex flex-col space-y-4">
+      <.link
+        :for={{dom_id, conversation} <- @streams.conversations}
+        id={dom_id}
+        navigate={~p"/conversations/#{conversation.id}"}
+        class="flex justify-between"
+      >
+        <div>
+          <h3 class="text-lg font-medium"><%= conversation.subject %></h3>
+          <p><%= conversation.customer.name %></p>
+        </div>
+        <div>
+          <%= conversation.inserted_at
+          |> Timex.format("{relative}", :relative)
+          |> elem(1) %>
+        </div>
+      </.link>
+    </div>
+    <%!--
     <div class="flex space-x-6">
       <div class="w-1/6">
-        <%!-- <ResolvdWeb.ConversationLive.Components.conversation_categories live_action={@live_action} /> --%>
+        <ResolvdWeb.ConversationLive.Components.conversation_categories live_action={@live_action} />
         <nav class="flex flex-1 flex-col" aria-label="Sidebar">
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
             <%!--
@@ -194,7 +214,6 @@ defmodule ResolvdWeb.ConversationLive.Index do
                 </li>
               </ul>
             </li>
-            --%>
             <li>
               <div class="text-xs font-semibold leading-6 text-gray-400">Mailboxes</div>
               <ul role="list" class="-mx-2 mt-2 space-y-1">
@@ -272,8 +291,8 @@ defmodule ResolvdWeb.ConversationLive.Index do
               </span>
 
               <div>
-                <p class="font-semibold"><%= row.customer.name %></p>
-                <p class="text-gray-600 dark:text-gray-400">
+                <p class="text-gray-600 dark:text-gray-400"><%= row.customer.name %></p>
+                <p class="font-semibold">
                   <%= row.subject %>
                 </p>
               </div>
@@ -299,7 +318,7 @@ defmodule ResolvdWeb.ConversationLive.Index do
             |> elem(1) %>
           </:col>
           <:action :let={{row_id, row}}>
-            <%!-- <.link navigate={~p"/conversations/#{row.id}"}>Show</.link> --%>
+            <.link navigate={~p"/conversations/#{row.id}"}>Show</.link>
           </:action>
         </.table>
       </div>

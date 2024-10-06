@@ -12,7 +12,8 @@ defmodule Resolvd.Mailboxes do
   end
 
   def send_customer_email(%Mailbox{} = mailbox, %Swoosh.Email{} = email) do
-    mail_config = Application.get_env(:resolvd, Resolvd.Mailboxes, adapter: Swoosh.Adapters.SMTP)
+    mail_config =
+      Application.get_env(:resolvd, Resolvd.Mailboxes, adapter: Swoosh.Adapters.Test)
 
     config = [
       adapter: Keyword.fetch!(mail_config, :adapter),
@@ -38,6 +39,13 @@ defmodule Resolvd.Mailboxes do
     email
     |> Swoosh.Email.from({mailbox.from, mailbox.email_address})
     |> Swoosh.Mailer.deliver(config)
+  end
+
+  def outbound_types do
+    %{
+      "SMTP" => {Swoosh.Adapters.SMTP, Resolvd.Mailboxes.OutboundProviders.SMTPProvider},
+      "Logger" => {Swoosh.Adapters.Logger, Resolvd.Mailboxes.OutboundProviders.LoggerProvider}
+    }
   end
 
   def list_inbound_types do
@@ -98,7 +106,6 @@ defmodule Resolvd.Mailboxes do
     )
     |> Bodyguard.scope(user)
     |> Repo.all()
-    |> dbg()
   end
 
   def get_mailbox!(id) do

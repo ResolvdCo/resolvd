@@ -599,7 +599,7 @@ defmodule ResolvdWeb.WindmillComponents do
   def dropdown(assigns) do
     ~H"""
     <div>
-      <div class="relative mt-2 group">
+      <div class="relative group">
         <button
           type="button"
           class="relative w-full cursor-pointer rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm sm:leading-6"
@@ -614,7 +614,7 @@ defmodule ResolvdWeb.WindmillComponents do
               alt=""
               class="h-5 w-5 flex-shrink-0 rounded-full"
             />
-            <span class="ml-3 block truncate">Tom Cook</span>
+            <span class="ml-3 block truncate">Billing Team</span>
           </span>
           <span class="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
             <svg

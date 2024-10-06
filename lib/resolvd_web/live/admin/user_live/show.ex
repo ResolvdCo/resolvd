@@ -1,5 +1,5 @@
 defmodule ResolvdWeb.Admin.UserLive.Show do
-  use ResolvdWeb, :admin_live_view
+  use ResolvdWeb, :live_view
 
   alias Resolvd.Accounts
 

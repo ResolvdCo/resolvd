@@ -11,9 +11,8 @@ defmodule Resolvd.Conversations.ConversationNotifier do
       |> from({"Resolvd", "notifier@resolvd.co"})
       |> subject(subject)
       |> text_body(body)
-      |> dbg()
 
-    with {:ok, _metadata} <- Mailer.deliver(email) |> dbg() do
+    with {:ok, _metadata} <- Mailer.deliver(email) do
       {:ok, email}
     end
   end

@@ -1,5 +1,5 @@
 defmodule ResolvdWeb.Admin.BillingLive do
-  use ResolvdWeb, :admin_live_view
+  use ResolvdWeb, :live_view
 
   @impl true
   def mount(_params, _session, socket) do

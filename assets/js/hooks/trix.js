@@ -7,7 +7,7 @@ export default {
             this.el.dispatchEvent(new Event("change", { bubbles: true }));
         });
         element.editor.element.addEventListener("trix-initialize", () => {
-            element.editor.element.focus();
+            // element.editor.element.focus();
             var length = element.editor.getDocument().toString().length;
             window.setTimeout(() => {
                 element.editor.setSelectedRange(length, length);

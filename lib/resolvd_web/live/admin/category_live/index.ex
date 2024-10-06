@@ -1,5 +1,5 @@
 defmodule ResolvdWeb.Admin.CategoryLive.Index do
-  use ResolvdWeb, :admin_live_view
+  use ResolvdWeb, :live_view
 
   alias Resolvd.Articles
   alias Resolvd.Articles.Category

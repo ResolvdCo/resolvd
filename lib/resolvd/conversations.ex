@@ -170,6 +170,7 @@ defmodule Resolvd.Conversations do
 
     if notify_customer do
       %{
+        conversation_id: conversation.id,
         mailbox_id: conversation.mailbox_id,
         headers: %{"Message-ID" => message_id},
         customer_email: customer.email,
@@ -282,7 +283,7 @@ defmodule Resolvd.Conversations do
 
   """
   def list_messages_for_conversation(%Conversation{id: id}) do
-    Repo.all(from(m in Message, where: m.conversation_id == ^id))
+    Repo.all(from(m in Message, where: m.conversation_id == ^id, order_by: m.inserted_at))
     |> Repo.preload([:customer, :user])
   end
 
@@ -334,24 +335,31 @@ defmodule Resolvd.Conversations do
       |> Message.changeset(attrs)
       |> Repo.insert()
 
-    conversation =
-      with %Conversation{user_id: nil, id: conversation_id} <- conversation,
-           %Conversation{user_id: nil} = conversation <- get_conversation!(user, conversation_id) do
-        conversation
-        |> Ecto.Changeset.change()
-        |> Ecto.Changeset.put_assoc(:user, user)
-        |> Repo.update!()
-      end
+    # conversation =
+    #   with %Conversation{user_id: nil, id: conversation_id} <- conversation,
+    #        %Conversation{user_id: nil} = conversation <- get_conversation!(user, conversation_id) do
+    #     conversation
+    #     |> Ecto.Changeset.change()
+    #     |> Ecto.Changeset.put_assoc(:user, user)
+    #     |> Repo.update!()
+    #   end
 
     case creation do
       {:ok, message} ->
+        Phoenix.PubSub.broadcast(
+          Resolvd.PubSub,
+          conversation.id,
+          {ResolvdWeb.ConversationLive.MessageComponent, {:saved, message, conversation}}
+        )
+
         %{
+          conversation_id: conversation.id,
           mailbox_id: conversation.mailbox_id,
           headers: %{"Message-ID" => message_id, "In-Reply-To" => in_reply_to},
           customer_email: conversation.customer.email,
           subject: conversation.subject,
           html_body: message.html_body,
-          text_body: message.text_body
+          text_body: HtmlSanitizeEx.strip_tags(message.html_body)
         }
         |> Resolvd.Workers.SendCustomerEmail.new()
         |> Oban.insert()
@@ -425,8 +433,6 @@ defmodule Resolvd.Conversations do
         %Resolvd.Mailboxes.Mailbox{} = mailbox,
         %Resolvd.Mailboxes.Mail{} = email
       ) do
-    dbg(email)
-
     if not is_nil(get_message_by_email_message_id(email.message_id)) do
       # If we've already seen this message ID -- ignore it!
       {:ok, :dupe}
@@ -453,18 +459,32 @@ defmodule Resolvd.Conversations do
           conversation
         end
 
-      %Message{
-        conversation: conversation,
-        customer: customer
-      }
-      |> Message.changeset(%{
-        email_message_id: email.message_id,
-        text_body: email.text_body,
-        html_body: email.html_body
-      })
-      |> Repo.insert()
+      {:ok, message} =
+        %Message{
+          conversation: conversation,
+          customer: customer
+        }
+        |> Message.changeset(%{
+          email_message_id: email.message_id,
+          text_body: email.text_body,
+          html_body: email.html_body
+        })
+        |> Repo.insert()
 
-      {:ok, get_conversation!(conversation.id)}
+      message =
+        get_message!(message.id)
+        |> Repo.preload([:customer, :user])
+
+      conversation = get_conversation!(conversation.id)
+      dbg("Got here")
+
+      Phoenix.PubSub.broadcast(
+        Resolvd.PubSub,
+        conversation.id,
+        {ResolvdWeb.ConversationLive.MessageComponent, {:saved, message, conversation}}
+      )
+
+      {:ok, conversation}
     end
   end
 

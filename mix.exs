@@ -69,6 +69,8 @@ defmodule Resolvd.MixProject do
       {:oban, "~> 2.16"},
       # Misc
       {:csv, "~> 3.0"},
+      {:req, "~> 0.5.6"},
+      {:html_sanitize_ex, "~> 1.4"},
       # Importing
       {:myxql, "~> 0.7.0"}
     ]
